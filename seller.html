@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bloom - Seller Portal</title>
+  <title>Bloom - Vendor Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,13 +13,13 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FFF9F5; min-height: 100vh; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F5F5F0; min-height: 100vh; }
 
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(255, 107, 107, 0.5); } 50% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); } }
+    @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(45, 125, 70, 0.5); } 50% { box-shadow: 0 0 20px rgba(45, 125, 70, 0.8); } }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     @keyframes confetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-100px) rotate(720deg); opacity: 0; } }
@@ -31,13 +31,13 @@
     .animate-spin { animation: spin 1s linear infinite; }
     .animate-shake { animation: shake 0.5s ease-in-out; }
 
-    input:focus, textarea:focus, select:focus { outline: none; border-color: #FF6B6B !important; box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2); }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #2D7D46 !important; box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.2); }
 
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #FFF9F5; }
-    ::-webkit-scrollbar-thumb { background: #FFD6D6; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #FF6B6B; }
+    ::-webkit-scrollbar-track { background: #F5F5F0; }
+    ::-webkit-scrollbar-thumb { background: #D4E6D4; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2D7D46; }
   </style>
 </head>
 <body>
@@ -59,29 +59,29 @@
     // DESIGN SYSTEM
     // =============================================
     const colors = {
-      primary: '#FF6B6B',
-      secondary: '#FF8E53',
-      accent: '#FFD93D',
-      mint: '#6BCB77',
-      lavender: '#B983FF',
-      cream: '#FFF9F5',
-      peach: '#FFE5D9',
-      blush: '#FFD6D6',
-      dark: '#2D3436',
-      gray: '#636E72',
-      lightGray: '#B2BEC3',
+      primary: '#2D7D46',
+      secondary: '#8B5E3C',
+      accent: '#F2A900',
+      mint: '#4CAF50',
+      lavender: '#7B4F9E',
+      cream: '#F5F5F0',
+      peach: '#E8E4D9',
+      blush: '#D4E6D4',
+      dark: '#1A2E1A',
+      gray: '#4A5D4A',
+      lightGray: '#8A9A8A',
       white: '#FFFFFF',
       error: '#E74C3C',
       success: '#27AE60',
-      gradient1: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-      gradient2: 'linear-gradient(135deg, #B983FF 0%, #FF6B6B 100%)',
-      gradient3: 'linear-gradient(135deg, #6BCB77 0%, #FFD93D 100%)',
+      gradient1: 'linear-gradient(135deg, #2D7D46 0%, #4CAF50 100%)',
+      gradient2: 'linear-gradient(135deg, #7B4F9E 0%, #2D7D46 100%)',
+      gradient3: 'linear-gradient(135deg, #F2A900 0%, #2D7D46 100%)',
     };
 
     const shadows = {
-      sm: '0 2px 8px rgba(255, 107, 107, 0.15)',
-      md: '0 4px 20px rgba(255, 107, 107, 0.2)',
-      lg: '0 8px 40px rgba(255, 107, 107, 0.25)',
+      sm: '0 2px 8px rgba(45, 125, 70, 0.15)',
+      md: '0 4px 20px rgba(45, 125, 70, 0.2)',
+      lg: '0 8px 40px rgba(45, 125, 70, 0.25)',
     };
 
     // =============================================
@@ -510,25 +510,25 @@
     // DATA OPTIONS
     // =============================================
     const CATEGORIES = [
-      { value: 'roses', label: '🌹 Roses' },
-      { value: 'tulips', label: '🌷 Tulips' },
-      { value: 'sunflowers', label: '🌻 Sunflowers' },
-      { value: 'lilies', label: '💐 Lilies' },
-      { value: 'orchids', label: '🪻 Orchids' },
-      { value: 'succulents', label: '🪴 Succulents' },
-      { value: 'arrangements', label: '💐 Arrangements' },
-      { value: 'dried', label: '🌾 Dried Flowers' },
-      { value: 'potted', label: '🌱 Potted Plants' },
-      { value: 'seasonal', label: '🍂 Seasonal' },
+      { value: 'lights', label: '💡 Grow Lights' },
+      { value: 'nutrients', label: '🧪 Nutrients' },
+      { value: 'soil', label: '🌿 Growing Media' },
+      { value: 'seeds', label: '🌱 Seeds' },
+      { value: 'containers', label: '🪴 Containers' },
+      { value: 'ventilation', label: '💨 Ventilation' },
+      { value: 'pest-control', label: '🛡️ Pest Control' },
+      { value: 'hydroponic', label: '💧 Hydroponic Systems' },
+      { value: 'testing', label: '🧬 Testing Kits' },
+      { value: 'climate', label: '🌡️ Climate Control' },
       { value: 'other', label: '✨ Other' },
     ];
 
     const PRICE_UNITS = [
-      { value: 'per stem', label: 'Per Stem' },
-      { value: 'per bunch', label: 'Per Bunch (10 stems)' },
-      { value: 'per dozen', label: 'Per Dozen' },
       { value: 'each', label: 'Each' },
-      { value: 'per arrangement', label: 'Per Arrangement' },
+      { value: 'per liter', label: 'Per Liter' },
+      { value: 'per kg', label: 'Per Kilogram' },
+      { value: 'per bottle', label: 'Per Bottle' },
+      { value: 'per unit', label: 'Per Unit' },
     ];
 
     const GROWING_METHODS = [
@@ -663,7 +663,7 @@
                   fontSize: 48,
                   marginBottom: 12,
                 }}
-              >🌸</div>
+              >🌿</div>
               <h1 style={{
                 fontSize: 32,
                 fontWeight: 800,
@@ -675,7 +675,7 @@
                 Bloom
               </h1>
               <p style={{ color: colors.gray, fontSize: 16 }}>
-                {mode === 'signin' ? 'Welcome back, grower!' : 'Start selling your flowers'}
+                {mode === 'signin' ? 'Welcome back, grower!' : 'Start selling supplies'}
               </p>
             </div>
 
@@ -766,7 +766,7 @@
                 loading={loading}
                 style={{ marginTop: 12 }}
               >
-                {mode === 'signin' ? 'Sign In 🌷' : 'Create Account 🌻'}
+                {mode === 'signin' ? 'Sign In 🌿' : 'Create Account 🌱'}
               </Button>
             </form>
           </Card>
@@ -875,7 +875,7 @@
       const renderStep1 = () => (
         <>
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: colors.dark }}>
-            Let's start with the basics 🌱
+            Let's start with the basics 🌿
           </h2>
           <p style={{ color: colors.gray, marginBottom: 28 }}>
             Tell us about yourself
@@ -898,7 +898,7 @@
               {profilePhotoUrl ? (
                 <img src={profilePhotoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <span style={{ fontSize: 48 }}>🌸</span>
+                <span style={{ fontSize: 48 }}>🌿</span>
               )}
             </div>
             <label style={{
@@ -950,7 +950,7 @@
       const renderStep2 = () => (
         <>
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: colors.dark }}>
-            Tell us about your growing 🌻
+            Tell us about your operation ☀️
           </h2>
           <p style={{ color: colors.gray, marginBottom: 28 }}>
             This helps buyers find you
@@ -1004,7 +1004,7 @@
             rows={4}
             value={bio}
             onChange={setBio}
-            placeholder="Tell buyers about your story, what makes your flowers special..."
+            placeholder="Tell buyers about your story, what makes your supplies special..."
           />
 
           <Input
@@ -1216,7 +1216,7 @@
                 }}
               >←</button>
               <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.dark }}>
-                Create Listing 🌷
+                Create Listing 🌱
               </h1>
             </div>
 
@@ -1247,7 +1247,7 @@
                 label="Title"
                 value={title}
                 onChange={setTitle}
-                placeholder="Fresh Cut Roses - Mixed Colors"
+                placeholder="Premium LED Grow Light Kit"
                 required
               />
 
@@ -1283,7 +1283,7 @@
                 rows={4}
                 value={description}
                 onChange={setDescription}
-                placeholder="Describe your product - variety, colors, freshness, special care instructions..."
+                placeholder="Describe your product - specifications, features, quality standards, usage instructions..."
               />
 
               <Button
@@ -1327,7 +1327,7 @@
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <span style={{ fontSize: 40 }}>🌸</span>
+                <span style={{ fontSize: 40 }}>🌿</span>
               )}
             </div>
 
@@ -1519,7 +1519,7 @@
             <div style={{ maxWidth: 800, margin: '0 auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span className="animate-float" style={{ fontSize: 32 }}>🌸</span>
+                  <span className="animate-float" style={{ fontSize: 32 }}>🌿</span>
                   <span style={{ fontSize: 24, fontWeight: 800, color: colors.white }}>Bloom</span>
                 </div>
                 <button
@@ -1553,7 +1553,7 @@
                   {profile.profile_photo_url ? (
                     <img src={profile.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <span style={{ fontSize: 28 }}>🌱</span>
+                    <span style={{ fontSize: 28 }}>🌿</span>
                   )}
                 </div>
                 <div>
@@ -1785,12 +1785,12 @@
                 </Card>
               ) : listings.length === 0 ? (
                 <Card style={{ textAlign: 'center', padding: 48 }}>
-                  <div className="animate-float" style={{ fontSize: 64, marginBottom: 16 }}>🌷</div>
+                  <div className="animate-float" style={{ fontSize: 64, marginBottom: 16 }}>🌱</div>
                   <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.dark, marginBottom: 8 }}>
                     No listings yet
                   </h3>
                   <p style={{ color: colors.gray, marginBottom: 24 }}>
-                    Create your first listing and start selling!
+                    Create your first listing and start selling supplies!
                   </p>
                   <Button onClick={onCreateListing}>
                     Create Your First Listing 🚀
@@ -1937,7 +1937,7 @@
             background: colors.gradient1,
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div className="animate-float" style={{ fontSize: 64, marginBottom: 20 }}>🌸</div>
+              <div className="animate-float" style={{ fontSize: 64, marginBottom: 20 }}>🌿</div>
               <Spinner size={32} />
             </div>
           </div>

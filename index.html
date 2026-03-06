@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bloom - Fresh Flowers from Local Growers</title>
+  <title>Bloom - Everything Growers Need, From Trusted Vendors</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #FFF9F5; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F5F5F0; }
 
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -31,9 +31,9 @@
     .animate-bounce { animation: bounce 0.3s ease-out; }
 
     ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: #FFF9F5; }
-    ::-webkit-scrollbar-thumb { background: #FFD6D6; border-radius: 5px; }
-    ::-webkit-scrollbar-thumb:hover { background: #FF6B6B; }
+    ::-webkit-scrollbar-track { background: #F5F5F0; }
+    ::-webkit-scrollbar-thumb { background: #D4E6D4; border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2D7D46; }
   </style>
 </head>
 <body>
@@ -47,21 +47,21 @@
     const { useState, useEffect } = React;
 
     const colors = {
-      primary: '#FF6B6B',
-      secondary: '#FF8E53',
-      accent: '#FFD93D',
-      mint: '#6BCB77',
-      lavender: '#B983FF',
-      cream: '#FFF9F5',
-      peach: '#FFE5D9',
-      blush: '#FFD6D6',
-      dark: '#2D3436',
-      gray: '#636E72',
-      lightGray: '#B2BEC3',
+      primary: '#2D7D46',
+      secondary: '#8B5E3C',
+      accent: '#F2A900',
+      mint: '#4CAF50',
+      lavender: '#7B4F9E',
+      cream: '#F5F5F0',
+      peach: '#E8E4D9',
+      blush: '#D4E6D4',
+      dark: '#1A2E1A',
+      gray: '#4A5D4A',
+      lightGray: '#8A9A8A',
       white: '#FFFFFF',
-      gradient1: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-      gradient2: 'linear-gradient(135deg, #B983FF 0%, #FF6B6B 100%)',
-      gradient3: 'linear-gradient(135deg, #6BCB77 0%, #FFD93D 100%)',
+      gradient1: 'linear-gradient(135deg, #2D7D46 0%, #4CAF50 100%)',
+      gradient2: 'linear-gradient(135deg, #7B4F9E 0%, #2D7D46 100%)',
+      gradient3: 'linear-gradient(135deg, #F2A900 0%, #2D7D46 100%)',
     };
 
     // =============================================
@@ -122,10 +122,10 @@
           right: 0,
           zIndex: 1000,
           padding: '16px 24px',
-          background: scrolled ? 'rgba(255, 249, 245, 0.95)' : 'transparent',
+          background: scrolled ? 'rgba(245, 245, 240, 0.95)' : 'transparent',
           backdropFilter: scrolled ? 'blur(10px)' : 'none',
           transition: 'all 0.3s ease',
-          boxShadow: scrolled ? '0 2px 20px rgba(255, 107, 107, 0.1)' : 'none',
+          boxShadow: scrolled ? '0 2px 20px rgba(45, 125, 70, 0.1)' : 'none',
         }}>
           <div style={{
             maxWidth: 1200,
@@ -135,7 +135,7 @@
             justifyContent: 'space-between',
           }}>
             <div onClick={() => onNavigate('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <span className="animate-float" style={{ fontSize: 32 }}>🌸</span>
+              <span className="animate-float" style={{ fontSize: 32 }}>🌿</span>
               <span style={{
                 fontSize: 24,
                 fontWeight: 800,
@@ -216,7 +216,7 @@
                 fontWeight: 600,
                 fontSize: 14,
                 textDecoration: 'none',
-                boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
+                boxShadow: '0 4px 15px rgba(45, 125, 70, 0.3)',
               }}>
                 Sell on Bloom
               </a>
@@ -240,7 +240,7 @@
         overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {['🌸', '🌷', '🌻', '🌹', '💐', '🌺'].map((flower, i) => (
+          {['🌱', '🌿', '☀️', '🪴', '💧', '🍃'].map((flower, i) => (
             <span key={i} className="animate-float" style={{
               position: 'absolute',
               fontSize: 40 + Math.random() * 30,
@@ -267,12 +267,12 @@
                 marginBottom: 24,
                 color: colors.dark,
               }}>
-                Fresh flowers,{' '}
+                Everything growers need,{' '}
                 <span style={{
                   background: colors.gradient1,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                }}>direct from growers</span>
+                }}>direct from the source</span>
               </h1>
 
               <p className="animate-fade-in-up" style={{
@@ -283,7 +283,7 @@
                 maxWidth: 480,
                 animationDelay: '0.2s',
               }}>
-                Connect with local farmers and florists. Get the freshest blooms delivered straight from the source.
+                Connect with trusted suppliers of seeds, nutrients, equipment, and more. Built for Thailand's growing community.
               </p>
 
               <div className="animate-fade-in-up" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', animationDelay: '0.3s' }}>
@@ -296,10 +296,10 @@
                   fontWeight: 700,
                   fontSize: 18,
                   cursor: 'pointer',
-                  boxShadow: '0 8px 30px rgba(255, 107, 107, 0.4)',
+                  boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                 }}>
-                  Browse Flowers 🌷
+                  Browse Supplies 🌿
                 </button>
               </div>
             </div>
@@ -313,10 +313,10 @@
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 30px 60px rgba(255, 107, 107, 0.3)',
+                boxShadow: '0 30px 60px rgba(45, 125, 70, 0.3)',
                 position: 'relative',
               }}>
-                <span style={{ fontSize: 180 }}>💐</span>
+                <span style={{ fontSize: 180 }}>🌱</span>
               </div>
             </div>
           </div>
@@ -335,17 +335,17 @@
           background: colors.white,
           borderRadius: 20,
           overflow: 'hidden',
-          boxShadow: '0 4px 20px rgba(255, 107, 107, 0.1)',
+          boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)',
           transition: 'all 0.3s ease',
           cursor: 'pointer',
         }}
         onMouseEnter={e => {
           e.currentTarget.style.transform = 'translateY(-8px)';
-          e.currentTarget.style.boxShadow = '0 12px 40px rgba(255, 107, 107, 0.2)';
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(45, 125, 70, 0.2)';
         }}
         onMouseLeave={e => {
           e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 20px rgba(255, 107, 107, 0.1)';
+          e.currentTarget.style.boxShadow = '0 4px 20px rgba(45, 125, 70, 0.1)';
         }}
       >
         <div style={{
@@ -358,7 +358,7 @@
           {listing.images && listing.images[0] ? (
             <img src={listing.images[0]} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ fontSize: 80 }}>🌸</span>
+            <span style={{ fontSize: 80 }}>🌿</span>
           )}
         </div>
 
@@ -417,8 +417,8 @@
         <section style={{ minHeight: '100vh', padding: '120px 24px 80px', background: colors.cream }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 60 }}>
-              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Fresh Blooms 🌸</h2>
-              <p style={{ fontSize: 18, color: colors.gray }}>Browse flowers from local growers</p>
+              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Grow Supplies 🌿</h2>
+              <p style={{ fontSize: 18, color: colors.gray }}>Everything you need to grow</p>
             </div>
 
             {loading ? (
@@ -436,7 +436,7 @@
               <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
                 <span style={{ fontSize: 64 }}>🌱</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Coming Soon!</h3>
-                <p style={{ color: colors.gray }}>Growers are preparing their freshest blooms.</p>
+                <p style={{ color: colors.gray }}>Suppliers are stocking their shelves.</p>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
@@ -485,7 +485,7 @@
               background: colors.white,
               borderRadius: 32,
               padding: 40,
-              boxShadow: '0 10px 40px rgba(255, 107, 107, 0.15)',
+              boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)',
             }}>
               {/* Image */}
               <div style={{
@@ -500,7 +500,7 @@
                 {product.images && product.images[0] ? (
                   <img src={product.images[0]} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <span style={{ fontSize: 120 }}>🌸</span>
+                  <span style={{ fontSize: 120 }}>🌿</span>
                 )}
               </div>
 
@@ -583,7 +583,7 @@
                     fontWeight: 700,
                     fontSize: 18,
                     cursor: 'pointer',
-                    boxShadow: '0 8px 30px rgba(255, 107, 107, 0.4)',
+                    boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                     transition: 'all 0.3s ease',
                   }}
@@ -614,25 +614,25 @@
               <div style={{
                 textAlign: 'center', padding: 80,
                 background: colors.white, borderRadius: 24,
-                boxShadow: '0 4px 20px rgba(255, 107, 107, 0.1)',
+                boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)',
               }}>
-                <span style={{ fontSize: 64 }}>🌸</span>
+                <span style={{ fontSize: 64 }}>🌿</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Your cart is empty</h3>
-                <p style={{ color: colors.gray, marginBottom: 32 }}>Add some beautiful flowers!</p>
+                <p style={{ color: colors.gray, marginBottom: 32 }}>Add some supplies to get growing!</p>
                 <button onClick={onContinueShopping} style={{
                   padding: '16px 32px', borderRadius: 30,
                   border: 'none', background: colors.gradient1,
                   color: colors.white, fontWeight: 600, fontSize: 16,
                   cursor: 'pointer', fontFamily: 'Plus Jakarta Sans',
                 }}>
-                  Browse Flowers
+                  Browse Supplies
                 </button>
               </div>
             ) : (
               <>
                 <div style={{
                   background: colors.white, borderRadius: 24,
-                  boxShadow: '0 4px 20px rgba(255, 107, 107, 0.1)',
+                  boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)',
                   overflow: 'hidden',
                 }}>
                   {cart.map((item, index) => (
@@ -651,7 +651,7 @@
                         {item.product.images && item.product.images[0] ? (
                           <img src={item.product.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
-                          <span style={{ fontSize: 36 }}>🌸</span>
+                          <span style={{ fontSize: 36 }}>🌿</span>
                         )}
                       </div>
 
@@ -694,7 +694,7 @@
                 {/* Total & Checkout */}
                 <div style={{
                   background: colors.white, borderRadius: 24, padding: 32, marginTop: 24,
-                  boxShadow: '0 4px 20px rgba(255, 107, 107, 0.1)',
+                  boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                     <span style={{ fontSize: 20, color: colors.dark }}>Total</span>
@@ -705,7 +705,7 @@
                     width: '100%', padding: '20px 40px', borderRadius: 30,
                     border: 'none', background: colors.gradient1,
                     color: colors.white, fontWeight: 700, fontSize: 18,
-                    cursor: 'pointer', boxShadow: '0 8px 30px rgba(255, 107, 107, 0.4)',
+                    cursor: 'pointer', boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                   }}>
                     Proceed to Checkout 🚀
@@ -826,7 +826,7 @@
 
             <div style={{
               background: colors.white, borderRadius: 24, padding: 40,
-              boxShadow: '0 10px 40px rgba(255, 107, 107, 0.15)',
+              boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)',
             }}>
               {/* Order Summary */}
               <div style={{
@@ -855,7 +855,7 @@
                 <span style={{ fontSize: 32 }}>💵</span>
                 <div>
                   <h4 style={{ fontWeight: 700, color: colors.dark }}>Cash on Delivery</h4>
-                  <p style={{ fontSize: 14, color: colors.dark, opacity: 0.8 }}>Pay when you receive your flowers</p>
+                  <p style={{ fontSize: 14, color: colors.dark, opacity: 0.8 }}>Pay when you receive your supplies</p>
                 </div>
               </div>
 
@@ -943,7 +943,7 @@
                   border: 'none', background: loading ? colors.gray : colors.gradient1,
                   color: colors.white, fontWeight: 700, fontSize: 18,
                   cursor: loading ? 'wait' : 'pointer',
-                  boxShadow: '0 8px 30px rgba(255, 107, 107, 0.4)',
+                  boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                 }}>
                   {loading ? 'Processing...' : `Place Order - ฿${total.toFixed(0)}`}
@@ -964,7 +964,7 @@
         <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
           <div style={{
             background: colors.white, borderRadius: 32, padding: 60,
-            boxShadow: '0 10px 40px rgba(255, 107, 107, 0.15)',
+            boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)',
           }}>
             <div className="animate-scale-in" style={{
               width: 120, height: 120, borderRadius: '50%',
@@ -1002,7 +1002,7 @@
             </div>
 
             <p style={{ color: colors.gray, marginBottom: 32, fontSize: 14 }}>
-              The grower will contact you to arrange delivery. 🌸
+              Your vendor will contact you to arrange delivery. 🌿
             </p>
 
             <button onClick={onContinueShopping} style={{
@@ -1010,9 +1010,9 @@
               border: 'none', background: colors.gradient1,
               color: colors.white, fontWeight: 700, fontSize: 18,
               cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
-              boxShadow: '0 8px 30px rgba(255, 107, 107, 0.4)',
+              boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
             }}>
-              Continue Shopping 🌷
+              Continue Shopping 🌿
             </button>
           </div>
         </div>
@@ -1039,8 +1039,8 @@
         <section style={{ minHeight: '100vh', padding: '120px 24px 80px', background: `linear-gradient(180deg, ${colors.cream} 0%, ${colors.peach} 50%, ${colors.cream} 100%)` }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 60 }}>
-              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Meet Our Growers 🌱</h2>
-              <p style={{ fontSize: 18, color: colors.gray }}>Passionate farmers bringing you the freshest flowers</p>
+              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Our Vendors 🌿</h2>
+              <p style={{ fontSize: 18, color: colors.gray }}>Trusted suppliers for Thailand's growing community</p>
             </div>
 
             {loading ? (
@@ -1050,12 +1050,12 @@
             ) : growers.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
                 <span style={{ fontSize: 64 }}>👨‍🌾</span>
-                <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Growers Coming Soon!</h3>
+                <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Vendors Coming Soon!</h3>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
                 {growers.map(grower => (
-                  <div key={grower.id} style={{ background: colors.white, borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(255, 107, 107, 0.1)', textAlign: 'center' }}>
+                  <div key={grower.id} style={{ background: colors.white, borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)', textAlign: 'center' }}>
                     <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {grower.profile_photo_url ? (
                         <img src={grower.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1087,10 +1087,10 @@
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40 }}>
             {[
-              { icon: '🔍', title: 'Browse', desc: 'Explore flowers from local growers' },
+              { icon: '🔍', title: 'Browse', desc: 'Explore supplies from trusted vendors' },
               { icon: '🛒', title: 'Order', desc: 'Add to cart and checkout with your address' },
-              { icon: '💵', title: 'Pay on Delivery', desc: 'Pay cash when your flowers arrive' },
-              { icon: '💐', title: 'Enjoy', desc: 'Receive the freshest blooms!' },
+              { icon: '💵', title: 'Pay on Delivery', desc: 'Pay cash when your order arrives' },
+              { icon: '📦', title: 'Grow', desc: 'Get everything you need delivered!' },
             ].map((step, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 30px rgba(255, 107, 107, 0.3)' }}>
@@ -1113,15 +1113,15 @@
       <section style={{ minHeight: '100vh', padding: '120px 24px 80px', background: `linear-gradient(180deg, ${colors.peach} 0%, ${colors.cream} 100%)` }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark }}>About Bloom 🌺</h2>
+            <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark }}>About Bloom 🌿</h2>
           </div>
-          <div style={{ background: colors.white, borderRadius: 32, padding: 60, boxShadow: '0 10px 40px rgba(255, 107, 107, 0.15)', textAlign: 'center' }}>
-            <span style={{ fontSize: 80 }}>🌸</span>
+          <div style={{ background: colors.white, borderRadius: 32, padding: 60, boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)', textAlign: 'center' }}>
+            <span style={{ fontSize: 80 }}>🌿</span>
             <p style={{ fontSize: 20, color: colors.dark, lineHeight: 1.8, marginTop: 32 }}>
-              Bloom connects you directly with local flower growers in Thailand.
+              Bloom connects growers in Thailand with the supplies they need.
             </p>
             <p style={{ fontSize: 17, color: colors.gray, lineHeight: 1.8, marginTop: 24 }}>
-              We believe everyone deserves fresh, beautiful flowers. By connecting you directly with growers, you get the freshest blooms while supporting local farmers.
+              We believe every grower deserves access to quality supplies. By connecting you directly with trusted vendors, you get the best products at fair prices.
             </p>
           </div>
         </div>
@@ -1139,7 +1139,7 @@
             <div style={{ textAlign: 'center', marginBottom: 48 }}>
               <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Get in Touch 💌</h2>
             </div>
-            <div style={{ background: colors.white, borderRadius: 32, padding: 48, boxShadow: '0 10px 40px rgba(255, 107, 107, 0.15)' }}>
+            <div style={{ background: colors.white, borderRadius: 32, padding: 48, boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)' }}>
               {sent ? (
                 <div style={{ textAlign: 'center', padding: 40 }}>
                   <span style={{ fontSize: 64 }}>✅</span>
@@ -1150,7 +1150,7 @@
                   <input type="text" placeholder="Name" required style={{ width: '100%', padding: 16, borderRadius: 12, border: `2px solid ${colors.blush}`, marginBottom: 16, fontSize: 16, fontFamily: 'Plus Jakarta Sans' }} />
                   <input type="email" placeholder="Email" required style={{ width: '100%', padding: 16, borderRadius: 12, border: `2px solid ${colors.blush}`, marginBottom: 16, fontSize: 16, fontFamily: 'Plus Jakarta Sans' }} />
                   <textarea placeholder="Message" rows={4} required style={{ width: '100%', padding: 16, borderRadius: 12, border: `2px solid ${colors.blush}`, marginBottom: 24, fontSize: 16, fontFamily: 'Plus Jakarta Sans', resize: 'vertical' }} />
-                  <button type="submit" style={{ width: '100%', padding: 18, borderRadius: 30, border: 'none', background: colors.gradient1, color: colors.white, fontWeight: 700, fontSize: 18, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans' }}>
+                  <button type="submit" style={{ width: '100%', padding: 18, borderRadius: 30, border: 'none', background: colors.gradient1, color: colors.white, fontWeight: 700, fontSize: 18, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans', boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)' }}>
                     Send Message 🚀
                   </button>
                 </form>
@@ -1168,10 +1168,10 @@
       <footer style={{ background: colors.dark, padding: '60px 24px 40px', color: colors.white }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 20 }}>
-            <span style={{ fontSize: 32 }}>🌸</span>
+            <span style={{ fontSize: 32 }}>🌿</span>
             <span style={{ fontSize: 24, fontWeight: 800 }}>Bloom</span>
           </div>
-          <p style={{ color: colors.lightGray }}>Fresh flowers, direct from local growers</p>
+          <p style={{ color: colors.lightGray }}>Everything growers need, from trusted vendors</p>
           <p style={{ color: colors.lightGray, fontSize: 13, marginTop: 24 }}>© 2026 Bloom. Made with 💖 in Thailand.</p>
         </div>
       </footer>
