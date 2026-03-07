@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bloom - Vendor Portal</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='lg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232D7D46'/><stop offset='100%25' style='stop-color:%231f5430'/></linearGradient><linearGradient id='ag' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23F2A900'/><stop offset='100%25' style='stop-color:%23d48c00'/></linearGradient></defs><path d='M64 95Q63 75 64 55Q64.5 45 64 35' stroke='url(%23lg)' stroke-width='2.5' fill='none' stroke-linecap='round'/><path d='M64 50Q45 45 38 35Q35 28 40 22Q48 18 55 28Q60 38 64 50' fill='url(%23lg)' opacity='.9'/><path d='M64 50Q83 45 90 35Q93 28 88 22Q80 18 73 28Q68 38 64 50' fill='url(%23lg)' opacity='.9'/><path d='M64 65Q42 62 32 52Q26 45 32 40Q42 38 52 50Q59 60 64 65' fill='url(%23lg)' opacity='.85'/><path d='M64 65Q86 62 96 52Q102 45 96 40Q86 38 76 50Q69 60 64 65' fill='url(%23lg)' opacity='.85'/><path d='M64 80Q55 85 50 92Q48 98 55 100Q63 100 68 90Q68 85 64 80' fill='url(%23ag)' opacity='.8'/><circle cx='64' cy='65' r='4' fill='url(%23ag)' opacity='.7'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -510,51 +511,43 @@
     // DATA OPTIONS
     // =============================================
     const CATEGORIES = [
-      { value: 'lights', label: '💡 Grow Lights' },
-      { value: 'nutrients', label: '🧪 Nutrients' },
-      { value: 'soil', label: '🌿 Growing Media' },
-      { value: 'seeds', label: '🌱 Seeds' },
-      { value: 'containers', label: '🪴 Containers' },
-      { value: 'ventilation', label: '💨 Ventilation' },
-      { value: 'pest-control', label: '🛡️ Pest Control' },
-      { value: 'hydroponic', label: '💧 Hydroponic Systems' },
-      { value: 'testing', label: '🧬 Testing Kits' },
-      { value: 'climate', label: '🌡️ Climate Control' },
-      { value: 'other', label: '✨ Other' },
+      { value: 'clones', label: '🌱 Clones' },
+      { value: 'seeds', label: '🫘 Seeds' },
+      { value: 'buds', label: '🌿 Buds' },
     ];
 
     const PRICE_UNITS = [
+      { value: 'per_clone', label: 'Per Clone' },
+      { value: 'per_pack', label: 'Per Pack' },
+      { value: 'per_seed', label: 'Per Seed' },
+      { value: 'per_gram', label: 'Per Gram' },
+      { value: 'per_ounce', label: 'Per Ounce' },
       { value: 'each', label: 'Each' },
-      { value: 'per liter', label: 'Per Liter' },
-      { value: 'per kg', label: 'Per Kilogram' },
-      { value: 'per bottle', label: 'Per Bottle' },
-      { value: 'per unit', label: 'Per Unit' },
     ];
 
     const GROWING_METHODS = [
-      { value: 'organic', label: 'Organic', icon: '🌿' },
-      { value: 'sustainable', label: 'Sustainable', icon: '♻️' },
-      { value: 'hydroponic', label: 'Hydroponic', icon: '💧' },
-      { value: 'greenhouse', label: 'Greenhouse', icon: '🏠' },
-      { value: 'field-grown', label: 'Field Grown', icon: '🌾' },
-      { value: 'no-till', label: 'No-Till', icon: '🌱' },
+      { value: 'indoor', label: 'Indoor' },
+      { value: 'outdoor', label: 'Outdoor' },
+      { value: 'greenhouse', label: 'Greenhouse' },
+      { value: 'hydroponic', label: 'Hydroponic' },
+      { value: 'organic', label: 'Organic' },
+      { value: 'living-soil', label: 'Living Soil' },
     ];
 
     const CERTIFICATIONS = [
-      { value: 'usda-organic', label: 'USDA Organic', icon: '✅' },
-      { value: 'veriflora', label: 'Veriflora', icon: '🌸' },
-      { value: 'fair-trade', label: 'Fair Trade', icon: '🤝' },
-      { value: 'rainforest-alliance', label: 'Rainforest Alliance', icon: '🌳' },
-      { value: 'local-certified', label: 'Locally Certified', icon: '📍' },
+      { value: 'organic', label: 'Organic Certified' },
+      { value: 'lab-tested', label: 'Lab Tested' },
+      { value: 'pest-free', label: 'Pest Free Certified' },
+      { value: 'gmp', label: 'GMP Certified' },
+      { value: 'local-licensed', label: 'Locally Licensed' },
     ];
 
     const FARM_SIZES = [
-      { value: 'backyard', label: 'Backyard Garden' },
-      { value: 'small', label: 'Small (< 1 acre)' },
-      { value: 'medium', label: 'Medium (1-5 acres)' },
-      { value: 'large', label: 'Large (5-20 acres)' },
-      { value: 'commercial', label: 'Commercial (20+ acres)' },
-      { value: 'greenhouse', label: 'Greenhouse Operation' },
+      { value: 'home', label: 'Home Grow' },
+      { value: 'small', label: 'Small Operation (< 50 plants)' },
+      { value: 'medium', label: 'Medium (50-200 plants)' },
+      { value: 'large', label: 'Large (200-1000 plants)' },
+      { value: 'commercial', label: 'Commercial (1000+ plants)' },
     ];
 
     // =============================================
@@ -931,7 +924,7 @@
             icon="👤"
           />
           <Input
-            label="Farm/Business Name"
+            label="Brand/Business Name"
             value={farmName}
             onChange={setFarmName}
             placeholder="Sunny Meadows Farm"
@@ -957,11 +950,11 @@
           </p>
 
           <Select
-            label="Farm Size"
+            label="Operation Size"
             value={farmSize}
             onChange={setFarmSize}
             options={FARM_SIZES}
-            placeholder="Select your farm size"
+            placeholder="Select your operation size"
           />
 
           <Input
@@ -1147,9 +1140,11 @@
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
 
+      const [category, setCategory] = useState('');
       const [title, setTitle] = useState('');
       const [description, setDescription] = useState('');
       const [price, setPrice] = useState('');
+      const [priceUnit, setPriceUnit] = useState('');
       const [quantity, setQuantity] = useState('');
       const [images, setImages] = useState([]);
       const [growingMethod, setGrowingMethod] = useState('');
@@ -1157,12 +1152,20 @@
       const handleSubmit = async () => {
         setError('');
 
+        if (!category.trim()) {
+          setError('Please select a product category');
+          return;
+        }
         if (!title.trim()) {
           setError('Title is required');
           return;
         }
         if (!price || parseFloat(price) <= 0) {
           setError('Please enter a valid price');
+          return;
+        }
+        if (!priceUnit) {
+          setError('Please select a price unit');
           return;
         }
 
@@ -1175,9 +1178,9 @@
               seller_id: profile.id,
               title: title.trim(),
               description: description.trim() || null,
-              category: 'flowers',
+              category: category,
               price: parseFloat(price),
-              price_unit: 'per unit',
+              price_unit: priceUnit,
               quantity_available: quantity ? parseInt(quantity) : null,
               images: images.length > 0 ? images : null,
               growing_method: growingMethod || null,
@@ -1237,6 +1240,51 @@
                 </div>
               )}
 
+              {/* Category Selector - First Field */}
+              <div style={{ marginBottom: 28 }}>
+                <label style={{
+                  display: 'block',
+                  marginBottom: 12,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.dark,
+                }}>
+                  Product Category <span style={{ color: colors.primary }}>*</span>
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12 }}>
+                  {CATEGORIES.map((cat) => {
+                    const isSelected = category === cat.value;
+                    return (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => setCategory(cat.value)}
+                        style={{
+                          padding: '16px 12px',
+                          borderRadius: 12,
+                          border: `2px solid ${isSelected ? colors.primary : colors.blush}`,
+                          background: isSelected ? colors.gradient1 : colors.white,
+                          color: isSelected ? colors.white : colors.dark,
+                          fontSize: 16,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <div style={{ fontSize: 24, marginBottom: 6 }}>
+                          {cat.label.split(' ')[0]}
+                        </div>
+                        <div style={{ fontSize: 13 }}>
+                          {cat.label.split(' ').slice(1).join(' ')}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <ImageUpload
                 images={images}
                 onImagesChange={setImages}
@@ -1247,18 +1295,27 @@
                 label="Title"
                 value={title}
                 onChange={setTitle}
-                placeholder="Premium LED Grow Light Kit"
+                placeholder="Describe your product"
                 required
               />
 
               <Input
-                label="Price (per unit)"
+                label="Price"
                 type="number"
                 value={price}
                 onChange={setPrice}
                 placeholder="50"
                 required
                 icon="฿"
+              />
+
+              <Select
+                label="Price Unit"
+                value={priceUnit}
+                onChange={setPriceUnit}
+                options={PRICE_UNITS}
+                placeholder="Select price unit"
+                required
               />
 
               <Input
@@ -1519,7 +1576,30 @@
             <div style={{ maxWidth: 800, margin: '0 auto' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span className="animate-float" style={{ fontSize: 32 }}>🌿</span>
+                  <svg
+                    className="animate-float"
+                    viewBox='0 0 128 128'
+                    xmlns='http://www.w3.org/2000/svg'
+                    style={{ width: 32, height: 32 }}
+                  >
+                    <defs>
+                      <linearGradient id='lg' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style={{ stopColor: '#FFFFFF' }} />
+                        <stop offset='100%' style={{ stopColor: '#E8E4D9' }} />
+                      </linearGradient>
+                      <linearGradient id='ag' x1='0%' y1='0%' x2='100%' y2='100%'>
+                        <stop offset='0%' style={{ stopColor: '#FFFFFF' }} />
+                        <stop offset='100%' style={{ stopColor: '#E8E4D9' }} />
+                      </linearGradient>
+                    </defs>
+                    <path d='M64 95Q63 75 64 55Q64.5 45 64 35' stroke='url(#lg)' strokeWidth='2.5' fill='none' strokeLinecap='round'/>
+                    <path d='M64 50Q45 45 38 35Q35 28 40 22Q48 18 55 28Q60 38 64 50' fill='url(#lg)' opacity='.9'/>
+                    <path d='M64 50Q83 45 90 35Q93 28 88 22Q80 18 73 28Q68 38 64 50' fill='url(#lg)' opacity='.9'/>
+                    <path d='M64 65Q42 62 32 52Q26 45 32 40Q42 38 52 50Q59 60 64 65' fill='url(#lg)' opacity='.85'/>
+                    <path d='M64 65Q86 62 96 52Q102 45 96 40Q86 38 76 50Q69 60 64 65' fill='url(#lg)' opacity='.85'/>
+                    <path d='M64 80Q55 85 50 92Q48 98 55 100Q63 100 68 90Q68 85 64 80' fill='url(#ag)' opacity='.8'/>
+                    <circle cx='64' cy='65' r='4' fill='url(#ag)' opacity='.7'/>
+                  </svg>
                   <span style={{ fontSize: 24, fontWeight: 800, color: colors.white }}>Bloom</span>
                 </div>
                 <button

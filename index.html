@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bloom - Everything Growers Need, From Trusted Vendors</title>
+  <title>Bloom - Thailand's Premier Clone Marketplace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'><defs><linearGradient id='lg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232D7D46'/><stop offset='100%25' style='stop-color:%231f5430'/></linearGradient><linearGradient id='ag' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23F2A900'/><stop offset='100%25' style='stop-color:%23d48c00'/></linearGradient></defs><path d='M64 95Q63 75 64 55Q64.5 45 64 35' stroke='url(%23lg)' stroke-width='2.5' fill='none' stroke-linecap='round'/><path d='M64 50Q45 45 38 35Q35 28 40 22Q48 18 55 28Q60 38 64 50' fill='url(%23lg)' opacity='.9'/><path d='M64 50Q83 45 90 35Q93 28 88 22Q80 18 73 28Q68 38 64 50' fill='url(%23lg)' opacity='.9'/><path d='M64 65Q42 62 32 52Q26 45 32 40Q42 38 52 50Q59 60 64 65' fill='url(%23lg)' opacity='.85'/><path d='M64 65Q86 62 96 52Q102 45 96 40Q86 38 76 50Q69 60 64 65' fill='url(%23lg)' opacity='.85'/><path d='M64 80Q55 85 50 92Q48 98 55 100Q63 100 68 90Q68 85 64 80' fill='url(%23ag)' opacity='.8'/><circle cx='64' cy='65' r='4' fill='url(%23ag)' opacity='.7'/></svg>">
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -108,7 +109,7 @@
       const navItems = [
         { id: 'home', label: 'Home' },
         { id: 'products', label: 'Products' },
-        { id: 'growers', label: 'Growers' },
+        { id: 'growers', label: 'Vendors' },
         { id: 'how-it-works', label: 'How It Works' },
         { id: 'about', label: 'About' },
         { id: 'contact', label: 'Contact' },
@@ -135,7 +136,25 @@
             justifyContent: 'space-between',
           }}>
             <div onClick={() => onNavigate('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <span className="animate-float" style={{ fontSize: 32 }}>🌿</span>
+              <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style={{ width: 36, height: 36 }}>
+                <defs>
+                  <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#2D7D46' }} />
+                    <stop offset="100%" style={{ stopColor: '#1f5430' }} />
+                  </linearGradient>
+                  <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#F2A900' }} />
+                    <stop offset="100%" style={{ stopColor: '#d48c00' }} />
+                  </linearGradient>
+                </defs>
+                <path d="M64 95Q63 75 64 55Q64.5 45 64 35" stroke="url(#lg)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M64 50Q45 45 38 35Q35 28 40 22Q48 18 55 28Q60 38 64 50" fill="url(#lg)" opacity=".9" />
+                <path d="M64 50Q83 45 90 35Q93 28 88 22Q80 18 73 28Q68 38 64 50" fill="url(#lg)" opacity=".9" />
+                <path d="M64 65Q42 62 32 52Q26 45 32 40Q42 38 52 50Q59 60 64 65" fill="url(#lg)" opacity=".85" />
+                <path d="M64 65Q86 62 96 52Q102 45 96 40Q86 38 76 50Q69 60 64 65" fill="url(#lg)" opacity=".85" />
+                <path d="M64 80Q55 85 50 92Q48 98 55 100Q63 100 68 90Q68 85 64 80" fill="url(#ag)" opacity=".8" />
+                <circle cx="64" cy="65" r="4" fill="url(#ag)" opacity=".7" />
+              </svg>
               <span style={{
                 fontSize: 24,
                 fontWeight: 800,
@@ -267,12 +286,12 @@
                 marginBottom: 24,
                 color: colors.dark,
               }}>
-                Everything growers need,{' '}
+                Thailand's Premier{' '}
                 <span style={{
                   background: colors.gradient1,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                }}>direct from the source</span>
+                }}>Clone Marketplace</span>
               </h1>
 
               <p className="animate-fade-in-up" style={{
@@ -283,7 +302,7 @@
                 maxWidth: 480,
                 animationDelay: '0.2s',
               }}>
-                Connect with trusted suppliers of seeds, nutrients, equipment, and more. Built for Thailand's growing community.
+                Source verified clones, premium seeds, and craft buds from trusted growers across Thailand.
               </p>
 
               <div className="animate-fade-in-up" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', animationDelay: '0.3s' }}>
@@ -299,7 +318,7 @@
                   boxShadow: '0 8px 30px rgba(45, 125, 70, 0.4)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                 }}>
-                  Browse Supplies 🌿
+                  Browse Clones 🌱
                 </button>
               </div>
             </div>
@@ -394,31 +413,70 @@
     );
 
     // =============================================
-    // PRODUCTS PAGE
+    // PRODUCTS PAGE WITH CATEGORY TABS
     // =============================================
     const ProductsPage = ({ onSelectProduct }) => {
       const [listings, setListings] = useState([]);
       const [loading, setLoading] = useState(true);
+      const [selectedCategory, setSelectedCategory] = useState('clones');
+
+      const categories = [
+        { id: 'clones', label: 'Clones', emoji: '🌱' },
+        { id: 'seeds', label: 'Seeds', emoji: '🫘' },
+        { id: 'buds', label: 'Buds', emoji: '🌿' },
+      ];
 
       useEffect(() => {
         const fetchListings = async () => {
-          const { data, error } = await supabase
+          setLoading(true);
+          let query = supabase
             .from('listings')
             .select('*, profiles(display_name, farm_name, location)')
-            .eq('is_available', true)
-            .order('created_at', { ascending: false });
+            .eq('is_available', true);
+
+          // Filter by category if not all
+          if (selectedCategory) {
+            query = query.eq('category', selectedCategory);
+          }
+
+          const { data, error } = await query.order('created_at', { ascending: false });
           if (!error && data) setListings(data);
           setLoading(false);
         };
         fetchListings();
-      }, []);
+      }, [selectedCategory]);
 
       return (
         <section style={{ minHeight: '100vh', padding: '120px 24px 80px', background: colors.cream }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 60 }}>
-              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Grow Supplies 🌿</h2>
-              <p style={{ fontSize: 18, color: colors.gray }}>Everything you need to grow</p>
+              <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Marketplace 🌿</h2>
+              <p style={{ fontSize: 18, color: colors.gray, marginBottom: 40 }}>Browse clones, seeds, and buds from verified vendors</p>
+
+              {/* Category Tabs */}
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    style={{
+                      padding: '12px 28px',
+                      borderRadius: 25,
+                      border: selectedCategory === cat.id ? 'none' : `2px solid ${colors.dark}`,
+                      background: selectedCategory === cat.id ? colors.gradient1 : colors.white,
+                      color: selectedCategory === cat.id ? colors.white : colors.dark,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      fontFamily: 'Plus Jakarta Sans, sans-serif',
+                      boxShadow: selectedCategory === cat.id ? '0 4px 15px rgba(45, 125, 70, 0.3)' : 'none',
+                    }}
+                  >
+                    {cat.emoji} {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {loading ? (
@@ -436,7 +494,7 @@
               <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
                 <span style={{ fontSize: 64 }}>🌱</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Coming Soon!</h3>
-                <p style={{ color: colors.gray }}>Suppliers are stocking their shelves.</p>
+                <p style={{ color: colors.gray }}>Vendors are stocking their shelves with {selectedCategory}.</p>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
@@ -618,14 +676,14 @@
               }}>
                 <span style={{ fontSize: 64 }}>🌿</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Your cart is empty</h3>
-                <p style={{ color: colors.gray, marginBottom: 32 }}>Add some supplies to get growing!</p>
+                <p style={{ color: colors.gray, marginBottom: 32 }}>Add some clones, seeds, or buds to get started!</p>
                 <button onClick={onContinueShopping} style={{
                   padding: '16px 32px', borderRadius: 30,
                   border: 'none', background: colors.gradient1,
                   color: colors.white, fontWeight: 600, fontSize: 16,
                   cursor: 'pointer', fontFamily: 'Plus Jakarta Sans',
                 }}>
-                  Browse Supplies
+                  Browse Products
                 </button>
               </div>
             ) : (
@@ -789,6 +847,35 @@
               console.error('Order error:', orderError);
               throw orderError;
             }
+
+            // Send Discord notification for this order
+            try {
+              const itemsList = items.map(i => `• ${i.title} x${i.quantity} — ฿${(i.price * i.quantity).toLocaleString()}`).join('\n');
+              await fetch('https://discord.com/api/webhooks/1479363779660615802/CKW1VeQrfAfCQdxP9dgrLoc43Bm9qOM9UhbEpBfPWs7hUE1kZak-VqppU50_4D6cXk3Y', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  username: 'Bloom Orders',
+                  avatar_url: 'https://bloom-marketplace.vercel.app/favicon.ico',
+                  embeds: [{
+                    title: '🛒 New Order Received!',
+                    color: 0x2D7D46,
+                    fields: [
+                      { name: '👤 Customer', value: name, inline: true },
+                      { name: '📱 Phone', value: phone, inline: true },
+                      { name: '💰 Total', value: `฿${orderTotal.toLocaleString()}`, inline: true },
+                      { name: '📦 Items', value: itemsList },
+                      { name: '📍 Address', value: `${address}, ${district}, ${province} ${postalCode}` },
+                      ...(notes ? [{ name: '📝 Notes', value: notes }] : []),
+                    ],
+                    timestamp: new Date().toISOString(),
+                    footer: { text: 'Bloom Marketplace' },
+                  }],
+                }),
+              });
+            } catch (discordErr) {
+              console.log('Discord notification failed (non-critical):', discordErr);
+            }
           }
 
           onPlaceOrder({ name, phone, address, district, province, postalCode, notes });
@@ -855,7 +942,7 @@
                 <span style={{ fontSize: 32 }}>💵</span>
                 <div>
                   <h4 style={{ fontWeight: 700, color: colors.dark }}>Cash on Delivery</h4>
-                  <p style={{ fontSize: 14, color: colors.dark, opacity: 0.8 }}>Pay when you receive your supplies</p>
+                  <p style={{ fontSize: 14, color: colors.dark, opacity: 0.8 }}>Pay when you receive your order</p>
                 </div>
               </div>
 
@@ -1020,19 +1107,19 @@
     );
 
     // =============================================
-    // GROWERS PAGE
+    // VENDORS PAGE
     // =============================================
-    const GrowersPage = () => {
-      const [growers, setGrowers] = useState([]);
+    const VendorsPage = () => {
+      const [vendors, setVendors] = useState([]);
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
-        const fetchGrowers = async () => {
+        const fetchVendors = async () => {
           const { data } = await supabase.from('profiles').select('*').eq('is_active', true);
-          if (data) setGrowers(data);
+          if (data) setVendors(data);
           setLoading(false);
         };
-        fetchGrowers();
+        fetchVendors();
       }, []);
 
       return (
@@ -1040,31 +1127,31 @@
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 60 }}>
               <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Our Vendors 🌿</h2>
-              <p style={{ fontSize: 18, color: colors.gray }}>Trusted suppliers for Thailand's growing community</p>
+              <p style={{ fontSize: 18, color: colors.gray }}>Trusted clone suppliers, seed banks, and bud producers across Thailand</p>
             </div>
 
             {loading ? (
               <div style={{ textAlign: 'center', padding: 60 }}>
                 <div style={{ width: 50, height: 50, border: `4px solid ${colors.blush}`, borderTopColor: colors.primary, borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
               </div>
-            ) : growers.length === 0 ? (
+            ) : vendors.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
-                <span style={{ fontSize: 64 }}>👨‍🌾</span>
+                <span style={{ fontSize: 64 }}>🌱</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Vendors Coming Soon!</h3>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
-                {growers.map(grower => (
-                  <div key={grower.id} style={{ background: colors.white, borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)', textAlign: 'center' }}>
+                {vendors.map(vendor => (
+                  <div key={vendor.id} style={{ background: colors.white, borderRadius: 24, padding: 32, boxShadow: '0 4px 20px rgba(45, 125, 70, 0.1)', textAlign: 'center' }}>
                     <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {grower.profile_photo_url ? (
-                        <img src={grower.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {vendor.profile_photo_url ? (
+                        <img src={vendor.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <span style={{ fontSize: 48 }}>🌻</span>
                       )}
                     </div>
-                    <h3 style={{ fontSize: 22, fontWeight: 700, color: colors.dark }}>{grower.farm_name || grower.display_name}</h3>
-                    {grower.location && <p style={{ color: colors.gray, marginTop: 8 }}>📍 {grower.location}</p>}
+                    <h3 style={{ fontSize: 22, fontWeight: 700, color: colors.dark }}>{vendor.farm_name || vendor.display_name}</h3>
+                    {vendor.location && <p style={{ color: colors.gray, marginTop: 8 }}>📍 {vendor.location}</p>}
                   </div>
                 ))}
               </div>
@@ -1082,18 +1169,18 @@
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 80 }}>
             <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>How It Works ✨</h2>
-            <p style={{ fontSize: 18, color: colors.gray }}>Getting fresh flowers has never been easier</p>
+            <p style={{ fontSize: 18, color: colors.gray }}>Get quality clones, seeds, and buds with just a few clicks</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40 }}>
             {[
-              { icon: '🔍', title: 'Browse', desc: 'Explore supplies from trusted vendors' },
+              { icon: '🔍', title: 'Browse', desc: 'Explore clones, seeds, and buds from verified vendors' },
               { icon: '🛒', title: 'Order', desc: 'Add to cart and checkout with your address' },
               { icon: '💵', title: 'Pay on Delivery', desc: 'Pay cash when your order arrives' },
-              { icon: '📦', title: 'Grow', desc: 'Get everything you need delivered!' },
+              { icon: '🌱', title: 'Grow', desc: 'Everything you need for successful cultivation!' },
             ].map((step, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 30px rgba(255, 107, 107, 0.3)' }}>
+                <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 30px rgba(45, 125, 70, 0.3)' }}>
                   <span style={{ fontSize: 48 }}>{step.icon}</span>
                 </div>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: colors.dark, color: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontWeight: 700 }}>{i + 1}</div>
@@ -1118,10 +1205,10 @@
           <div style={{ background: colors.white, borderRadius: 32, padding: 60, boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)', textAlign: 'center' }}>
             <span style={{ fontSize: 80 }}>🌿</span>
             <p style={{ fontSize: 20, color: colors.dark, lineHeight: 1.8, marginTop: 32 }}>
-              Bloom connects growers in Thailand with the supplies they need.
+              Bloom connects cannabis cultivators in Thailand with verified clone vendors, seed banks, and craft bud suppliers.
             </p>
             <p style={{ fontSize: 17, color: colors.gray, lineHeight: 1.8, marginTop: 24 }}>
-              We believe every grower deserves access to quality supplies. By connecting you directly with trusted vendors, you get the best products at fair prices.
+              We believe every grower deserves access to quality genetics and premium products. By connecting you directly with trusted vendors, you get the best clones, seeds, and buds at fair prices.
             </p>
           </div>
         </div>
@@ -1168,10 +1255,20 @@
       <footer style={{ background: colors.dark, padding: '60px 24px 40px', color: colors.white }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 20 }}>
-            <span style={{ fontSize: 32 }}>🌿</span>
+            <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" style={{ width: 32, height: 32 }}>
+              <defs>
+                <linearGradient id="lg-footer" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: '#4CAF50' }} />
+                  <stop offset="100%" style={{ stopColor: '#2D7D46' }} />
+                </linearGradient>
+              </defs>
+              <path d="M64 95Q63 75 64 55Q64.5 45 64 35" stroke="url(#lg-footer)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M64 50Q45 45 38 35Q35 28 40 22Q48 18 55 28Q60 38 64 50" fill="url(#lg-footer)" opacity=".9" />
+              <path d="M64 50Q83 45 90 35Q93 28 88 22Q80 18 73 28Q68 38 64 50" fill="url(#lg-footer)" opacity=".9" />
+            </svg>
             <span style={{ fontSize: 24, fontWeight: 800 }}>Bloom</span>
           </div>
-          <p style={{ color: colors.lightGray }}>Everything growers need, from trusted vendors</p>
+          <p style={{ color: colors.lightGray }}>Thailand's Premier Clone Marketplace</p>
           <p style={{ color: colors.lightGray, fontSize: 13, marginTop: 24 }}>© 2026 Bloom. Made with 💖 in Thailand.</p>
         </div>
       </footer>
@@ -1232,7 +1329,7 @@
           case 'cart': return <CartPage cart={cart} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onCheckout={() => setCurrentPage('checkout')} onContinueShopping={() => setCurrentPage('products')} />;
           case 'checkout': return <CheckoutPage cart={cart} onPlaceOrder={handlePlaceOrder} onBack={() => setCurrentPage('cart')} />;
           case 'order-confirmation': return <OrderConfirmationPage order={orderDetails} onContinueShopping={() => setCurrentPage('products')} />;
-          case 'growers': return <GrowersPage />;
+          case 'growers': return <VendorsPage />;
           case 'how-it-works': return <HowItWorksPage />;
           case 'about': return <AboutPage />;
           case 'contact': return <ContactPage />;
