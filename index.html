@@ -503,30 +503,32 @@
           )}
         </div>
 
-        <div style={{ padding: 20 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 4, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {listing.title}
           </h3>
           {listing.profiles && (
-            <p style={{ fontSize: 14, color: colors.gray, marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: colors.gray, marginBottom: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               by {listing.profiles.farm_name || listing.profiles.display_name}
             </p>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ fontSize: 24, fontWeight: 800, color: colors.primary }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, whiteSpace: 'nowrap' }}>
               ฿{parseFloat(listing.price).toFixed(0)}
-              <span style={{ fontSize: 14, fontWeight: 400, color: colors.gray }}>/unit</span>
+              <span style={{ fontSize: 12, fontWeight: 400, color: colors.gray }}>/unit</span>
             </p>
             {listing.quantity_available && (
               <span style={{
-                padding: '6px 12px',
+                padding: '4px 10px',
                 background: colors.mint,
                 borderRadius: 20,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 600,
                 color: colors.dark,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}>
-                {listing.quantity_available} available
+                {listing.quantity_available} avail
               </span>
             )}
           </div>
