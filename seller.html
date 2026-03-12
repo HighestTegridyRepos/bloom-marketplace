@@ -25,8 +25,11 @@
   <meta name="twitter:title" content="SiamClones - Vendor Portal">
   <meta name="twitter:description" content="Source verified cannabis clones, premium seeds, and craft buds from trusted growers across Thailand.">
   
-  <!-- Additional SEO -->
-  <meta name="theme-color" content="#1A2E1A">
+  <!-- PWA & Additional SEO -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2D7D46">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SiamClones">
   <meta name="application-name" content="SiamClones">
   
@@ -38,6 +41,7 @@
     "name": "SiamClones",
     "url": "https://siamclones.com",
     "description": "Thailand's premier marketplace for verified cannabis clones, seeds, and buds",
+    "inLanguage": "en",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://siamclones.com/?search={search_term_string}",
@@ -51,20 +55,23 @@
     "@type": "Organization",
     "name": "SiamClones",
     "url": "https://siamclones.com",
-    "description": "Thailand's #1 cannabis clone marketplace",
+    "logo": "https://siamclones.com/favicon.svg",
+    "description": "Thailand's #1 cannabis clone marketplace connecting buyers with verified growers",
     "areaServed": {
       "@type": "Country",
       "name": "Thailand"
-    }
+    },
+    "sameAs": []
   }
   </script>
 
-  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAeeklEQVR42u17d3xVVdb2WvvU29MLJVIElCZqHBQFk7EwoiiKuVYsoMY6jg3LjHNznaYiylhehdFxsHuDgEhRUAIKCBpEIEGK0iE9t99zT9l7fX+E+PrOOzMKlvn95v3OvzfZZ61nr2eVZ+8D8P+ff99DRIyI2L/TBvbvcTwiEQG27p4zoWV37QVEgEQR6f8MAAAAiECS3TJJsdsmIQL9n4kAohADqBLNze8XM5Eey0T67IMHPywEqBIUCrH//AhYAQwRibdtuyXg87l8Xr8HOxpvQ0RaUfHT24M/+e5jmJp3v90nRz7wRSqJs1FS0es2r4k6PQeVHHXBboAQIobFf2YE1G5BBCSW+OKvjpWWTSp+gLTeNULYspTcMQsRCGqHIPwnPt1Zfu+mv1xL7U/Tns8ef6D7t/0bn76HOl+gPRtnXQMAQJF/T0X4cRwHQCJCAMADB+oKolsfjbVsfmwdEbH6+nqFqF4BYNDaOOPj2PbHkge3Ly481CMg0Y9PUfYTJBlav75aBgCi1s+rA1454LC8uxFR9PJvvqVpW8OtAAIsNe8ul6Z4eXrHbV3Jskb6Kcoj+3HDnhgQ4YknznIAALiTnri/Obutx+BrV7e1feGTndb7ZN5yx3YirdeAq9e0thnbwE5N6AIgLEJELPQjl8YjWjwSqZL+VQUJhUKMiPCrtc/137pq2nwAQgqFGHGBIBwNEYXVsvTm/BypuNAn9fZseOIOAALiXCZCORQChmEUl3/86NzLxvcYSNT1//+KZods+mkACAZredcG0z8EoaKiq9Znsy3X9CnKnr99zcPPYDgsSNLe71Hk7bN38+yb3VJ6akecfRhNy8tdqvnA/k2zb8zPc/UnSV0WDoP4at2fZvQpyF7AEweu/lc9AhEhAtAhm378PqCu7kVdSrWcN2b8/XMACOrqQnJlZdj5Zq1HDIsvPnl5kJTetIkYyxTkenLaEmz6oFN/ff/BjdM25HjZkKwFTkumuCwv1y9U68sDLo2keJK+KB5+97CvPnn4d4U++/7WdiPOQOiWPvS4Y382aVv32v9ty6F3E+Ga9x69HPx9544aFTR+tAiIRKqkysprsyK9/8ZP59729rp1y/K7nScKMSJAqAFoIFJ5YvOrKMkc8kaOak/gX4/u5bpr5+fPXyII6t0+F8Sz2nV5uX7hCKGmTL1a98hgO/bqfVteHl9WhPc3d4q/SoVnjkRJEyy19RUikqEGoGtwCjEAwMrKsLPp47eL1y/81Qc8feD6U0YFs4dLhcMCoLBwMAIAINNeD7j5+fau2s9Wz793coiIIYZFY2NIwXBYmMvCd5Tk6ycmstotg4Zd9MWg0x6csqc5uz4gNb1cFOBX79mXnt7vhNtmy86uhRrf927ZiFte2HPAnFmUx65z8V3z9rdYnw86rWZKv2PP2Jay3LcUF+rlny//wx0YDovG2pCCGBZABB8vfOCa5IEl6/2aUym4/AoCULeNPwoFukNwzaLpw5zo5s+YBHJ+ng+SBmwy5J43nX7efWvq6xe4oWl5EzLl4xPPnfaLDRvqcrzpjycrshXWNOa1uOuBo8rv+VPbF9PeKMiVLyEhoK1TvFk8dOql+z+f/qDGMg+lDZ60hOdennPuK8cee2xy87JfLyXKjhRFZ/cYMWJs+sOFfxzpFs3P+Vw0oiOaBocjh8CgE8aMm7rp72nywwIAgNiV/NS6lya1al5/g+IpfYpZB59xa3p+a1oLHtV35LJMy/KoUAoeIeK7dJU/UlzgDXQk7GWW3PuXx5Rfv7VjyyORvN5qVesBdq/gSCU9xKPtB53awiF3B7+onzVM503/VZCjnNbcGo8ajh5SFeyvis7braKKws7tn56S684syGSyMZvl3yys2E1WOj684Mq/FQ1FtLpt/FEogAAUiVRJiGjJqnu1Y2aH/ewXD74ZdZ01KJ3lH3sx8Wo8ET0hnbGiCnXeW+i3n0PETe2Z4uH9Tg6d7ZZTR7U0/GGvz8OqmvbAXcXH3PJo6ZCbpx3YB3fn+KSqlk0P73FLRmnfkTWj24zAycik7SU51pPMid8eTYioSGSHeJTkm7aN69I5pw88+byHXudmajhTtdVDEa1IpEo6HOePqAx2c0ySfIvyAl7/yiW/P+Gssy7qSMHAq1CSuZPc8rzL7c61HGlX1PCNHTD64THC6ey/a80DW0tzjHcFJ3NPp17ZY+htjxOF5Pr6mUqv4bdO393h+rkQwumdZ7y3e+0DW8k0Co8+9Q8nt2f859kO26drSq7RVv8X4FyJmcWTx4wJtq1a9PvyvFx/ABXfkm/a9qMCULECuvjlL10uOAdMtp9KRFhx/i27LYe+Ks6lviZpczrGTh8Ys7SmrSvu3lzkS84TBJ6D7fza0uPuGzDg+JtWEEUkxLBTXl5tE0WkAcdfV7c1WjVkf5T9kpD8pbnGOztW/3Zd3M7f3tr/4YEO6PNLcsWArEk7Rl9w945QKMTIip0miABcPesAANratvx0ylIdkbzipas7P3r9umUAAA11Ee/q2mp73cK7ZgIA1L/74K/2rv01NSy/p3nzh7+bdCiL4vvr3x++d+8aFwDA0vVLeyxeu7hXd03vXnvXLtK3rX7shh2rHozv+yRMG96vuQUAYP2Se2avnXezeeBAvRsA4MPIjXUrXp/cSURy1/KAP0knGIlUSZWIjiQrKxGc0USEbfHGYxzJt3DkedOr1y2884leBfYTsTTUJtpP6jtszIMvL6xfcPOi9Qumk2NmW1tVBwDAVNMPCo/14KHYgm5xtG9fzA469e5Zcf2k/kmDv9OnwH66fuG9j5x4zrSrUct7Z/fGxYOIiElonSLJyhpEdLpy0+EPT/KRAPA111Tvkhy3NeGTd383GAI9dp9eccNFa96h+8sK+K/2tlgzf3bu4ze+tvS1Hu9tXfS+lbbTiuS68KzysWkiwvr6emU3fXk+IkoNDQ23DR0y1I7URtjXO7kiJGH5+e2A0vkbl079a1kRTV09/969I8f98eK6Bc8WfPbBH4fm+t1ae1JddKT8P+II6M4Dkrf3cpsjGMnOMysrq9tXL/lTea7u/HFvC1/8s3Mfv/Gtj944zlPmWZ+0jKOMr6xzxo4Ym+5aoQabWNNgYlgKEiveY345PFIbYcFgkAeDQY4IhJVhhyjE6n57mnzcWY9M3teBC3N94ul17z08ovL86vZ0In6m7cjA5OLlh+YP8ZMBgOEwAQCcMvbOXYmk2c6EMQ4AATJNfzFMiLZJJ1+5pP6tUuGTF6lupYQn+T3BYJC/u2HRhLpddSMQwwKYU+J1eVBXNSCJFwSDQf7+1veHL17/zqWHRmAEqKHK8EoHQEDac+Jk2xIpK7F3FgAAWqnzYwmj49QLpn7ZJbOH6ScDAACoLnS6jIicgK0inj1p/bLHL8n32MelDLnmvPOuiGYd/oIvx9sz2ZLozPflLwcAtJD3QxdteGfzgic18AB3BGcchEv42FufvTUdPGJjlsxB4XBYRBoiCiLSnA/eGDd/xRuVY8YE2+KG9Fihl59U/8FTVSCMEYi4EhH5of7/JwUAoKKiawGUl3pUlmvFd7zYEbdj/fsOfD6yNvJzOaCfwxxwGMptZ7x1RhsRwfkjzn+8o6nj/eL+RbelIflnwzDtTNZyUlJmRq9BPe+MtcU+urB84kMRikiNQxqduevm5nMPvWpJVEpE6C4bOSuW5nGR3PGy2yUHhKy/9334/50AiPwTgbKbc1pO2YdZGxyXYrocybu4Z3l1JmMl7wMFiElINrf9+6bs0w710jjx+Kqz9u84+AK62ECUQOUgZNLo6LZd7c9ffEJwDAJSdH2UhTEs0kbqWVeuOyfrmHmISOXlE5s48y3SpaxmWOC4fT3X/Cv+V32HyZB9i6SFwWCQh6hL4fmfR1tdnMvo925zUN2m6y6SZNeCCJHqMHGKjIi6ohmgYNGmtk2DAQDqdtdp73y26CpFVnvLsoKSIjNZlZikyCiQjlr4+cJJdbvq9OryavvF5S9egS6sSicS5HA+/OvXaq46VXeRTcpXLP/ubf+I/0SEIQqx2mAt/2eizb8EoPvEdtGni06Z9+nC6jCGBSJSXV2d/I0FqS50ulxZiY4kK58AMlRR/jy9/r1+Ls3llQDArWng9XilhJG4HREpfiCuSIh5siI1WQlrqjBpMWXFe5nO7H1MkpqIpNJkR5Itq18WcAR/LKDLwq/JmLXMId3vVFz+LwAEMklaV16ONn2T/wQYqgvJiEhhDItZ82ZNeemdv4757yO5794HEABAQA980WS3fjCv4Z3T9Kw8tbK8sgkAIFRXJ8OKFQIqACC8EoCkddls9pqeAaljo5Xop6kSuVxe5Jx2YlasKiorujWy8rW/TThtwnIAmPH1Ocn6txwG8i8uOenCR7758lc+eOnunFxvSQ+f24oatsokuffeNWtcZaNGGR7NG7djnAC1DwEAVhQORiLCmpoaKYxhJwxhZ/bc2fkxjP3JEOkpXk9x70OllwDC3w0ARKRIJCKNHj46+uankcW+fO+VnU2dZy74bPH0PnKvF4YPHx4FABg/fqZERLjmnZqVWasVM7GkS+/piwOPo2MKQh87ekDvvk807N3xoVrgmTP/4/nnTDhlwrrImogL/MA9lus9Qxi/jayJ5IEfUtFslEqhVGmNtd+Wp7hIkVAC4oAIeWsz2/MA4EAm0alyE1B3+T8CAPT5eiAiEgA4ixe/7N9np67qcDru8eZ7y1JtyQ8uP/vyg6FQiCGiOKwcUFhY2DX1kTI/Gzcox+sv0XPUaTvEzs3zNy/+45INdX3Ky6ttRKSl42u2W1L+0y1K/tHaSb/40jHtjqyZBVVXvW2Z6OUn9B38sCrLAUMzP5732dtTgqOCRnBo0Bp3wrgtNrdXo4R/Cg4NWtXl1XZnZ+uZikcuc8sgbM4ZEYEQ3MUkxQcAkLGoyOD+ZxePq/mSCKC8vNp+ecnLpX+e++ffbs20bWQ6PpXn95SBIYSC6rxDXTY77CRYUVHBAQCK9YKFmXQm6nG7RbE/3/YHfD2ZC++PUvvGtz6f9/tVq1b5woiiecLv7korvRuDiBwBFjnAMRGL20yhsUme/MsxPQY8oktavSff83ykfs7776x99zgAgLLSsiokLIt8FLkQAIAkabzfpQtVBrK4g4IEMJSYkBQGABD1lGzIHDf5jjCiWLr0Jfcz85/6dXO6ZaPkYuGcgN6nR77H8bg0kU4Y6Xw5fw4AQE1FDT9sABCRQnUhefTw0VEJ5BfjVpJluYn5vgAVeXKc/ECu3+Xz/LrVG/10yYZl5wYRrbFjr2olIvS6vY91ROPUnogiEDlpJ9ujPdOm/3z4abepDs5ABqOEz/78rfp5L+zf01548ckXn6MwbGloaPByojNcmsSAMSIAIhLgcMfi6XQGAPCCM69vGTdwoPmXt589a0cm/oniUX9fXOAvLMv3OaV5fgIS0J5OMy545PILLm+JRCLSIYocQR9QAQIIMEf3PRWNJsxoKsEQEFRZlUtzCqjQk+N4fe5BWdVYOGf929MICGtra9mF5RduBhsfEcDkeDIjBBck6/IdW5q3TOtb2vfzkQNOnMwceI7pOJnc2T1z6uc+1Luh76dDhw5NCU7TFcCYy6MrROTYRCAEpXLRk+hOzk/MfeKhOBhLdb88uDTX7fTI85Mqy7KECJ0pgyXiaSeguqYDADZWNdIR9wFhDIsIRNgZQ87Ywxz2rABiju1wRATLsVGWJbkwkCM8us6VgHx3pH7unH7RfqwqUiVdPfqKBzLtqVdTRlbt6IyJbNpwFE0Zvbdz98xOs/2mEwcP+2BIz0FTPJprSaDY/2Dj0C37XvvwzStvGDvlGY+kD0slsh/4fT4FhSRUVJoLCqJJIsIZc2fMZh75wTyvInrleoUmoZy1rK4sKIhnOTIF5Feuv+iWLyKRCAt/i0D6rZ1gFVSJUCjEermKH0rFkk3RdJwBkQAgyGQz4HCHFecWSH7FZXtzPRftOXF/baQqIoK1QXblmCuvNBOZmUnDkPe1NsuJRMKSJEmzmTNmV9ueV5M8WX7ykBOeKJAD97k1PaXnKy+/WPfCu42fp8zRgyaeaSTtmbJbZzY5jeXl1fYz8555wZ3rvarEo9tHFeQhCWLJjAEkBIAQ1BJNslRnJpnnyvsNEWFjYyN971YYEWnIkCE4evjoqEraLSkzyzqSUa7IMiiyAqlMBmybQ4E/X/Erbtud67qgdt1bM+YE5/C317x99JWnXXkjz/DJ6WS2oyOeUNvaOimTStkAQmUq3bRt//YXZBnFmOEnz8zT/O8iibM9pdbW2fOfP/5nA8ffuOurgx8ogCsef3PGjVJAuTZXRbsk4FdsBzCRNkFmDGSG0BZLOPFMlqFDU68Zf82B2tpaFg5/uzz+nYeICEWkIAb5a2sjM30F3htyNJ8d8PqVrGlCIpmAHL8fVEWFls4WO26kFExLVSZlqr0u13vnj7jwscjiSKHt5w8bdvZqb8AtuWVF5AT8XHdpiq7rYKTNDT3zyh7dvWPv1q/at88lIQKQlMewONud8WYmxSj5ZGmuB48qzJUMk2NHPA1+rwa6IkE8nbWb4mklmzTnTL3s3qpIJCIFg0H+g06DVVAlIpGIdNnIqluteLYuaaWVtJGxXZoGXo8HDrS3QMbMQEFuvqRqKmVE5nFFVnoWlOZPW9+6rnbwcf1cV5x22ZSAnneCkTTnNrV1sj1NzUpHZ9ROJzMOU/H4/dE9r+T29F0ycmj53xRd9mYwXjtp0qRMPB0/WOB3KaW5XoynDdzX2gFejwyayiBjWk5HylK4QZ8dlzfimhCFWFVVlfjBx2FEpMbGRkJEx2XrE4yEsb7TiCnRZMx26Trk+gOwu2U/mLbFeuWWoMfj7u0gHdveFuWqGy9OsnTjgsb5f9QU/PLa06+a6JE846y0Vd/SHlf2HmiSzYzpAJIUz0bvYy785cDeA2O6Tz/2xXdf+OW9k+5dUJabu47JmrTzQBsPeBXQVQni6bRzMJaRzbSzvYAVnDd27Ng01HTZ+qPoATU1NTSzfqa8buS6lGblnJeMpT7ptJJKa7yD53h9UJJbBPubm0FmChTlFpDNbXBISPF4khu24XXleu83LbMKAODKisuWTDlj8kmSzabGYkl7++49cjyZ4Jw71Bprzc/LzfF4VG8mm83cCgAgQJnd3JmGHkUBCvg80BpL8YNRU04kjO2qrY6dNHFS08z6mUpNTc1hCSPfmgOIiK1YsYJVVFTwf4Ts6/Vvzlbc2lU5Lh/0yiuG1mgntEY74OjeZfDVgT1g2Cb07VFKGdOglraYmc9y+qOGx7j82nWZePq1c4aft+j1FS+PbkvH32AK9hjY9yihqgp6XV7MxLKtDVs2FRW48vvta2mT+h6dv8PnUehAaxQ6kiY6WZp7RtJ3aXl1tf13oxyGVoSkIW1DKBgMin+lFv3zWx4U+l81dN3+dfkd7R1lKW4UM2AekCAVULytWcu61pbt61yyrvUuKmH72pognklCrj8HDra3Qr8epeSAwLamzq90WVuh+7UpuksC0+LQ2Zycetmo4LTZi2YPTPDkCr/PUzKgfx9CCZkMUnpD40aPnRITb77wtnfmf/xitC2e9qRSVlYF9VWvrs+KW5k8x3Y8sixbquZuKcrL2z3x1Imtf39j5Z9VhG+NgKWblpZnhHWuYRuVnPgwJkl5mksDiXWxx7EcsLL2AQSRb5GjK5IMPYtLoK2zE4gIOBdQmpcH6awBsWQSiovzgHPTSWZMsEwhJC6fDbudVcFgkM9e8texaZ5d0rtHCRUV5zESwmncsV1OdWaqb7/4zlmPvvFImwWiQBXMJIJOWWGlTJWBkwACAsd0gDsQl5jU6FKUlQHVveDaC25Ye1gUCIVCrKamhhZ+smQC6fxh0thAAQQezQUyk0ACRqqsCOw6JwYuhCQYQSKZgFQ2A1nDBIccKPDnAbcdshwL/W4vZCyTFBW5qkpkOlzJZrgl0uKKy8cE50QiEamxsRHD4bAzrXb6R/mFgdMG9O9N6LDYF9u+zLFTzpUtm9vf0I5WOzW3GtBlBl6PCxAAGEMOCCCEAMfmjBOgLQSYjgCGMoBNuxXSf33TxBter6mpwb+PhP+VBMOHJG/g/BMJ2VNGxthg2hbYjg1uSee5br9wazrTFEVSFUVyqSq4ZY1KcguhT0kv6N/rKOiZVwJm1gSb20hA0JlKECGh7vHIqaxQzLRYrVvymG7ng8Egh4ouKUtTpEVZywTTtrlhmB5hEWqy+/PjzxpUUlaa5y/N80Ke302qhKTIDGSJSZokSS5VYX6vS7g1xSEBwB0AK2ttkwifVkFa/T98+xZBhBARAOAAADxNkcizcwdolxpJ484myz7B43aDAhKoksRlWSJJUgABERFBZQx1RWc5Hj+YuflwoKMJ4qkESaqCtsXbjJj1poepS8aVj1vcLbh+3bCsAMBKpGfmPbFL2AKETdQRj6mZbPbArxpv2rr4Fy9VFRYGMB5L2pxE18YhkcM5GJyjw0niAiXLFGBbYqtb0p8c0WvE30aNGmUAAFwH1x3e0RgRYS3UMsQgB4BXiej1xRvfGxfrjE2xuF2pe/SAS9dBlRWQGAOGDDjnkE5lgHMOhp0FRABgSMLhWQkld7Kp+elJ51y3LRKJSI1VjRTEb3RrFQBUQ/jkW0+omiJDJmPwWDKlCKBZGEYxY/BjN7oCKpAQiuJSgTscbEeAEACm6UA2a2ZUWVvtQ/eLw4qOmVdZWZk9RGm5pqaG/7Pe4Lu0whihCPumsUvqV5baWrqcC/tEx+EDOHcKkKHCibyEdBK3HSrJL0RV0URzZyvTLL3SYKmndF3rwZJs2IZlG5oPheTXfAzVheRwZdiZ9sa0Gf4Czy+REGPt8T19pH7HpvSDQ9sy2U8s2wEV5PUcYa/EmC5JclyRld1MSJ+5XOon15133Z5vyvnfVgIP94oMRiIR1lhVReF/oK999NFHubu0/Ys0TT25d14JeDQPb060y7G22MJLTrl4/IL6BceATg2ZhLH80lGXnv3N8D8kauLIc0Z6v9y/fYvkYj0d0zEYhzHtDfHPBp9euFZI7KQ9TXEBnDXkidxzb5h0w/5/lMCHDBmC38XxI74n+E169Fvfj+3Ud2KZWqZvb9u5ypvvG1bszRWarIrmjjY5lc50+IVnxLol6w6Gw2Hx+srXp+T3yX++fWf7pMsrL3+le8Dq3v0/R5541l/gu9GIZzokmyZWB29fOeP1x58LFLuqNXAszkHuSFvMSjl7S1ylJxntRvRg7kGERhAAIL7L9PfDHI4iUhCDfOfOnSI4NGjtbNvzaFFx4bA+/lKTOIldbfvlmJHIqI40cdzJ4/b3HzXKBQBw2emXvdCyr3WDUMWjDQ0NahVUiW7nn3j1sQlKjnZjPJ74ClLyqdXB21dGiCRCnNfSHI23xEyVcyFK/G4zkOspa800Tauurra3wBYeDoedI3H+e50NdofwGx+9dZyj8CmWkbU70lGtNdEuk8k/lVNYcdGoi1ZuXPGHN04NfLp+86q/9QcAUDjen5OXU9rQ0TAeEQkqQCxe/LJf8sr/ZZvWQTUDZ9905Tl76hfftbp43l1v3HHpHe+pXPo52Lg6nhFy3LA00zJsLonLnnltxvDaYC2vOsJ7wt8LgG7ZnGR+fUFRgRzPJpWDHa2b0YbrCpMFoy6tuPTTCEUkYvIiBdODZLGztqGB1EtalPdjrdEWR1g3dMtue614dU5+TimlnKtuvuLOnavmPTE/x2WPkmW9LhQKyXdOuvezOy+5+zRJKNdGY2a9aZFSWJyv2BK/DQBgcOORH44ecQ5ARFq8drG/k2I7vF5PPdnsmQnx85ZiJTrds8SQ2i0YDNby+g9+d/2wfq5Z2/faU4edfv+0V+v+9oIDdIUAyLmm4hrz6bef3IOE0Vsv/OVxH719X9XRxRDZcdD6zZiLHv9DJFIlNTYOpu4QZ4jw/Jxnfm7K4uaMYVT4Wc7A64PXd3bb9JNckel+YmS7VJKDE4ZdsPLvlCMRxrAgIoxEgtKJP//N81tX/+4CgVIZAAAHvsrldU9WMlD49LynM5pf7+0kzRe7fnOG722n93sff9t0CvkYVNWIYLDLsW7aTZ5483IAWP5c5LlTUEX9+/jwg3yS8t3LDwICwGt1L1VIfmWZKwPlJpczKSm1xYpZl1WPr57TddFLfGv+aaxqpPAP8HXZ9wOAALvv9nzbn/7l3VkrSMGh3OKCIbjdAa8nFU2nOOfk8uk+M2EYhJRmioRg84abxt9a+W21PEQhFoYwwff4tEb+nvBREILf8UMFbGRMyhADiwGgmchmZSZpjJDZCctkwFQikVFlxcU5O/hdGpl/fwQcZtKkNXtdawM7e7FUKgkeACF08ngALNNmutApRsKT085ahlZWpo40qR3u8/8AynYkw3bGnR0AAAAASUVORK5CYII=">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
@@ -79,6 +86,7 @@
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     @keyframes confetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-100px) rotate(720deg); opacity: 0; } }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
     .animate-float { animation: float 3s ease-in-out infinite; }
     .animate-bounce-in { animation: bounceIn 0.6s ease-out; }
@@ -86,8 +94,17 @@
     .animate-glow { animation: glow 2s ease-in-out infinite; }
     .animate-spin { animation: spin 1s linear infinite; }
     .animate-shake { animation: shake 0.5s ease-in-out; }
+    .page-transition { animation: pageIn 0.3s ease-out; }
 
     input:focus, textarea:focus, select:focus { outline: none; border-color: #2D7D46 !important; box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.2); }
+
+    /* Accessibility: visible focus ring for keyboard navigation */
+    *:focus-visible { outline: 3px solid #F2A900; outline-offset: 2px; border-radius: 4px; }
+    button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+    /* Skip to content link for screen readers / keyboard users */
+    .skip-to-content { position: absolute; left: -9999px; top: 0; z-index: 10000; padding: 12px 24px; background: #2D7D46; color: #fff; font-weight: 700; font-size: 16px; text-decoration: none; border-radius: 0 0 8px 0; }
+    .skip-to-content:focus { left: 0; }
 
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; }
@@ -218,7 +235,16 @@
   </style>
 </head>
 <body>
+  <a class="skip-to-content" href="#main-content">Skip to main content</a>
   <div id="root"></div>
+  <noscript>
+    <div style="max-width:700px;margin:60px auto;padding:40px;text-align:center;font-family:sans-serif;">
+      <h1>SiamClones — Vendor Portal</h1>
+      <p style="margin:20px 0;font-size:18px;line-height:1.6;">Manage your cannabis clone, seed, and bud listings on Thailand's premier marketplace. Sign in to access your vendor dashboard.</p>
+      <p style="margin:20px 0;">JavaScript is required to use the vendor portal. Please enable JavaScript in your browser settings and reload the page.</p>
+      <p><a href="https://siamclones.com/" style="color:#2D7D46;font-weight:bold;">Back to Marketplace</a></p>
+    </div>
+  </noscript>
 
   <script type="text/babel">
     // =============================================
@@ -576,28 +602,145 @@
       </div>
     );
 
-    // Image Upload Component - uses base64 for simplicity (no storage bucket needed)
-    const ImageUpload = ({ images, onImagesChange, maxImages = 5 }) => {
+    // Confirmation Modal Component for destructive actions
+    const ConfirmModal = ({ show, title, message, onConfirm, onCancel, confirmText = 'Confirm', cancelText = 'Cancel', isDangerous = false }) => {
+      if (!show) return null;
+      return (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: 20,
+        }}>
+          <div style={{
+            background: colors.white,
+            borderRadius: 16,
+            padding: 32,
+            maxWidth: 400,
+            width: '100%',
+            boxShadow: shadows.lg,
+            animation: 'pageIn 0.3s ease-out',
+          }}>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: colors.dark, marginBottom: 12 }}>{title}</h3>
+            <p style={{ color: colors.gray, marginBottom: 24, lineHeight: 1.6 }}>{message}</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+              <button
+                onClick={onCancel}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: `2px solid ${colors.blush}`,
+                  background: colors.white,
+                  color: colors.dark,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = colors.blush;
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = colors.white;
+                }}
+              >
+                {cancelText}
+              </button>
+              <button
+                onClick={onConfirm}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: isDangerous ? colors.error : colors.primary,
+                  color: colors.white,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.opacity = '0.9';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.opacity = '1';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                {confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Image Upload Component - uploads to Supabase Storage for CDN delivery
+    const ImageUpload = ({ images, onImagesChange, maxImages = 5, sellerId }) => {
       const [uploading, setUploading] = useState(false);
+      const [uploadError, setUploadError] = useState('');
+
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
       const handleUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
+        setUploadError('');
         setUploading(true);
         const newImages = [...images];
 
         for (const file of files) {
           if (newImages.length >= maxImages) break;
 
-          // Convert to base64 - simpler, no storage bucket needed
-          const reader = new FileReader();
-          const base64 = await new Promise((resolve) => {
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          });
+          // Validate file size
+          if (file.size > MAX_FILE_SIZE) {
+            setUploadError('Image too large. Maximum 5MB per image.');
+            setUploading(false);
+            return;
+          }
 
-          newImages.push(base64);
+          // Validate file type
+          if (!ALLOWED_TYPES.includes(file.type)) {
+            setUploadError('Invalid image format. Please use JPEG, PNG, or WebP.');
+            setUploading(false);
+            return;
+          }
+
+          // Upload to Supabase Storage
+          try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${sellerId || 'unknown'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
+            const filePath = `listings/${fileName}`;
+
+            const { data, error: storageError } = await supabase.storage
+              .from('images')
+              .upload(filePath, file);
+
+            if (storageError) {
+              setUploadError(`Upload error: ${storageError.message}`);
+              setUploading(false);
+              return;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+              .from('images')
+              .getPublicUrl(filePath);
+
+            newImages.push(publicUrl);
+          } catch (err) {
+            setUploadError(`Upload failed: ${err.message}`);
+            setUploading(false);
+            return;
+          }
         }
 
         onImagesChange(newImages);
@@ -621,22 +764,44 @@
             Product Images <span style={{ color: colors.gray, fontWeight: 400 }}>({images.length}/{maxImages})</span>
           </label>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          {uploadError && (
+            <div style={{
+              padding: '12px 16px',
+              background: '#FFE5E5',
+              borderRadius: 10,
+              color: colors.error,
+              fontSize: 13,
+              marginBottom: 12,
+            }}>
+              {uploadError}
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 12, marginBottom: 16 }}>
             {images.map((url, index) => (
               <div
                 key={index}
                 style={{
                   position: 'relative',
-                  width: 100,
-                  height: 100,
+                  width: '100%',
+                  paddingBottom: '100%',
                   borderRadius: 12,
                   overflow: 'hidden',
+                  background: colors.blush,
+                  boxShadow: shadows.sm,
                 }}
               >
                 <img
                   src={url}
                   alt={`Product ${index + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
                 />
                 <button
                   onClick={() => removeImage(index)}
@@ -644,15 +809,27 @@
                     position: 'absolute',
                     top: 4,
                     right: 4,
-                    width: 24,
-                    height: 24,
+                    width: 28,
+                    height: 28,
                     borderRadius: '50%',
-                    background: colors.primary,
+                    background: colors.error,
                     color: colors.white,
                     border: 'none',
                     cursor: 'pointer',
-                    fontSize: 14,
+                    fontSize: 18,
                     fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.background = '#c0392b';
+                    e.target.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.background = colors.error;
+                    e.target.style.transform = 'scale(1)';
                   }}
                 >×</button>
               </div>
@@ -660,8 +837,8 @@
 
             {images.length < maxImages && (
               <label style={{
-                width: 100,
-                height: 100,
+                width: '100%',
+                paddingBottom: '100%',
                 borderRadius: 12,
                 border: `2px dashed ${colors.blush}`,
                 display: 'flex',
@@ -671,7 +848,22 @@
                 cursor: uploading ? 'wait' : 'pointer',
                 transition: 'all 0.3s ease',
                 background: colors.cream,
-              }}>
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+              onMouseOver={(e) => {
+                if (!uploading) {
+                  e.currentTarget.style.borderColor = colors.primary;
+                  e.currentTarget.style.background = colors.blush;
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!uploading) {
+                  e.currentTarget.style.borderColor = colors.blush;
+                  e.currentTarget.style.background = colors.cream;
+                }
+              }}
+              >
                 <input
                   type="file"
                   accept="image/*"
@@ -683,10 +875,10 @@
                 {uploading ? (
                   <Spinner size={24} />
                 ) : (
-                  <>
-                    <span style={{ fontSize: 28, color: colors.primary }}>+</span>
+                  <div style={{ textAlign: 'center' }}>
+                    <span style={{ fontSize: 28, color: colors.primary, display: 'block', marginBottom: 4 }}>+</span>
                     <span style={{ fontSize: 12, color: colors.gray }}>Add Photo</span>
-                  </>
+                  </div>
                 )}
               </label>
             )}
@@ -775,6 +967,15 @@
     // AUTH SCREENS
     // =============================================
 
+    // Password strength calculator
+    const getPasswordStrength = (pwd) => {
+      if (!pwd) return { strength: 0, label: 'Too short', color: colors.error };
+      if (pwd.length < 6) return { strength: 1, label: 'Weak', color: colors.error };
+      if (pwd.length < 10) return { strength: 2, label: 'Fair', color: colors.accent };
+      if (pwd.length < 14) return { strength: 3, label: 'Good', color: colors.mint };
+      return { strength: 4, label: 'Strong', color: colors.primary };
+    };
+
     const AuthScreen = ({ onAuthSuccess }) => {
       const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
       const [email, setEmail] = useState('');
@@ -831,14 +1032,37 @@
       };
 
       return (
-        <div style={{
+        <div className="page-transition" style={{
           minHeight: '100vh',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 20,
           background: `linear-gradient(180deg, ${colors.cream} 0%, ${colors.peach} 100%)`,
         }}>
+          <a
+            href="/"
+            style={{
+              position: 'absolute',
+              top: 20,
+              left: 20,
+              background: 'rgba(255,255,255,0.9)',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: 20,
+              color: colors.primary,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: 14,
+              textDecoration: 'none',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseOver={(e) => e.target.style.background = colors.white}
+            onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.9)'}
+          >
+            ← Back to Shop
+          </a>
           <Card style={{ maxWidth: 440, width: '100%', padding: 40 }} className="animate-bounce-in">
             {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
@@ -855,7 +1079,10 @@
               }}>
                 SiamClones
               </h1>
-              <p style={{ color: colors.gray, fontSize: 16 }}>
+              <p style={{ color: colors.primary, fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
+                Vendor Portal - Manage your listings
+              </p>
+              <p style={{ color: colors.gray, fontSize: 14 }}>
                 {mode === 'signin' ? 'Welcome back, grower!' : 'Start selling supplies'}
               </p>
             </div>
@@ -920,15 +1147,46 @@
                 required
                 icon="📧"
               />
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={setPassword}
-                placeholder="••••••••"
-                required
-                icon="🔒"
-              />
+              <div style={{ marginBottom: 20 }}>
+                <Input
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="••••••••"
+                  required
+                  icon="🔒"
+                />
+                {mode === 'signup' && password && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={{
+                      display: 'flex',
+                      gap: 4,
+                      marginBottom: 6,
+                    }}>
+                      {[1, 2, 3, 4].map(i => (
+                        <div
+                          key={i}
+                          style={{
+                            flex: 1,
+                            height: 6,
+                            borderRadius: 3,
+                            background: i <= getPasswordStrength(password).strength ? getPasswordStrength(password).color : colors.blush,
+                            transition: 'all 0.3s ease',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <p style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: getPasswordStrength(password).color,
+                    }}>
+                      Strength: {getPasswordStrength(password).label}
+                    </p>
+                  </div>
+                )}
+              </div>
               {mode === 'signup' && (
                 <Input
                   label="Confirm Password"
@@ -979,23 +1237,42 @@
       const [websiteUrl, setWebsiteUrl] = useState(existingProfile?.website_url || '');
       const [instagramHandle, setInstagramHandle] = useState(existingProfile?.instagram_handle || '');
       const [profilePhotoUrl, setProfilePhotoUrl] = useState(existingProfile?.profile_photo_url || '');
+      const [notificationEmail, setNotificationEmail] = useState(existingProfile?.notification_email || '');
+      const [lineNotifyToken, setLineNotifyToken] = useState(existingProfile?.line_notify_token || '');
+      const [promptpayId, setPromptpayId] = useState(existingProfile?.promptpay_id || '');
       const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
       const handlePhotoUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+          setError('Image too large. Maximum 5MB per image.');
+          return;
+        }
+
+        // Validate file type
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError('Invalid image format. Please use JPEG, PNG, or WebP.');
+          return;
+        }
+
+        setError('');
         setUploadingPhoto(true);
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `profiles/${fileName}`;
 
-        const { data, error } = await supabase.storage
+        const { data, uploadError } = await supabase.storage
           .from('images')
           .upload(filePath, file);
 
-        if (error) {
-          console.error('Upload error:', error);
+        if (uploadError) {
+          setError(`Upload error: ${uploadError.message}`);
           setUploadingPhoto(false);
           return;
         }
@@ -1010,6 +1287,42 @@
 
       const handleSubmit = async () => {
         setError('');
+
+        // Validate display name length
+        if (displayName.trim().length > 0 && displayName.trim().length < 2) {
+          setError('Display name must be at least 2 characters long');
+          return;
+        }
+
+        // Validate farm name length if provided
+        if (farmName.trim().length > 0 && farmName.trim().length < 2) {
+          setError('Farm/Business name must be at least 2 characters long');
+          return;
+        }
+
+        // Validate bio max length
+        if (bio.trim().length > 500) {
+          setError('Bio must be 500 characters or less');
+          return;
+        }
+
+        // Validate phone number if provided
+        if (phone.trim()) {
+          const phoneDigits = phone.replace(/\D/g, '');
+          if (phoneDigits.length < 9) {
+            setError('Phone number must be at least 9 digits');
+            return;
+          }
+        }
+
+        // Validate website URL if provided
+        if (websiteUrl.trim()) {
+          if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+            setError('Website URL must start with http:// or https://');
+            return;
+          }
+        }
+
         setLoading(true);
 
         // Use email username as fallback if no display name provided
@@ -1030,6 +1343,9 @@
           certifications: certifications.length > 0 ? certifications : null,
           website_url: websiteUrl.trim() || null,
           instagram_handle: instagramHandle.trim() || null,
+          notification_email: notificationEmail.trim() || null,
+          line_notify_token: lineNotifyToken.trim() || null,
+          promptpay_id: promptpayId.trim() || null,
         };
 
         try {
@@ -1180,14 +1496,26 @@
             Connect with your customers
           </p>
 
-          <Input
-            label="Bio"
-            multiline
-            rows={4}
-            value={bio}
-            onChange={setBio}
-            placeholder="Tell buyers about your story, what makes your supplies special..."
-          />
+          <div style={{ marginBottom: 20 }}>
+            <label style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              color: colors.dark,
+            }}>
+              <span>Bio 📝</span>
+              <span style={{ color: colors.gray, fontWeight: 400 }}>{bio.length}/500</span>
+            </label>
+            <Input
+              multiline
+              rows={4}
+              value={bio}
+              onChange={setBio}
+              placeholder="Tell buyers about your story, what makes your supplies special..."
+            />
+          </div>
 
           <Input
             label="Phone Number"
@@ -1214,11 +1542,70 @@
             placeholder="@yourfarm"
             icon="📸"
           />
+
+          {/* Order Notification Settings */}
+          <div style={{
+            marginTop: 28,
+            paddingTop: 24,
+            borderTop: `1px solid ${colors.blush}`,
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 4 }}>
+              Order Notifications
+            </h3>
+            <p style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>
+              Get notified when a customer places an order
+            </p>
+
+            <Input
+              label="Notification Email"
+              type="email"
+              value={notificationEmail}
+              onChange={setNotificationEmail}
+              placeholder="orders@yourfarm.com (uses account email if blank)"
+              icon="📧"
+            />
+
+            <Input
+              label="LINE Notify Token"
+              value={lineNotifyToken}
+              onChange={setLineNotifyToken}
+              placeholder="Your LINE Notify access token (optional)"
+              icon="💬"
+            />
+            <p style={{ fontSize: 12, color: colors.gray, marginTop: -12, marginBottom: 16 }}>
+              Get a token at <a href="https://notify-bot.line.me/" target="_blank" rel="noopener noreferrer" style={{ color: colors.primary }}>notify-bot.line.me</a>
+            </p>
+          </div>
+
+          {/* PromptPay Payment Settings */}
+          <div style={{
+            marginTop: 20,
+            paddingTop: 24,
+            borderTop: `1px solid ${colors.blush}`,
+          }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 4 }}>
+              PromptPay Payment
+            </h3>
+            <p style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>
+              Let customers pay you instantly via QR code
+            </p>
+
+            <Input
+              label="PromptPay ID"
+              value={promptpayId}
+              onChange={setPromptpayId}
+              placeholder="Phone number (08X-XXX-XXXX) or citizen ID"
+              icon="📱"
+            />
+            <p style={{ fontSize: 12, color: colors.gray, marginTop: -12, marginBottom: 16 }}>
+              Customers will see a QR code at checkout to pay you directly
+            </p>
+          </div>
         </>
       );
 
       return (
-        <div style={{
+        <div className="page-transition" style={{
           minHeight: '100vh',
           padding: 20,
           background: `linear-gradient(180deg, ${colors.cream} 0%, ${colors.peach} 100%)`,
@@ -1329,6 +1716,7 @@
       const isMobile = useIsMobile();
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
+      const [showSuccess, setShowSuccess] = useState(false);
 
       const [category, setCategory] = useState('');
       const [title, setTitle] = useState('');
@@ -1350,18 +1738,41 @@
           setError('Title is required');
           return;
         }
+        if (title.trim().length < 3) {
+          setError('Title must be at least 3 characters long');
+          return;
+        }
+        if (title.trim().length > 200) {
+          setError('Title must be 200 characters or less');
+          return;
+        }
+        if (description.trim().length > 2000) {
+          setError('Description must be 2000 characters or less');
+          return;
+        }
         if (!price || parseFloat(price) <= 0) {
-          setError('Please enter a valid price');
+          setError('Please enter a valid price greater than 0');
           return;
         }
         if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) {
           setError('Please enter a valid quantity');
-          setLoading(false);
+          return;
+        }
+        if (parseInt(quantity) > 10000) {
+          setError('Quantity cannot exceed 10,000');
           return;
         }
         if (!priceUnit) {
           setError('Please select a price unit');
           return;
+        }
+        if (images.length === 0) {
+          setError('Please add at least 1 product image');
+          return;
+        }
+
+        if (loading) {
+          return; // Prevent double submission
         }
 
         setLoading(true);
@@ -1383,7 +1794,10 @@
             }]);
 
           if (error) throw error;
-          onSuccess();
+          setShowSuccess(true);
+          setTimeout(() => {
+            onSuccess();
+          }, 1500);
         } catch (err) {
           setError(err.message);
         }
@@ -1391,7 +1805,7 @@
       };
 
       return (
-        <div style={{
+        <div className="page-transition" style={{
           minHeight: '100vh',
           padding: 20,
           background: colors.cream,
@@ -1432,6 +1846,27 @@
                   }}
                 >
                   {error}
+                </div>
+              )}
+
+              {showSuccess && (
+                <div
+                  className="animate-slide-up"
+                  style={{
+                    padding: '16px 20px',
+                    background: colors.mint,
+                    borderRadius: 10,
+                    color: colors.white,
+                    fontSize: 14,
+                    marginBottom: 20,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>✓</span>
+                  Listing created successfully! Redirecting...
                 </div>
               )}
 
@@ -1484,6 +1919,7 @@
                 images={images}
                 onImagesChange={setImages}
                 maxImages={5}
+                sellerId={profile?.user_id}
               />
 
               <Input
@@ -1670,6 +2106,8 @@
       const [showConfetti, setShowConfetti] = useState(false);
       const [alert, setAlert] = useState(null);
       const [activeTab, setActiveTab] = useState('listings'); // 'listings' or 'orders'
+      const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+      const [deleteConfirm, setDeleteConfirm] = useState({ show: false, listing: null });
 
       const fetchListings = async () => {
         const { data, error } = await supabase
@@ -1679,7 +2117,8 @@
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Error fetching listings:', error);
+          setAlert({ type: 'error', message: `Failed to load listings: ${error.message}` });
+          setListings([]);
         } else {
           setListings(data || []);
         }
@@ -1694,7 +2133,8 @@
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Error fetching orders:', error);
+          setAlert({ type: 'error', message: `Failed to load orders: ${error.message}` });
+          setOrders([]);
         } else {
           setOrders(data || []);
         }
@@ -1706,7 +2146,9 @@
           .update({ status: newStatus })
           .eq('id', orderId);
 
-        if (!error) {
+        if (error) {
+          setAlert({ type: 'error', message: `Failed to update order: ${error.message}` });
+        } else {
           fetchOrders();
           setAlert({ type: 'success', message: `Order marked as ${newStatus}` });
         }
@@ -1723,7 +2165,9 @@
           .update({ is_available: !listing.is_available })
           .eq('id', listing.id);
 
-        if (!error) {
+        if (error) {
+          setAlert({ type: 'error', message: `Failed to update listing: ${error.message}` });
+        } else {
           fetchListings();
           setAlert({
             type: 'success',
@@ -1732,15 +2176,22 @@
         }
       };
 
-      const handleDelete = async (listing) => {
-        if (!window.confirm('Are you sure you want to delete this listing?')) return;
+      const handleDelete = (listing) => {
+        setDeleteConfirm({ show: true, listing });
+      };
+
+      const confirmDelete = async () => {
+        const listing = deleteConfirm.listing;
+        setDeleteConfirm({ show: false, listing: null });
 
         const { error } = await supabase
           .from('listings')
           .delete()
           .eq('id', listing.id);
 
-        if (!error) {
+        if (error) {
+          setAlert({ type: 'error', message: `Failed to delete listing: ${error.message}` });
+        } else {
           fetchListings();
           setAlert({ type: 'success', message: 'Listing deleted' });
         }
@@ -1749,7 +2200,7 @@
       const activeListings = listings.filter(l => l.is_available).length;
 
       return (
-        <div style={{
+        <div className="page-transition" style={{
           minHeight: '100vh',
           background: colors.cream,
         }}>
@@ -1775,21 +2226,46 @@
                   <img src="data:image/png;base64,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" width="40" height="40" alt="SiamClones" style={{ borderRadius: 8 }}/>
                   <span style={{ fontSize: 20, fontWeight: 800, color: colors.white }}>SiamClones</span>
                 </div>
-                <button
-                  onClick={onLogout}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: 20,
-                    color: colors.white,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    fontSize: 14,
-                  }}
-                >
-                  Sign Out
-                </button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <a
+                    href="/"
+                    style={{
+                      background: 'rgba(255,255,255,0.15)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      padding: '8px 16px',
+                      borderRadius: 20,
+                      color: colors.white,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: 14,
+                      textDecoration: 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.25)'}
+                    onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.15)'}
+                  >
+                    ← Back to Shop
+                  </a>
+                  <button
+                    onClick={() => setShowLogoutConfirm(true)}
+                    aria-label="Sign out of vendor portal"
+                    style={{
+                      background: 'rgba(255,255,255,0.2)',
+                      border: 'none',
+                      padding: '8px 16px',
+                      borderRadius: 20,
+                      color: colors.white,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: 14,
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.3)'}
+                    onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+                  >
+                    Sign Out
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -1929,7 +2405,12 @@
             {activeTab === 'orders' ? (
               /* Orders Tab */
               <div style={{ marginBottom: 32 }}>
-                {orders.length === 0 ? (
+                {loading ? (
+                  <Card style={{ textAlign: 'center', padding: 40 }}>
+                    <Spinner size={32} />
+                    <p style={{ color: colors.gray, marginTop: 12 }}>Loading orders...</p>
+                  </Card>
+                ) : orders.length === 0 ? (
                   <Card style={{ textAlign: 'center', padding: 48 }}>
                     <div style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
                     <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.dark, marginBottom: 8 }}>
@@ -2040,10 +2521,10 @@
                 <Card style={{ textAlign: 'center', padding: 48 }}>
                   <div className="animate-float" style={{ fontSize: 64, marginBottom: 16 }}>🌱</div>
                   <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.dark, marginBottom: 8 }}>
-                    No listings yet
+                    You haven't created any listings yet
                   </h3>
                   <p style={{ color: colors.gray, marginBottom: 24 }}>
-                    Create your first listing and start selling supplies!
+                    Create your first listing and start selling products to customers!
                   </p>
                   <Button onClick={onCreateListing}>
                     Create Your First Listing 🚀
@@ -2063,9 +2544,95 @@
             </div>
             )}
           </div>
+
+          {/* Delete Listing Confirmation Modal */}
+          <ConfirmModal
+            show={deleteConfirm.show}
+            title="Delete Listing?"
+            message={`Are you sure you want to delete "${deleteConfirm.listing?.title}"? This action cannot be undone.`}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeleteConfirm({ show: false, listing: null })}
+            confirmText="Delete"
+            cancelText="Keep It"
+            isDangerous={true}
+          />
+
+          {/* Logout Confirmation Modal */}
+          <ConfirmModal
+            show={showLogoutConfirm}
+            title="Sign Out?"
+            message="Are you sure you want to sign out? You'll need to sign in again to access your vendor dashboard."
+            onConfirm={() => {
+              setShowLogoutConfirm(false);
+              onLogout();
+            }}
+            onCancel={() => setShowLogoutConfirm(false)}
+            confirmText="Sign Out"
+            cancelText="Stay"
+          />
         </div>
       );
     };
+
+    // =============================================
+    // ERROR BOUNDARY
+    // =============================================
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+
+      componentDidCatch(error, errorInfo) {
+        console.error('Error boundary caught:', error, errorInfo);
+      }
+
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div style={{
+              minHeight: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
+              background: colors.cream,
+            }}>
+              <div style={{ maxWidth: 500, textAlign: 'center' }}>
+                <div className="animate-float" style={{ fontSize: 64, marginBottom: 20 }}>⚠️</div>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginBottom: 12 }}>
+                  Something went wrong
+                </h1>
+                <p style={{ color: colors.gray, marginBottom: 24, lineHeight: 1.6 }}>
+                  An unexpected error occurred. Please try refreshing the page.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{
+                    padding: '12px 24px',
+                    background: colors.primary,
+                    color: colors.white,
+                    border: 'none',
+                    borderRadius: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: 14,
+                  }}
+                >
+                  Refresh Page
+                </button>
+              </div>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
 
     // =============================================
     // MAIN APP
@@ -2087,6 +2654,7 @@
             await loadProfile(session.user.id);
           } else {
             setScreen('auth');
+            window.history.replaceState({ screen: 'auth' }, '', '#auth');
           }
           setLoading(false);
         };
@@ -2098,6 +2666,7 @@
             setUser(null);
             setProfile(null);
             setScreen('auth');
+            window.history.replaceState({ screen: 'auth' }, '', '#auth');
           }
         });
 
@@ -2107,6 +2676,26 @@
       useEffect(() => {
         window.scrollTo(0, 0);
       }, [screen]);
+
+      // Navigation wrapper for History API support
+      const navigateTo = (newScreen) => {
+        setScreen(newScreen);
+        window.history.pushState({ screen: newScreen }, '', `#${newScreen}`);
+      };
+
+      // Listen for browser back button
+      useEffect(() => {
+        const handlePopState = (event) => {
+          if (event.state && event.state.screen) {
+            setScreen(event.state.screen);
+          } else {
+            // If no state, go back to main site
+            window.location.href = '/';
+          }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+      }, []);
 
       const loadProfile = async (userId) => {
         const { data, error } = await supabase
@@ -2118,9 +2707,11 @@
         if (data) {
           setProfile(data);
           setScreen('dashboard');
+          window.history.replaceState({ screen: 'dashboard' }, '', '#dashboard');
         } else {
           // No profile exists, need to create one
           setScreen('setup');
+          window.history.replaceState({ screen: 'setup' }, '', '#setup');
         }
       };
 
@@ -2129,7 +2720,7 @@
         setIsNewUser(isNew);
 
         if (isNew) {
-          setScreen('setup');
+          navigateTo('setup');
         } else {
           await loadProfile(authenticatedUser.id);
         }
@@ -2222,8 +2813,8 @@
         return (
           <CreateListingScreen
             profile={profile}
-            onBack={() => setScreen('dashboard')}
-            onSuccess={() => setScreen('dashboard')}
+            onBack={() => navigateTo('dashboard')}
+            onSuccess={() => navigateTo('dashboard')}
           />
         );
       }
@@ -2234,14 +2825,26 @@
           user={user}
           profile={profile}
           onLogout={handleLogout}
-          onEditProfile={() => setScreen('setup')}
-          onCreateListing={() => setScreen('create-listing')}
+          onEditProfile={() => navigateTo('setup')}
+          onCreateListing={() => navigateTo('create-listing')}
         />
       );
     };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    root.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
+  </script>
+  <script>
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
