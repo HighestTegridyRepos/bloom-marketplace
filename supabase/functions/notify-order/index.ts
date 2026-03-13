@@ -1,16 +1,19 @@
 // SiamClones — Order Notification Edge Function
-// Sends email (via Resend) and/or LINE Notify to the vendor when a new order arrives.
+// Sends email (via Resend), LINE Notify, and/or Discord webhook
+// to the vendor when a new order arrives.
 //
 // DEPLOY: supabase functions deploy notify-order --project-ref bqglrepbhjxmbgggdqal
 //
 // SECRETS NEEDED (set via Supabase Dashboard → Edge Functions → Secrets):
-//   RESEND_API_KEY  — Get from https://resend.com (free tier: 100 emails/day)
-//   FROM_EMAIL      — Your verified sender email in Resend (e.g. orders@siamclones.com)
+//   RESEND_API_KEY       — Get from https://resend.com (free tier: 100 emails/day)
+//   FROM_EMAIL           — Your verified sender email in Resend (e.g. orders@siamclones.com)
+//   DISCORD_WEBHOOK_URL  — Discord channel webhook URL for order notifications
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "noreply@siamclones.com";
+const DISCORD_WEBHOOK_URL = Deno.env.get("DISCORD_WEBHOOK_URL") || "";
 
 interface OrderPayload {
   order_id: string;
@@ -26,6 +29,19 @@ interface OrderPayload {
   created_at: string;
 }
 
+function formatPaymentMethod(method: string): string {
+  if (method === 'promptpay') return 'PromptPay';
+  if (method === 'cod') return 'Cash on Delivery';
+  return method || 'Not specified';
+}
+
+function formatItemsList(items: any): string {
+  if (!Array.isArray(items)) return "See dashboard for details";
+  return items
+    .map((item: any) => `• ${item.title || item.product?.title || "Item"} × ${item.quantity}`)
+    .join("\n");
+}
+
 // ---- EMAIL via Resend ----
 async function sendEmail(payload: OrderPayload): Promise<boolean> {
   if (!RESEND_API_KEY || !payload.vendor_email) {
@@ -33,13 +49,8 @@ async function sendEmail(payload: OrderPayload): Promise<boolean> {
     return false;
   }
 
-  const itemsList = Array.isArray(payload.items)
-    ? payload.items
-        .map((item: any) => `• ${item.title || item.product?.title || "Item"} × ${item.quantity}`)
-        .join("\n")
-    : "See dashboard for details";
-
-  const paymentMethodDisplay = payload.payment_method === 'promptpay' ? 'PromptPay' : 'Cash on Delivery';
+  const itemsList = formatItemsList(payload.items);
+  const paymentMethodDisplay = formatPaymentMethod(payload.payment_method);
 
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -109,6 +120,8 @@ async function sendLineNotify(payload: OrderPayload): Promise<boolean> {
     return false;
   }
 
+  const paymentMethodDisplay = formatPaymentMethod(payload.payment_method);
+
   const message = `
 🌿 New SiamClones Order!
 
@@ -145,6 +158,60 @@ https://siamclones.com/seller.html`;
   }
 }
 
+// ---- DISCORD Webhook ----
+async function sendDiscordNotification(payload: OrderPayload): Promise<boolean> {
+  if (!DISCORD_WEBHOOK_URL) {
+    console.log("Skipping Discord: no webhook URL configured");
+    return false;
+  }
+
+  const paymentMethodDisplay = formatPaymentMethod(payload.payment_method);
+  const itemsList = formatItemsList(payload.items);
+
+  const embed = {
+    title: "🌿 New Order on SiamClones!",
+    color: 0x2D7D46, // green
+    fields: [
+      { name: "Order ID", value: payload.order_id || "—", inline: true },
+      { name: "Total", value: `฿${payload.total_amount}`, inline: true },
+      { name: "Payment", value: paymentMethodDisplay, inline: true },
+      { name: "Customer", value: payload.buyer_name, inline: true },
+      { name: "Phone", value: payload.buyer_phone, inline: true },
+      { name: "Vendor", value: payload.vendor_name, inline: true },
+      { name: "Delivery", value: payload.delivery_address, inline: false },
+      { name: "Items", value: itemsList.substring(0, 1024), inline: false },
+    ],
+    timestamp: payload.created_at || new Date().toISOString(),
+    footer: {
+      text: "SiamClones Marketplace",
+    },
+  };
+
+  try {
+    const res = await fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "SiamClones Orders",
+        avatar_url: "https://siamclones.com/icon-192.png",
+        embeds: [embed],
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Discord webhook error:", err);
+      return false;
+    }
+
+    console.log("Discord notification sent");
+    return true;
+  } catch (e) {
+    console.error("Discord failed:", e);
+    return false;
+  }
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -172,16 +239,19 @@ serve(async (req: Request) => {
     const results = await Promise.allSettled([
       sendEmail(payload),
       sendLineNotify(payload),
+      sendDiscordNotification(payload),
     ]);
 
     const emailResult = results[0].status === "fulfilled" ? results[0].value : false;
     const lineResult = results[1].status === "fulfilled" ? results[1].value : false;
+    const discordResult = results[2].status === "fulfilled" ? results[2].value : false;
 
     return new Response(
       JSON.stringify({
         success: true,
         email_sent: emailResult,
         line_sent: lineResult,
+        discord_sent: discordResult,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
