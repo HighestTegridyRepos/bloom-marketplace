@@ -922,6 +922,7 @@
     // PRODUCT CARD
     // =============================================
     const ProductCard = ({ listing, onClick, t = (key) => key }) => {
+      const isMobile = useIsMobile();
       const [imgLoaded, setImgLoaded] = useState(false);
       const [imgError, setImgError] = useState(false);
 
