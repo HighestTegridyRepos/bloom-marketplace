@@ -645,10 +645,10 @@
           right: 0,
           zIndex: 1000,
           padding: isMobile ? '12px 16px' : '16px 24px',
-          background: scrolled ? 'rgba(26, 46, 26, 0.95)' : (menuOpen ? 'rgba(26,46,26,0.98)' : 'transparent'),
-          backdropFilter: scrolled ? 'blur(10px)' : 'none',
+          background: (scrolled || currentPage !== 'home') ? 'rgba(26, 46, 26, 0.95)' : (menuOpen ? 'rgba(26,46,26,0.98)' : 'transparent'),
+          backdropFilter: (scrolled || currentPage !== 'home') ? 'blur(10px)' : 'none',
           transition: 'all 0.3s ease',
-          boxShadow: scrolled ? '0 2px 20px rgba(0, 0, 0, 0.3)' : 'none',
+          boxShadow: (scrolled || currentPage !== 'home') ? '0 2px 20px rgba(0, 0, 0, 0.3)' : 'none',
         }}>
           <div style={{
             maxWidth: 1200,
