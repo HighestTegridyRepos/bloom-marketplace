@@ -41,7 +41,13 @@ function checkRateLimit(ip) {
 }
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = ['https://siamclones.com', 'https://www.siamclones.com', 'https://bloom-marketplace.vercel.app'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://siamclones.com');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -96,11 +102,22 @@ module.exports = async function handler(req, res) {
     }
 
     const data = await geminiRes.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    // Check for safety blocks or empty responses with specific messaging
+    const candidate = data?.candidates?.[0];
+    const finishReason = candidate?.finishReason;
+    const text = candidate?.content?.parts?.[0]?.text;
+
+    if (finishReason === 'SAFETY') {
+      return res.status(200).json({ text: "I can't answer that question, but I'm happy to help with anything about SiamClones — our products, ordering, shipping, or selling. What can I help you with? 🌿" });
+    }
 
     if (!text) {
       console.error('Empty Gemini response:', JSON.stringify(data).substring(0, 500));
-      return res.status(502).json({ error: 'No response from AI. Please try again.' });
+      if (finishReason === 'RECITATION') {
+        return res.status(200).json({ text: "I wasn't able to generate a response for that. Could you try rephrasing your question? I'm here to help with anything about SiamClones! 🌱" });
+      }
+      return res.status(502).json({ error: 'No response from AI. Please try again in a moment.' });
     }
 
     // Return plain JSON — simple and reliable

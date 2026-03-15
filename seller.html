@@ -3578,46 +3578,6 @@
         await supabase.auth.signOut();
       };
 
-      // Configuration check
-      if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-        return (
-          <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20,
-            background: colors.cream,
-          }}>
-            <Card style={{ maxWidth: 500, textAlign: 'center', padding: 40 }}>
-              <div className="animate-float" style={{ fontSize: 64, marginBottom: 20 }}>⚙️</div>
-              <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginBottom: 12 }}>
-                Setup Required
-              </h1>
-              <p style={{ color: colors.gray, marginBottom: 24, lineHeight: 1.6 }}>
-                To use this app, you need to add your Supabase credentials. Open this HTML file and update the configuration at the top:
-              </p>
-              <div style={{
-                background: colors.dark,
-                borderRadius: 12,
-                padding: 20,
-                textAlign: 'left',
-                fontFamily: 'monospace',
-                fontSize: 13,
-                color: '#A8E6CF',
-                overflowX: 'auto',
-              }}>
-                <div>const SUPABASE_URL = <span style={{ color: '#FFD93D' }}>'https://xxx.supabase.co'</span>;</div>
-                <div>const SUPABASE_ANON_KEY = <span style={{ color: '#FFD93D' }}>'your-anon-key'</span>;</div>
-              </div>
-              <p style={{ color: colors.gray, marginTop: 20, fontSize: 14 }}>
-                You can find these in your Supabase dashboard under Settings → API
-              </p>
-            </Card>
-          </div>
-        );
-      }
-
       // Loading screen
       if (loading || screen === 'loading') {
         return (

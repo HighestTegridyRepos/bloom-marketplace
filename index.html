@@ -65,9 +65,11 @@
       "@type": "Country",
       "name": "Thailand"
     },
-    "sameAs": [
-      "TODO: Add LINE Official Account URL when available (e.g., https://line.me/ti/p/LINE_USER_ID)"
-    ]
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "email": "support@siamclones.com"
+    }
   }
   </script>
   <script type="application/ld+json">
@@ -411,11 +413,17 @@
         error_reload: 'Reload Page',
         error_vendors: 'Unable to load vendors. Please try again.',
 
+        // 404
+        page_not_found: 'Page Not Found',
+        page_not_found_desc: "The page you're looking for doesn't exist or has been moved.",
+        back_home: 'Back to Home',
+
         // Footer
         footer_tagline: "Thailand's trusted marketplace for verified cannabis genetics.",
 
         // QR
         qr_scan: 'Scan with any Thai banking app',
+        payment_confirm_note: 'Payment is confirmed by the seller within 1-2 hours during business hours.',
 
         // Filters
         filter_search: 'Search',
@@ -605,9 +613,14 @@
         error_reload: 'โหลดหน้าใหม่',
         error_vendors: 'ไม่สามารถโหลดข้อมูลผู้ขายได้',
 
+        page_not_found: 'ไม่พบหน้า',
+        page_not_found_desc: 'หน้าที่คุณกำลังมองหาไม่มีอยู่หรือถูกย้ายไปแล้ว',
+        back_home: 'กลับหน้าแรก',
+
         footer_tagline: 'ตลาดกิ่งพันธุ์กัญชาที่เชื่อถือได้ของไทย',
 
         qr_scan: 'สแกนด้วยแอปธนาคาร',
+        payment_confirm_note: 'ผู้ขายจะยืนยันการชำระเงินภายใน 1-2 ชั่วโมงในเวลาทำการ',
 
         // Filters
         filter_search: 'ค้นหา',
@@ -996,6 +1009,9 @@
           />
           <p style={{ fontSize: 12, color: colors.gray, marginTop: 8 }}>
             {t('qr_scan')}
+          </p>
+          <p style={{ fontSize: 11, color: colors.gray, marginTop: 4, fontStyle: 'italic' }}>
+            {t('payment_confirm_note') || 'Payment is confirmed by the seller within 1-2 hours during business hours.'}
           </p>
         </div>
       );
@@ -2437,6 +2453,9 @@
 
       // Submit order (supports both PromptPay and COD)
       const handleSubmitOrder = async () => {
+        // Prevent double-submit while Supabase calls are in-flight
+        if (loading) return;
+
         if (paymentMethod === 'promptpay' && !proofFile) {
           setError(lang === 'th' ? 'กรุณาอัพโหลดภาพหน้าจอการชำระเงินก่อน' : 'Please upload your payment screenshot first');
           return;
@@ -2976,6 +2995,38 @@
     };
 
     // =============================================
+    // 404 NOT FOUND PAGE
+    // =============================================
+    const NotFoundPage = ({ onNavigate, t }) => (
+      <section style={{
+        minHeight: '70vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+        padding: '60px 24px', fontFamily: 'Plus Jakarta Sans, sans-serif',
+      }}>
+        <span style={{ fontSize: 80, marginBottom: 16 }}>🌿</span>
+        <h1 style={{ fontSize: 48, fontWeight: 800, color: '#1A2E1A', marginBottom: 8 }}>404</h1>
+        <h2 style={{ fontSize: 24, fontWeight: 600, color: '#2D7D46', marginBottom: 16 }}>
+          {t('page_not_found') || 'Page Not Found'}
+        </h2>
+        <p style={{ fontSize: 16, color: '#666', maxWidth: 400, marginBottom: 32, lineHeight: 1.6 }}>
+          {t('page_not_found_desc') || "The page you're looking for doesn't exist or has been moved."}
+        </p>
+        <button
+          onClick={() => onNavigate('home')}
+          style={{
+            padding: '14px 32px', borderRadius: 30, border: 'none',
+            background: 'linear-gradient(135deg, #2D7D46, #4CAF50)', color: '#fff',
+            fontWeight: 700, fontSize: 16, cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(45,125,70,0.3)',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
+          }}
+        >
+          {t('back_home') || 'Back to Home'}
+        </button>
+      </section>
+    );
+
+    // =============================================
     // ERROR BOUNDARY
     // =============================================
     class ErrorBoundary extends React.Component {
@@ -3511,7 +3562,7 @@
           case 'how-it-works': return <HowItWorksPage t={t} />;
           case 'about': return <AboutPage t={t} />;
           case 'contact': return <ContactPage t={t} />;
-          default: return <HeroSection onNavigate={navigateTo} t={t} />;
+          default: return <NotFoundPage onNavigate={navigateTo} t={t} />;
         }
       };
 

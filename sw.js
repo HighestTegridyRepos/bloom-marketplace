@@ -1,6 +1,6 @@
 // SiamClones Service Worker — Cache-first for assets, network-first for API
 // Version bump: increment this on each deploy for cache busting
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 const CACHE_NAME = `siamclones-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
