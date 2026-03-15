@@ -1,8 +1,7 @@
 {
   "functions": {
     "api/chat.js": {
-      "maxDuration": 30,
-      "runtime": "nodejs20.x"
+      "maxDuration": 30
     }
   }
 }
