@@ -4,11 +4,12 @@
   "description": "Thailand's premier marketplace for verified cannabis clones, seeds, and buds.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFF8F0",
+  "background_color": "#F5F5F0",
   "theme_color": "#2D7D46",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "en",
+  "lang": "th",
+  "dir": "ltr",
   "icons": [
     {
       "src": "favicon.svg",
@@ -31,5 +32,19 @@
   ],
   "categories": ["shopping", "lifestyle"],
   "screenshots": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Browse Products",
+      "short_name": "Products",
+      "url": "/#products",
+      "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Vendor Portal",
+      "short_name": "Sell",
+      "url": "/seller.html",
+      "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
+    }
+  ]
 }

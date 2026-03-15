@@ -1,11 +1,15 @@
 // SiamClones Service Worker — Cache-first for assets, network-first for API
-const CACHE_NAME = 'siamclones-v1';
+// Version bump: increment this on each deploy for cache busting
+const CACHE_VERSION = 2;
+const CACHE_NAME = `siamclones-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/seller.html',
   '/favicon.svg',
   '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
 ];
 
 // Install — pre-cache static shell
@@ -38,21 +42,19 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Network-first for Supabase API calls
-  if (url.hostname.includes('supabase')) {
-    event.respondWith(
-      fetch(request).catch(() => caches.match(request))
-    );
-    return;
-  }
+  // Skip chrome-extension and other non-http(s) requests
+  if (!url.protocol.startsWith('http')) return;
 
-  // Network-first for CDN scripts (React, Babel, etc.)
-  if (url.hostname === 'unpkg.com' || url.hostname === 'cdnjs.cloudflare.com') {
+  // Network-first for Supabase API calls (always want fresh data)
+  if (url.hostname.includes('supabase')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          // Cache successful GET responses for offline fallback
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
           return response;
         })
         .catch(() => caches.match(request))
@@ -60,15 +62,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for same-origin static assets
+  // Network-first for CDN scripts (React, Babel, etc.) with caching
+  if (url.hostname === 'unpkg.com' || url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for same-origin static assets
+  // Serve from cache immediately, update cache in background
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(request).then((cached) => {
         const networkFetch = fetch(request).then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
           return response;
-        });
+        }).catch(() => cached);
         return cached || networkFetch;
       })
     );

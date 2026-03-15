@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Note: lang attribute is set to "en" by default. The React App component has a useEffect that updates document.documentElement.lang when the user changes language. -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -44,7 +45,7 @@
     "name": "SiamClones",
     "url": "https://siamclones.com",
     "description": "Thailand's premier marketplace for verified cannabis clones, seeds, and buds",
-    "inLanguage": "en",
+    "inLanguage": ["en", "th"],
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://siamclones.com/?search={search_term_string}",
@@ -64,7 +65,9 @@
       "@type": "Country",
       "name": "Thailand"
     },
-    "sameAs": []
+    "sameAs": [
+      "TODO: Add LINE Official Account URL when available (e.g., https://line.me/ti/p/LINE_USER_ID)"
+    ]
   }
   </script>
   <script type="application/ld+json">
@@ -221,7 +224,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxZ2xyZXBiaGp4bWJnZ2dkcWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5ODk4NzcsImV4cCI6MjA4NTU2NTg3N30.f9CdQ43T2_Fj2aurV2wUjuIESqjygBCnSZaIxYZzgCA';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useCallback, useMemo, useRef } = React;
 
     const colors = {
       primary: '#2D7D46',
@@ -236,6 +239,8 @@
       gray: '#4A5D4A',
       lightGray: '#8A9A8A',
       white: '#FFFFFF',
+      error: '#E74C3C',
+      errorBg: '#FFE5E5',
       gradient1: 'linear-gradient(135deg, #2D7D46 0%, #4CAF50 100%)',
       gradient2: 'linear-gradient(135deg, #7B4F9E 0%, #2D7D46 100%)',
       gradient3: 'linear-gradient(135deg, #F2A900 0%, #2D7D46 100%)',
@@ -256,10 +261,17 @@
         nav_cart: 'Shopping cart',
 
         // Hero
-        hero_title: "Thailand's Premier Clone Marketplace",
-        hero_subtitle: 'Source verified clones, premium seeds, and craft buds from trusted growers across Thailand.',
-        hero_browse: 'Browse Products',
+        hero_title: 'Verified Clones, Seeds & Buds — Delivered Across Thailand',
+        hero_subtitle: 'Direct from trusted growers. Cash on delivery or PromptPay. Browse the marketplace and order in minutes.',
+        hero_browse: 'Browse Clones',
         hero_sell: 'Start Selling',
+        hero_how: 'How It Works',
+        // Trust bar
+        trust_verified: 'Verified Growers',
+        trust_cod: 'COD Available',
+        trust_promptpay: 'PromptPay',
+        trust_dispatch: 'Fast Dispatch',
+        trust_line: 'LINE Support',
 
         // Products
         products_title: 'Marketplace',
@@ -271,6 +283,53 @@
         no_listings_sub: 'Our vendors are preparing their {category} inventory',
         want_to_sell: 'Want to sell {category}? Become a vendor',
         per_unit: 'per unit',
+        per_clone: 'per clone',
+        per_pack: 'per pack',
+        per_seed: 'per seed',
+        per_gram: 'per gram',
+        per_ounce: 'per ounce',
+        per_100g: 'per 100g',
+        each: 'each',
+        in_stock: 'In Stock',
+        low_stock: 'Low Stock',
+        out_of_stock: 'Sold Out',
+        dispatch_time: 'Dispatch: 24–48h',
+        verified_seller: 'Verified Seller',
+        featured: 'Featured',
+        // Share
+        share_listing: 'Share',
+        share_line: 'Share on LINE',
+        share_whatsapp: 'Share on WhatsApp',
+        share_copy: 'Copy Link',
+        share_copied: 'Link copied!',
+        share_order_text: 'I just ordered from SiamClones! Check it out:',
+        share_listing_text: 'Check out this listing on SiamClones:',
+        // Delivery info
+        delivery_how_title: 'How Delivery Works',
+        delivery_how_1: 'Place your order with delivery details',
+        delivery_how_2: 'Vendor prepares and ships within 24-48 hours',
+        delivery_how_3: 'Track via LINE — pay on delivery (COD) or pre-pay via PromptPay',
+        returns_title: 'Returns & Refunds',
+        returns_desc: 'Wrong item or damaged on arrival? Contact us within 24 hours for a replacement.',
+        faq_title: 'Frequently Asked Questions',
+        faq_q1: 'How long does delivery take?',
+        faq_a1: 'Most orders are dispatched within 24-48 hours. Delivery typically takes 1-3 business days depending on your location.',
+        faq_q2: 'Is Cash on Delivery available?',
+        faq_a2: 'Yes! COD is available for all orders. You can also pay instantly via PromptPay QR.',
+        faq_q3: 'How do I know the grower is trustworthy?',
+        faq_a3: 'All vendors go through our verification process. Look for the "Verified Seller" badge on listings.',
+        faq_q4: 'Can I contact the seller before buying?',
+        faq_a4: 'Yes, sellers provide their LINE contact. You can message them with questions before ordering.',
+        // Landing
+        landing_featured: 'Featured Products',
+        landing_categories: 'Shop by Category',
+        landing_coverage: 'Delivering across Bangkok, Chiang Mai, Phuket, and all 77 provinces',
+        // Lead capture
+        alert_title: 'Get Restock Alerts',
+        alert_desc: 'Be the first to know when new products are available.',
+        alert_placeholder: 'Your LINE ID or email',
+        alert_submit: 'Notify Me',
+        alert_thanks: 'We will notify you when new stock arrives!',
         available: 'available',
         add_to_cart: 'Add to Cart',
         quantity: 'Quantity:',
@@ -332,6 +391,14 @@
         // About
         about_title: 'About SiamClones',
         about_desc: "Thailand's trusted marketplace connecting you with verified cannabis growers. Quality genetics, transparent sourcing, delivered to your door.",
+        about_p1: 'SiamClones connects cannabis cultivators in Thailand with verified clone vendors, seed banks, and craft bud suppliers.',
+        about_p2: 'We believe every grower deserves access to quality genetics and premium products. By connecting you directly with trusted vendors, you get the best clones, seeds, and buds at fair prices.',
+
+        // Validation errors
+        validation_required: 'Please fill in all required fields',
+        validation_name_length: 'Name must be at least 2 characters',
+        validation_phone_digits: 'Phone number must be at least 9 digits',
+        validation_postal_code: 'Postal code must be exactly 5 digits',
 
         // Contact
         contact_title: 'Contact Us',
@@ -350,6 +417,46 @@
         // QR
         qr_scan: 'Scan with any Thai banking app',
 
+        // Filters
+        filter_search: 'Search',
+        filter_search_placeholder: 'Search by name...',
+        filter_min_price: 'Min Price',
+        filter_max_price: 'Max Price',
+        filter_sort: 'Sort By',
+        filter_sort_newest: 'Newest',
+        filter_sort_price_asc: 'Price: Low to High',
+        filter_sort_price_desc: 'Price: High to Low',
+        filter_province: 'Province',
+        filter_all_provinces: 'All Provinces',
+        filter_clear: 'Clear Filters',
+        filter_no_match: 'No products match your filters',
+        filter_no_match_sub: 'Try adjusting your search, price range, or filters to find what you are looking for.',
+
+        // Misc
+        back_products: 'Back to Products',
+        back_cart: 'Back to Cart',
+        back_delivery: 'Back to Delivery Info',
+        step_delivery: 'Delivery Info',
+        step_pay: 'Pay & Confirm',
+        payment_proof_received: 'Payment Proof Received',
+        payment_proof_processing: 'Your order is being processed. The seller will contact you soon.',
+        submitting: 'Submitting Order...',
+        confirm_order: 'Confirm Order',
+        upload_to_continue: 'Upload screenshot to continue',
+        upload_drag: 'Drag & drop your payment proof here',
+        upload_or_click: 'or click to browse',
+        choose_different: 'Choose different image',
+        live_marketplace: 'LIVE MARKETPLACE',
+        retry: 'Retry',
+        reload: 'Reload Page',
+
+        // COD
+        cod_option: 'Cash on Delivery',
+        cod_desc: 'Pay when you receive your order',
+        promptpay_option: 'PromptPay QR',
+        promptpay_desc: 'Scan QR to pay instantly',
+        select_payment: 'Select Payment Method',
+
         // Language
         lang_toggle: 'TH',
       },
@@ -363,10 +470,16 @@
         nav_signin: 'เข้าสู่ระบบ',
         nav_cart: 'ตะกร้าสินค้า',
 
-        hero_title: 'ตลาดกิ่งพันธุ์กัญชาอันดับ 1 ของไทย',
-        hero_subtitle: 'เลือกกิ่งพันธุ์ เมล็ด และดอกคุณภาพจากผู้ปลูกที่เชื่อถือได้ทั่วไทย',
-        hero_browse: 'ดูสินค้า',
+        hero_title: 'กิ่งพันธุ์ เมล็ด และดอกคุณภาพ — ส่งทั่วไทย',
+        hero_subtitle: 'จากผู้ปลูกที่เชื่อถือได้ เก็บเงินปลายทางหรือพร้อมเพย์ สั่งซื้อง่ายภายในไม่กี่นาที',
+        hero_browse: 'ดูกิ่งพันธุ์',
         hero_sell: 'เริ่มขาย',
+        hero_how: 'วิธีการสั่งซื้อ',
+        trust_verified: 'ผู้ปลูกตรวจสอบแล้ว',
+        trust_cod: 'เก็บเงินปลายทาง',
+        trust_promptpay: 'พร้อมเพย์',
+        trust_dispatch: 'จัดส่งเร็ว',
+        trust_line: 'LINE ซัพพอร์ต',
 
         products_title: 'ตลาดสินค้า',
         products_subtitle: 'เลือกกิ่งพันธุ์ เมล็ด และดอกจากผู้ขายที่ตรวจสอบแล้ว',
@@ -377,6 +490,49 @@
         no_listings_sub: 'ผู้ขายกำลังเตรียม{category}อยู่',
         want_to_sell: 'ต้องการขาย{category}? สมัครเป็นผู้ขาย',
         per_unit: 'ต่อหน่วย',
+        per_clone: 'ต่อกิ่ง',
+        per_pack: 'ต่อแพ็ค',
+        per_seed: 'ต่อเมล็ด',
+        per_gram: 'ต่อกรัม',
+        per_ounce: 'ต่อออนซ์',
+        per_100g: 'ต่อ 100 กรัม',
+        each: 'ต่อชิ้น',
+        in_stock: 'มีสินค้า',
+        low_stock: 'เหลือน้อย',
+        out_of_stock: 'หมด',
+        dispatch_time: 'จัดส่ง: 24–48 ชม.',
+        verified_seller: 'ผู้ขายยืนยันแล้ว',
+        featured: 'แนะนำ',
+        share_listing: 'แชร์',
+        share_line: 'แชร์ผ่าน LINE',
+        share_whatsapp: 'แชร์ผ่าน WhatsApp',
+        share_copy: 'คัดลอกลิงก์',
+        share_copied: 'คัดลอกลิงก์แล้ว!',
+        share_order_text: 'ฉันเพิ่งสั่งของจาก SiamClones! ลองดูเลย:',
+        share_listing_text: 'ดูสินค้านี้บน SiamClones:',
+        delivery_how_title: 'วิธีการจัดส่ง',
+        delivery_how_1: 'สั่งซื้อพร้อมกรอกที่อยู่จัดส่ง',
+        delivery_how_2: 'ผู้ขายเตรียมและจัดส่งภายใน 24-48 ชั่วโมง',
+        delivery_how_3: 'ติดตามผ่าน LINE — ชำระเงินปลายทางหรือพร้อมเพย์',
+        returns_title: 'การคืนสินค้าและคืนเงิน',
+        returns_desc: 'สินค้าผิดหรือเสียหาย? ติดต่อเราภายใน 24 ชั่วโมงเพื่อเปลี่ยนสินค้า',
+        faq_title: 'คำถามที่พบบ่อย',
+        faq_q1: 'จัดส่งใช้เวลานานเท่าไหร่?',
+        faq_a1: 'สินค้าส่วนใหญ่จัดส่งภายใน 24-48 ชั่วโมง ถึงปลายทางภายใน 1-3 วันทำการ',
+        faq_q2: 'มีเก็บเงินปลายทางไหม?',
+        faq_a2: 'มี! COD พร้อมให้บริการทุกออเดอร์ หรือจ่ายผ่านพร้อมเพย์ QR ก็ได้',
+        faq_q3: 'จะรู้ได้อย่างไรว่าผู้ปลูกเชื่อถือได้?',
+        faq_a3: 'ผู้ขายทุกรายผ่านการตรวจสอบ ดูป้าย "ผู้ขายยืนยันแล้ว" ที่สินค้า',
+        faq_q4: 'ติดต่อผู้ขายก่อนสั่งได้ไหม?',
+        faq_a4: 'ได้! ผู้ขายมี LINE ให้ติดต่อสอบถามก่อนสั่งซื้อ',
+        landing_featured: 'สินค้าแนะนำ',
+        landing_categories: 'เลือกตามหมวดหมู่',
+        landing_coverage: 'จัดส่งทั่วไทย กรุงเทพ เชียงใหม่ ภูเก็ต และทุก 77 จังหวัด',
+        alert_title: 'รับแจ้งเตือนสินค้าเข้าใหม่',
+        alert_desc: 'เป็นคนแรกที่รู้เมื่อมีสินค้าใหม่',
+        alert_placeholder: 'LINE ID หรืออีเมล',
+        alert_submit: 'แจ้งเตือนฉัน',
+        alert_thanks: 'เราจะแจ้งเตือนเมื่อมีสินค้าใหม่เข้า!',
         available: 'มีสินค้า',
         add_to_cart: 'เพิ่มลงตะกร้า',
         quantity: 'จำนวน:',
@@ -432,6 +588,13 @@
 
         about_title: 'เกี่ยวกับ SiamClones',
         about_desc: 'ตลาดกัญชาที่เชื่อถือได้ เชื่อมต่อคุณกับผู้ปลูกที่ตรวจสอบแล้ว พันธุกรรมคุณภาพ จัดส่งถึงบ้าน',
+        about_p1: 'SiamClones เชื่อมต่อผู้ปลูกกัญชาในประเทศไทยกับผู้จำหน่ายกิ่งพันธุ์ที่ได้รับการตรวจสอบ เมล็ด และดอกคุณภาพ',
+        about_p2: 'เราเชื่อว่าผู้ปลูกทุกคนสมควรได้รับการเข้าถึงพันธุกรรมคุณภาพและสินค้าพรีเมียม การเชื่อมต่อคุณโดยตรงกับผู้ขายที่เชื่อถือได้ช่วยให้คุณได้กิ่งพันธุ์ เมล็ด และดอกที่ดีที่สุดในราคาที่ยุติธรรม',
+
+        validation_required: 'กรุณากรอกข้อมูลทั้งหมด',
+        validation_name_length: 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร',
+        validation_phone_digits: 'เบอร์โทรศัพท์ต้องมีอย่างน้อย 9 หลัก',
+        validation_postal_code: 'รหัสไปรษณีย์ต้องมี 5 หลักพอดี',
 
         contact_title: 'ติดต่อเรา',
 
@@ -445,6 +608,46 @@
         footer_tagline: 'ตลาดกิ่งพันธุ์กัญชาที่เชื่อถือได้ของไทย',
 
         qr_scan: 'สแกนด้วยแอปธนาคาร',
+
+        // Filters
+        filter_search: 'ค้นหา',
+        filter_search_placeholder: 'ค้นหาตามชื่อ...',
+        filter_min_price: 'ราคาต่ำสุด',
+        filter_max_price: 'ราคาสูงสุด',
+        filter_sort: 'เรียงตาม',
+        filter_sort_newest: 'ใหม่สุด',
+        filter_sort_price_asc: 'ราคา: ต่ำ → สูง',
+        filter_sort_price_desc: 'ราคา: สูง → ต่ำ',
+        filter_province: 'จังหวัด',
+        filter_all_provinces: 'ทุกจังหวัด',
+        filter_clear: 'ล้างตัวกรอง',
+        filter_no_match: 'ไม่พบสินค้าที่ตรงกับตัวกรอง',
+        filter_no_match_sub: 'ลองปรับการค้นหา ช่วงราคา หรือตัวกรองของคุณ',
+
+        // Misc
+        back_products: 'กลับไปหน้าสินค้า',
+        back_cart: 'กลับไปตะกร้า',
+        back_delivery: 'กลับไปข้อมูลจัดส่ง',
+        step_delivery: 'ข้อมูลจัดส่ง',
+        step_pay: 'ชำระเงิน',
+        payment_proof_received: 'ได้รับหลักฐานการชำระเงินแล้ว',
+        payment_proof_processing: 'กำลังดำเนินการสั่งซื้อ ผู้ขายจะติดต่อคุณเร็วๆ นี้',
+        submitting: 'กำลังส่งคำสั่งซื้อ...',
+        confirm_order: 'ยืนยันคำสั่งซื้อ',
+        upload_to_continue: 'อัพโหลดภาพหน้าจอเพื่อดำเนินการต่อ',
+        upload_drag: 'ลากและวางหลักฐานการชำระเงินที่นี่',
+        upload_or_click: 'หรือคลิกเพื่อเลือกไฟล์',
+        choose_different: 'เลือกรูปอื่น',
+        live_marketplace: 'ตลาดออนไลน์',
+        retry: 'ลองอีกครั้ง',
+        reload: 'โหลดหน้าใหม่',
+
+        // COD
+        cod_option: 'เก็บเงินปลายทาง',
+        cod_desc: 'ชำระเงินเมื่อได้รับสินค้า',
+        promptpay_option: 'พร้อมเพย์ QR',
+        promptpay_desc: 'สแกน QR เพื่อชำระทันที',
+        select_payment: 'เลือกวิธีชำระเงิน',
 
         lang_toggle: 'EN',
       }
@@ -476,11 +679,224 @@
     const useIsMobile = () => {
       const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
       useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth <= 768);
+        let timeout;
+        const handleResize = () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => setIsMobile(window.innerWidth <= 768), 150);
+        };
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => { window.removeEventListener('resize', handleResize); clearTimeout(timeout); };
       }, []);
       return isMobile;
+    };
+
+    // =============================================
+    // DEBOUNCE UTILITY
+    // =============================================
+    const useDebounce = (value, delay) => {
+      const [debouncedValue, setDebouncedValue] = useState(value);
+      useEffect(() => {
+        const timer = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(timer);
+      }, [value, delay]);
+      return debouncedValue;
+    };
+
+    // =============================================
+    // SHARE UTILITY
+    // =============================================
+    const shareUrl = (url, text, medium) => {
+      const utmUrl = `${url}${url.includes('?') ? '&' : '?'}utm_source=share&utm_medium=${medium}&utm_campaign=organic`;
+      if (medium === 'native' && navigator.share) {
+        navigator.share({ title: 'SiamClones', text, url: utmUrl }).catch(() => {});
+        return;
+      }
+      const encodedUrl = encodeURIComponent(utmUrl);
+      const encodedText = encodeURIComponent(text);
+      const shareUrls = {
+        line: `https://social-plugins.line.me/lineit/share?url=${encodedUrl}`,
+        whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+        copy: null,
+      };
+      if (medium === 'copy') {
+        navigator.clipboard?.writeText(utmUrl);
+        return true;
+      }
+      if (shareUrls[medium]) window.open(shareUrls[medium], '_blank', 'noopener,noreferrer');
+    };
+
+    // Share buttons component
+    const ShareButtons = ({ url, text, t = (key) => key, compact = false }) => {
+      const [copied, setCopied] = useState(false);
+      const handleCopy = () => {
+        shareUrl(url, text, 'copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+      const btnStyle = {
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: compact ? '6px 12px' : '8px 16px',
+        borderRadius: 20, border: `1px solid ${colors.blush}`,
+        background: colors.white, fontSize: compact ? 12 : 13,
+        fontWeight: 600, cursor: 'pointer',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
+        transition: 'all 0.2s', color: colors.dark,
+      };
+      return (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: compact ? 'flex-start' : 'center' }}>
+          {navigator.share && (
+            <button style={btnStyle} onClick={() => shareUrl(url, text, 'native')}>
+              <span aria-hidden="true">📤</span> {t('share_listing')}
+            </button>
+          )}
+          {!navigator.share && (
+            <>
+              <button style={{ ...btnStyle, borderColor: '#06C755', color: '#06C755' }} onClick={() => shareUrl(url, text, 'line')}>
+                <span aria-hidden="true">💬</span> LINE
+              </button>
+              <button style={{ ...btnStyle, borderColor: '#25D366', color: '#25D366' }} onClick={() => shareUrl(url, text, 'whatsapp')}>
+                <span aria-hidden="true">📱</span> WhatsApp
+              </button>
+            </>
+          )}
+          <button style={{ ...btnStyle, background: copied ? '#E8F5E9' : colors.white, color: copied ? '#2E7D32' : colors.dark }}
+            onClick={handleCopy}>
+            <span aria-hidden="true">{copied ? '✓' : '🔗'}</span> {copied ? t('share_copied') : t('share_copy')}
+          </button>
+        </div>
+      );
+    };
+
+    // =============================================
+    // ANALYTICS TRACKING (lightweight)
+    // =============================================
+    // Map database price_unit value to translated display label
+    const getPriceUnitLabel = (priceUnit, t) => {
+      const unitMap = {
+        per_clone: 'per_clone',
+        per_pack: 'per_pack',
+        per_seed: 'per_seed',
+        per_gram: 'per_gram',
+        per_ounce: 'per_ounce',
+        per_100g: 'per_100g',
+        each: 'each',
+      };
+      const key = unitMap[priceUnit];
+      return key ? t(key) : t('per_unit');
+    };
+
+    const trackEvent = (eventName, data = {}) => {
+      try {
+        // Get or create session ID
+        let sessionId = sessionStorage.getItem('sc_session');
+        if (!sessionId) {
+          sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+          sessionStorage.setItem('sc_session', sessionId);
+        }
+        // Store events locally (can be sent to analytics service later)
+        const events = JSON.parse(localStorage.getItem('sc_events') || '[]');
+        events.push({
+          event: eventName,
+          ...data,
+          session_id: sessionId,
+          timestamp: new Date().toISOString(),
+          url: window.location.href,
+        });
+        // Keep last 200 events max
+        if (events.length > 200) events.splice(0, events.length - 200);
+        localStorage.setItem('sc_events', JSON.stringify(events));
+
+        // Also push to dataLayer for GA4 if present
+        if (window.dataLayer) {
+          window.dataLayer.push({ event: eventName, ...data });
+        }
+      } catch (e) {
+        // Silently fail
+      }
+    };
+
+    // =============================================
+    // FAQ ACCORDION COMPONENT
+    // =============================================
+    const Accordion = ({ items, t }) => {
+      const [openIndex, setOpenIndex] = useState(null);
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {items.map((item, i) => (
+            <div key={i} style={{
+              background: colors.white, borderRadius: 12, overflow: 'hidden',
+              border: `1px solid ${openIndex === i ? colors.primary : colors.blush}`,
+              transition: 'border-color 0.3s',
+            }}>
+              <button onClick={() => setOpenIndex(openIndex === i ? null : i)} style={{
+                width: '100%', padding: '16px 20px', border: 'none',
+                background: 'none', display: 'flex', justifyContent: 'space-between',
+                alignItems: 'center', cursor: 'pointer', textAlign: 'left',
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+              }}>
+                <span style={{ fontSize: 15, fontWeight: 600, color: colors.dark }}>{item.q}</span>
+                <span style={{ fontSize: 20, color: colors.gray, transition: 'transform 0.3s', transform: openIndex === i ? 'rotate(180deg)' : 'rotate(0)' }}>▾</span>
+              </button>
+              {openIndex === i && (
+                <div style={{ padding: '0 20px 16px', color: colors.gray, fontSize: 14, lineHeight: 1.7 }}>
+                  {item.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    // =============================================
+    // LEAD CAPTURE COMPONENT
+    // =============================================
+    const RestockAlert = ({ t = (key) => key }) => {
+      const [contact, setContact] = useState('');
+      const [submitted, setSubmitted] = useState(false);
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!contact.trim()) return;
+        // Store lead locally (can be sent to Supabase or email service later)
+        try {
+          const leads = JSON.parse(localStorage.getItem('sc_leads') || '[]');
+          leads.push({ contact: contact.trim(), timestamp: new Date().toISOString() });
+          localStorage.setItem('sc_leads', JSON.stringify(leads));
+          // Also try to store in Supabase if available
+          if (typeof supabase !== 'undefined') {
+            supabase.from('leads').insert([{ contact: contact.trim() }]).then(() => {});
+          }
+        } catch (e) {}
+        trackEvent('lead_capture', { contact_type: contact.includes('@') ? 'email' : 'line_id' });
+        setSubmitted(true);
+      };
+      if (submitted) {
+        return (
+          <div style={{ textAlign: 'center', padding: 24, background: '#E8F5E9', borderRadius: 16 }}>
+            <span style={{ fontSize: 32 }}>🎉</span>
+            <p style={{ color: '#2E7D32', fontWeight: 600, marginTop: 8 }}>{t('alert_thanks')}</p>
+          </div>
+        );
+      }
+      return (
+        <div style={{ background: 'linear-gradient(135deg, #E8F5E9, #FFF8E1)', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+          <h4 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 8 }}>{t('alert_title')}</h4>
+          <p style={{ fontSize: 14, color: colors.gray, marginBottom: 16 }}>{t('alert_desc')}</p>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, maxWidth: 400, margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <input type="text" value={contact} onChange={e => setContact(e.target.value)}
+              placeholder={t('alert_placeholder')}
+              style={{ flex: 1, minWidth: 200, padding: '12px 16px', borderRadius: 12, border: `2px solid ${colors.blush}`, fontSize: 14, fontFamily: 'Plus Jakarta Sans, sans-serif', outline: 'none' }}
+              onFocus={e => e.target.style.borderColor = colors.primary}
+              onBlur={e => e.target.style.borderColor = colors.blush}
+            />
+            <button type="submit" style={{
+              padding: '12px 24px', borderRadius: 12, border: 'none',
+              background: colors.gradient1, color: colors.white, fontWeight: 700,
+              fontSize: 14, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+            }}>{t('alert_submit')}</button>
+          </form>
+        </div>
+      );
     };
 
     // =============================================
@@ -566,7 +982,12 @@
       if (!promptpayId) return null;
       return (
         <div style={{ textAlign: 'center' }}>
-          <canvas ref={canvasRef} style={{ borderRadius: 12, border: `2px solid ${colors.blush}` }} />
+          <canvas
+            ref={canvasRef}
+            style={{ borderRadius: 12, border: `2px solid ${colors.blush}` }}
+            aria-label={`PromptPay QR code for payment of ${amount ? amount + ' THB' : 'amount'}`}
+            role="img"
+          />
           <p style={{ fontSize: 12, color: colors.gray, marginTop: 8 }}>
             {t('qr_scan')}
           </p>
@@ -792,20 +1213,52 @@
     const HeroSection = ({ onNavigate, t = (key) => key }) => {
       const isMobile = useIsMobile();
       const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+      const [isVisible, setIsVisible] = useState(true);
+      const heroRef = useRef(null);
 
+      // Disable mouse tracking on mobile and when hero is off-screen
       useEffect(() => {
+        if (isMobile) return; // Skip mouse tracking on mobile for performance
+
+        // Create IntersectionObserver to track if hero is visible
+        const observer = new IntersectionObserver(
+          (entries) => {
+            setIsVisible(entries[0].isIntersecting);
+          },
+          { threshold: 0.1 }
+        );
+
+        if (heroRef.current) {
+          observer.observe(heroRef.current);
+        }
+
+        return () => {
+          if (heroRef.current) {
+            observer.unobserve(heroRef.current);
+          }
+          observer.disconnect();
+        };
+      }, [isMobile]);
+
+      // Mouse tracking only runs when hero is visible and not on mobile
+      useEffect(() => {
+        if (isMobile || !isVisible) return; // Skip if on mobile or hero is off-screen
+        let rafId;
         const handleMouse = (e) => {
-          setMousePos({
-            x: (e.clientX / window.innerWidth) * 100,
-            y: (e.clientY / window.innerHeight) * 100,
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            setMousePos({
+              x: (e.clientX / window.innerWidth) * 100,
+              y: (e.clientY / window.innerHeight) * 100,
+            });
           });
         };
-        window.addEventListener('mousemove', handleMouse);
-        return () => window.removeEventListener('mousemove', handleMouse);
-      }, []);
+        window.addEventListener('mousemove', handleMouse, { passive: true });
+        return () => { window.removeEventListener('mousemove', handleMouse); cancelAnimationFrame(rafId); };
+      }, [isMobile, isVisible]);
 
       return (
-        <section style={{
+        <section ref={heroRef} style={{
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
@@ -820,30 +1273,33 @@
           }}>
             <div style={{
               position: 'absolute',
-              width: 600, height: 600,
+              width: isMobile ? 300 : 600, height: isMobile ? 300 : 600,
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(45,125,70,0.4) 0%, transparent 70%)',
               left: `${mousePos.x * 0.3}%`, top: `${mousePos.y * 0.3 - 20}%`,
               transition: 'left 2s ease-out, top 2s ease-out',
-              filter: 'blur(40px)',
+              filter: isMobile ? 'blur(20px)' : 'blur(40px)',
+              willChange: 'transform',
             }} />
             <div style={{
               position: 'absolute',
-              width: 500, height: 500,
+              width: isMobile ? 250 : 500, height: isMobile ? 250 : 500,
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(242,169,0,0.25) 0%, transparent 70%)',
               right: `${(100 - mousePos.x) * 0.2}%`, bottom: `${(100 - mousePos.y) * 0.2}%`,
               transition: 'right 3s ease-out, bottom 3s ease-out',
-              filter: 'blur(60px)',
+              filter: isMobile ? 'blur(30px)' : 'blur(60px)',
+              willChange: 'transform',
             }} />
             <div style={{
               position: 'absolute',
-              width: 400, height: 400,
+              width: isMobile ? 200 : 400, height: isMobile ? 200 : 400,
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(123,79,158,0.2) 0%, transparent 70%)',
               left: '60%', top: '20%',
               animation: 'float 8s ease-in-out infinite',
-              filter: 'blur(50px)',
+              filter: isMobile ? 'blur(25px)' : 'blur(50px)',
+              willChange: 'transform',
             }} />
           </div>
 
@@ -865,7 +1321,7 @@
                 marginBottom: 32,
               }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4CAF50', animation: 'pulse 2s infinite' }} />
-                <span style={{ color: '#4CAF50', fontSize: 14, fontWeight: 600, letterSpacing: '0.5px' }}>LIVE MARKETPLACE</span>
+                <span style={{ color: '#4CAF50', fontSize: 14, fontWeight: 600, letterSpacing: '0.5px' }}>{t('live_marketplace')}</span>
               </div>
 
               <h1 className="animate-fade-in-up" style={{
@@ -891,6 +1347,7 @@
                 {t('hero_subtitle')}
               </p>
 
+              {/* Dual CTAs */}
               <div className="animate-fade-in-up" style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', animationDelay: '0.3s' }}>
                 <button onClick={() => onNavigate('products')} style={{
                   padding: isMobile ? '14px 24px' : '18px 40px',
@@ -910,6 +1367,52 @@
                 >
                   {t('hero_browse')}
                 </button>
+                <button onClick={() => onNavigate('how-it-works')} style={{
+                  padding: isMobile ? '14px 24px' : '18px 40px',
+                  borderRadius: 30,
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  background: 'rgba(255,255,255,0.08)',
+                  color: colors.white,
+                  fontWeight: 600,
+                  fontSize: isMobile ? 15 : 18,
+                  cursor: 'pointer',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)',
+                }}
+                onMouseEnter={e => { e.target.style.background = 'rgba(255,255,255,0.15)'; e.target.style.borderColor = 'rgba(255,255,255,0.5)'; }}
+                onMouseLeave={e => { e.target.style.background = 'rgba(255,255,255,0.08)'; e.target.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+                >
+                  {t('hero_how')}
+                </button>
+              </div>
+
+              {/* Trust Bar */}
+              <div className="animate-fade-in-up" style={{
+                display: 'flex', gap: isMobile ? 8 : 12, justifyContent: 'center', flexWrap: 'wrap',
+                marginTop: isMobile ? 32 : 48, animationDelay: '0.5s',
+              }}>
+                {[
+                  { icon: '✓', label: t('trust_verified') },
+                  { icon: '💵', label: t('trust_cod') },
+                  { icon: '📱', label: t('trust_promptpay') },
+                  { icon: '⚡', label: t('trust_dispatch') },
+                  { icon: '💬', label: t('trust_line') },
+                ].map((chip, i) => (
+                  <span key={i} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: isMobile ? '6px 12px' : '8px 16px',
+                    borderRadius: 20,
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: isMobile ? 12 : 13,
+                    fontWeight: 500,
+                    backdropFilter: 'blur(10px)',
+                  }}>
+                    <span aria-hidden="true">{chip.icon}</span> {chip.label}
+                  </span>
+                ))}
               </div>
 
             </div>
@@ -959,6 +1462,7 @@
           justifyContent: 'center',
           overflow: 'hidden',
           position: 'relative',
+          aspectRatio: '1',
         }}>
           {!imgLoaded && !imgError && listing.images && listing.images[0] && (
             <div style={{
@@ -986,35 +1490,54 @@
         </div>
 
         <div style={{ padding: isMobile ? 12 : 16 }}>
-          <h3 style={{ fontSize: isMobile ? 14 : 16, fontWeight: 700, color: colors.dark, marginBottom: 4, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {listing.title}
-          </h3>
-          {listing.profiles && (
-            <p style={{ fontSize: 13, color: colors.gray, marginBottom: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              by {listing.profiles.farm_name || listing.profiles.display_name}
-            </p>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-            <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, whiteSpace: 'nowrap' }}>
-              ฿{parseFloat(listing.price).toFixed(0)}
-              <span style={{ fontSize: 12, fontWeight: 400, color: colors.gray }}>/unit</span>
-            </p>
-            {listing.quantity_available && (
+          {/* Badge row: Category + Stock */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+            <span style={{
+              padding: '3px 8px', borderRadius: 12, fontSize: 10, fontWeight: 700,
+              background: listing.category === 'clones' ? '#E8F5E9' : listing.category === 'seeds' ? '#FFF3E0' : '#F3E5F5',
+              color: listing.category === 'clones' ? '#2E7D32' : listing.category === 'seeds' ? '#E65100' : '#7B1FA2',
+              textTransform: 'uppercase', letterSpacing: '0.5px',
+            }}>
+              {listing.category === 'clones' ? '🌱' : listing.category === 'seeds' ? '🫘' : '🌿'} {t('cat_' + (listing.category || 'clones'))}
+            </span>
+            {listing.quantity_available != null && (
               <span style={{
-                padding: '4px 10px',
-                background: colors.mint,
-                borderRadius: 20,
-                fontSize: 11,
-                fontWeight: 600,
-                color: colors.dark,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                transition: 'transform 0.3s ease',
+                padding: '3px 8px', borderRadius: 12, fontSize: 10, fontWeight: 700,
+                background: listing.quantity_available <= 0 ? '#FFEBEE' : listing.quantity_available <= 5 ? '#FFF8E1' : '#E8F5E9',
+                color: listing.quantity_available <= 0 ? '#C62828' : listing.quantity_available <= 5 ? '#F57F17' : '#2E7D32',
               }}>
-                {listing.quantity_available} avail
+                {listing.quantity_available <= 0 ? t('out_of_stock') : listing.quantity_available <= 5 ? `${t('low_stock')} (${listing.quantity_available})` : t('in_stock')}
               </span>
             )}
           </div>
+
+          <h3 style={{ fontSize: isMobile ? 14 : 16, fontWeight: 700, color: colors.dark, marginBottom: 4, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {listing.title}
+          </h3>
+
+          {/* Vendor + Location */}
+          {listing.profiles && (
+            <p style={{ fontSize: 12, color: colors.gray, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {listing.profiles.farm_name || listing.profiles.display_name}
+              {listing.profiles.location && <span> · {listing.profiles.location}</span>}
+            </p>
+          )}
+
+          {/* Dispatch + Verified */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, color: colors.lightGray, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span aria-hidden="true">⚡</span> {t('dispatch_time')}
+            </span>
+            <span style={{ fontSize: 11, color: '#2E7D32', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
+              <span aria-hidden="true">✓</span> {t('verified_seller')}
+            </span>
+          </div>
+
+          {/* Price */}
+          <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, whiteSpace: 'nowrap' }}>
+            ฿{parseFloat(listing.price).toFixed(0)}
+            <span style={{ fontSize: 12, fontWeight: 400, color: colors.gray }}>/{getPriceUnitLabel(listing.price_unit, t)}</span>
+          </p>
         </div>
       </article>
     );
@@ -1105,40 +1628,54 @@
         fetchListings();
       }, [selectedCategory]);
 
-      // Apply client-side filtering and sorting
-      let filtered = [...listings];
-      if (searchTerm) {
-        filtered = filtered.filter(l => l.title.toLowerCase().includes(searchTerm.toLowerCase()));
-      }
-      if (priceMin) {
-        filtered = filtered.filter(l => l.price >= Number(priceMin));
-      }
-      if (priceMax) {
-        filtered = filtered.filter(l => l.price <= Number(priceMax));
-      }
-      if (filterProvince && listings.length > 0 && listings[0].profiles?.location) {
-        filtered = filtered.filter(l => l.profiles?.location === filterProvince);
-      }
-      if (sortBy === 'price_asc') {
-        filtered.sort((a, b) => a.price - b.price);
-      } else if (sortBy === 'price_desc') {
-        filtered.sort((a, b) => b.price - a.price);
-      } else if (sortBy === 'newest') {
-        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      }
+      // Debounced search for performance
+      const debouncedSearch = useDebounce(searchTerm, 300);
 
-      // Extract unique provinces for filter
-      const uniqueProvinces = [...new Set(listings
+      // Extract unique provinces for filter (memoized)
+      const uniqueProvinces = useMemo(() => [...new Set(listings
         .filter(l => l.profiles?.location)
         .map(l => l.profiles.location)
-      )].sort();
+      )].sort(), [listings]);
+
+      // Apply client-side filtering and sorting (memoized)
+      const filtered = useMemo(() => {
+        let result = [...listings];
+        if (debouncedSearch) {
+          const term = debouncedSearch.toLowerCase();
+          result = result.filter(l =>
+            l.title?.toLowerCase().includes(term) ||
+            l.description?.toLowerCase().includes(term) ||
+            l.profiles?.farm_name?.toLowerCase().includes(term)
+          );
+        }
+        const minPrice = Number(priceMin);
+        if (priceMin && !isNaN(minPrice)) {
+          result = result.filter(l => parseFloat(l.price) >= minPrice);
+        }
+        const maxPrice = Number(priceMax);
+        if (priceMax && !isNaN(maxPrice)) {
+          result = result.filter(l => parseFloat(l.price) <= maxPrice);
+        }
+        if (filterProvince) {
+          result = result.filter(l => l.profiles?.location === filterProvince);
+        }
+        // Sort with spread to avoid mutation
+        if (sortBy === 'price_asc') {
+          result = [...result].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        } else if (sortBy === 'price_desc') {
+          result = [...result].sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        } else {
+          result = [...result].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+        return result;
+      }, [listings, debouncedSearch, priceMin, priceMax, filterProvince, sortBy]);
 
       return (
         <section style={{ minHeight: '100vh', padding: isMobile ? '80px 16px 40px' : '120px 24px 80px', background: colors.cream }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 60 }}>
-              <h2 style={{ fontSize: isMobile ? 28 : 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>Marketplace 🌿</h2>
-              <p style={{ fontSize: 18, color: colors.gray, marginBottom: 40 }}>Browse clones, seeds, and buds from verified vendors</p>
+              <h2 style={{ fontSize: isMobile ? 28 : 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>{t('products_title')} <span aria-hidden="true">🌿</span></h2>
+              <p style={{ fontSize: 18, color: colors.gray, marginBottom: 40 }}>{t('products_subtitle')}</p>
 
               {/* Category Tabs */}
               <div role="tablist" aria-label="Product categories" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1147,6 +1684,7 @@
                     key={cat.id}
                     role="tab"
                     aria-selected={selectedCategory === cat.id}
+                    aria-controls="product-grid"
                     aria-label={`Filter by ${cat.label}`}
                     onClick={() => setSelectedCategory(cat.id)}
                     style={{
@@ -1183,10 +1721,10 @@
             }} className="filter-bar">
               {/* Search Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>Search</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>{t('filter_search')}</label>
                 <input
                   type="text"
-                  placeholder="Search by name..."
+                  placeholder={t('filter_search_placeholder')}
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   style={{
@@ -1206,16 +1744,17 @@
 
               {/* Min Price Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>Min Price</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>{t('filter_min_price')}</label>
                 <input
                   type="number"
                   placeholder="฿0"
                   value={priceMin}
                   onChange={e => setPriceMin(e.target.value)}
+                  min="0"
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: `2px solid ${colors.lightGray}`,
+                    border: `2px solid ${priceMin && priceMax && Number(priceMin) > Number(priceMax) ? colors.error : colors.lightGray}`,
                     borderRadius: 12,
                     fontSize: 14,
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -1223,22 +1762,26 @@
                     boxSizing: 'border-box',
                   }}
                   onFocus={e => e.target.style.borderColor = colors.primary}
-                  onBlur={e => e.target.style.borderColor = colors.lightGray}
+                  onBlur={e => e.target.style.borderColor = priceMin && priceMax && Number(priceMin) > Number(priceMax) ? colors.error : colors.lightGray}
                 />
+                {priceMin && priceMax && Number(priceMin) > Number(priceMax) && (
+                  <div style={{ fontSize: 12, color: colors.error, marginTop: 4 }}>Min price must be less than or equal to max price</div>
+                )}
               </div>
 
               {/* Max Price Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>Max Price</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>{t('filter_max_price')}</label>
                 <input
                   type="number"
                   placeholder="฿999,999"
                   value={priceMax}
                   onChange={e => setPriceMax(e.target.value)}
+                  min="0"
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: `2px solid ${colors.lightGray}`,
+                    border: `2px solid ${priceMin && priceMax && Number(priceMin) > Number(priceMax) ? colors.error : colors.lightGray}`,
                     borderRadius: 12,
                     fontSize: 14,
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
@@ -1246,13 +1789,13 @@
                     boxSizing: 'border-box',
                   }}
                   onFocus={e => e.target.style.borderColor = colors.primary}
-                  onBlur={e => e.target.style.borderColor = colors.lightGray}
+                  onBlur={e => e.target.style.borderColor = priceMin && priceMax && Number(priceMin) > Number(priceMax) ? colors.error : colors.lightGray}
                 />
               </div>
 
               {/* Sort Dropdown */}
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>Sort By</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>{t('filter_sort')}</label>
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
@@ -1272,16 +1815,16 @@
                   onFocus={e => e.target.style.borderColor = colors.primary}
                   onBlur={e => e.target.style.borderColor = colors.lightGray}
                 >
-                  <option value="newest">Newest</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
+                  <option value="newest">{t('filter_sort_newest')}</option>
+                  <option value="price_asc">{t('filter_sort_price_asc')}</option>
+                  <option value="price_desc">{t('filter_sort_price_desc')}</option>
                 </select>
               </div>
 
               {/* Province Filter */}
               {uniqueProvinces.length > 0 && (
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>Province</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase' }}>{t('filter_province')}</label>
                   <select
                     value={filterProvince}
                     onChange={e => setFilterProvince(e.target.value)}
@@ -1301,7 +1844,7 @@
                     onFocus={e => e.target.style.borderColor = colors.primary}
                     onBlur={e => e.target.style.borderColor = colors.lightGray}
                   >
-                    <option value="">All Provinces</option>
+                    <option value="">{t('filter_all_provinces')}</option>
                     {uniqueProvinces.map(province => (
                       <option key={province} value={province}>{province}</option>
                     ))}
@@ -1336,7 +1879,7 @@
                     onMouseEnter={e => e.target.style.background = colors.primary}
                     onMouseLeave={e => e.target.style.background = colors.mint}
                   >
-                    Clear Filters
+                    {t('filter_clear')}
                   </button>
                 </div>
               )}
@@ -1345,8 +1888,8 @@
             {loading ? (
               <LoadingSkeleton isMobile={isMobile} />
             ) : error ? (
-              <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
-                <span style={{ fontSize: 64 }}>⚠️</span>
+              <div role="alert" style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
+                <span style={{ fontSize: 64 }} aria-hidden="true">⚠️</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>{error}</h3>
                 <button
                   onClick={() => window.location.reload()}
@@ -1363,7 +1906,7 @@
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                   }}
                 >
-                  Retry
+                  {t('retry')}
                 </button>
               </div>
             ) : listings.length === 0 ? (
@@ -1391,9 +1934,9 @@
             ) : filtered.length === 0 ? (
               <div role="status" style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24, boxShadow: '0 4px 20px rgba(45, 125, 70, 0.08)' }}>
                 <div style={{ fontSize: 80, marginBottom: 20 }} aria-hidden="true">🔍</div>
-                <h3 style={{ fontSize: 28, fontWeight: 800, color: colors.dark, marginBottom: 12 }}>No products match your filters</h3>
+                <h3 style={{ fontSize: 28, fontWeight: 800, color: colors.dark, marginBottom: 12 }}>{t('filter_no_match')}</h3>
                 <p style={{ color: colors.gray, fontSize: 16, marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>
-                  Try adjusting your search, price range, or filters to find what you're looking for.
+                  {t('filter_no_match_sub')}
                 </p>
                 <button
                   onClick={() => {
@@ -1415,11 +1958,11 @@
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                   }}
                 >
-                  Clear Filters
+                  {t('filter_clear')}
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(155px, 1fr))' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: isMobile ? 12 : 24 }}>
+              <div id="product-grid" role="tabpanel" style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(155px, 1fr))' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: isMobile ? 12 : 24 }}>
                 {filtered.map(listing => (
                   <ProductCard key={listing.id} listing={listing} onClick={() => onSelectProduct(listing)} t={t} />
                 ))}
@@ -1456,7 +1999,7 @@
               boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
               fontFamily: 'Plus Jakarta Sans, sans-serif',
             }}>
-              ← Back to Products
+              ← {t('back_products')}
             </button>
 
             <div style={{
@@ -1477,6 +2020,7 @@
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
+                aspectRatio: '1',
               }}>
                 {product.images && product.images[0] ? (
                   <img src={product.images[0]} alt={product.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1500,7 +2044,7 @@
 
                 <p style={{ fontSize: 48, fontWeight: 800, color: colors.primary, marginBottom: 24 }}>
                   ฿{parseFloat(product.price).toFixed(0)}
-                  <span style={{ fontSize: 18, fontWeight: 400, color: colors.gray }}> {t('per_unit')}</span>
+                  <span style={{ fontSize: 18, fontWeight: 400, color: colors.gray }}> {getPriceUnitLabel(product.price_unit, t)}</span>
                 </p>
 
                 {product.description && (
@@ -1575,6 +2119,30 @@
                 >
                   {added ? '✓ ' + t('add_to_cart') + '!' : `${t('add_to_cart')} - ฿${(product.price * quantity).toFixed(0)}`}
                 </button>
+
+                {/* Share Buttons */}
+                <div style={{ marginTop: 24 }}>
+                  <ShareButtons
+                    url={`https://siamclones.com/?listing=${product.id}`}
+                    text={`${t('share_listing_text')} ${product.title} - ฿${parseFloat(product.price).toFixed(0)}`}
+                    t={t}
+                    compact
+                  />
+                </div>
+
+                {/* Delivery Info Accordion */}
+                <div style={{ marginTop: 32, borderTop: `1px solid ${colors.blush}`, paddingTop: 24 }}>
+                  <Accordion items={[
+                    { q: `⚡ ${t('delivery_how_title')}`, a: (
+                      <div>
+                        <p style={{ marginBottom: 8 }}>1. {t('delivery_how_1')}</p>
+                        <p style={{ marginBottom: 8 }}>2. {t('delivery_how_2')}</p>
+                        <p>3. {t('delivery_how_3')}</p>
+                      </div>
+                    )},
+                    { q: `🔄 ${t('returns_title')}`, a: t('returns_desc') },
+                  ]} t={t} />
+                </div>
               </div>
             </div>
           </div>
@@ -1632,7 +2200,7 @@
                         width: isMobile ? 60 : 80, height: isMobile ? 60 : 80, borderRadius: 12,
                         background: colors.gradient1,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        overflow: 'hidden', flexShrink: 0,
+                        overflow: 'hidden', flexShrink: 0, aspectRatio: '1',
                       }}>
                         {item.product.images && item.product.images[0] ? (
                           <img src={item.product.images[0]} alt={item.product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1644,7 +2212,7 @@
                       {/* Details - on mobile, spans full width below image */}
                       <div style={{ gridColumn: isMobile ? '1 / -1' : undefined }}>
                         <h4 style={{ fontSize: isMobile ? 14 : 18, fontWeight: 600, color: colors.dark, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product.title}</h4>
-                        <p style={{ fontSize: isMobile ? 12 : 14, color: colors.gray, marginTop: 4 }}>฿{parseFloat(item.product.price).toFixed(0)} {t('per_unit')}</p>
+                        <p style={{ fontSize: isMobile ? 12 : 14, color: colors.gray, marginTop: 4 }}>฿{parseFloat(item.product.price).toFixed(0)} {getPriceUnitLabel(item.product.price_unit, t)}</p>
                       </div>
 
                       {/* Quantity - right side on mobile */}
@@ -1712,7 +2280,7 @@
     // =============================================
     // CHECKOUT PAGE — Multi-step: Info → QR Payment → Screenshot Upload → Auto-submit
     // =============================================
-    const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key }) => {
+    const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lang = 'en' }) => {
       const isMobile = useIsMobile();
       // Step: 1 = delivery info, 2 = QR payment + screenshot upload
       const [step, setStep] = useState(1);
@@ -1728,9 +2296,42 @@
       const [uploadingProof, setUploadingProof] = useState(false);
       const [proofPreview, setProofPreview] = useState(null);
       const [proofFile, setProofFile] = useState(null);
+      const [dragActive, setDragActive] = useState(false);
+      const [paymentMethod, setPaymentMethod] = useState('promptpay'); // 'promptpay' or 'cod'
+      const [fieldErrors, setFieldErrors] = useState({});
       const fileInputRef = React.useRef(null);
 
       const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+
+      // Real-time field validation
+      const validateField = (field, value) => {
+        const errs = { ...fieldErrors };
+        switch (field) {
+          case 'name':
+            errs.name = value.length > 0 && value.length < 2 ? (lang === 'th' ? 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' : 'Name must be at least 2 characters') : '';
+            break;
+          case 'phone':
+            const digits = value.replace(/\D/g, '');
+            // Thai phone numbers: 9-10 digits (landline: 9 digits, mobile: 10 digits)
+            if (digits.length > 0) {
+              if (digits.length < 9 || digits.length > 10) {
+                errs.phone = lang === 'th' ? 'เบอร์โทรต้องมี 9-10 หลัก (เริ่มต้นด้วย 0)' : 'Thai phone must be 9-10 digits (starting with 0)';
+              } else if (!digits.startsWith('0')) {
+                errs.phone = lang === 'th' ? 'เบอร์โทรต้องเริ่มต้นด้วย 0' : 'Thai phone must start with 0';
+              } else {
+                errs.phone = '';
+              }
+            } else {
+              errs.phone = '';
+            }
+            break;
+          case 'postalCode':
+            const postal = value.replace(/\D/g, '');
+            errs.postalCode = postal.length > 0 && postal.length !== 5 ? (lang === 'th' ? 'รหัสไปรษณีย์ต้องมี 5 หลัก' : 'Postal code must be 5 digits') : '';
+            break;
+        }
+        setFieldErrors(errs);
+      };
 
       const inputStyle = {
         width: '100%', padding: '12px 16px', borderRadius: 12,
@@ -1745,21 +2346,25 @@
         setError('');
 
         if (!name || !phone || !address || !district || !province || !postalCode) {
-          setError('Please fill in all required fields');
+          setError(t('validation_required'));
           return;
         }
         if (name.length < 2) {
-          setError('Name must be at least 2 characters');
+          setError(t('validation_name_length'));
           return;
         }
         const phoneDigits = phone.replace(/\D/g, '');
-        if (phoneDigits.length < 9) {
-          setError('Phone number must be at least 9 digits');
+        if (phoneDigits.length < 9 || phoneDigits.length > 10) {
+          setError(lang === 'th' ? 'เบอร์โทรต้องมี 9-10 หลัก (เริ่มต้นด้วย 0)' : 'Thai phone must be 9-10 digits (starting with 0)');
+          return;
+        }
+        if (!phoneDigits.startsWith('0')) {
+          setError(lang === 'th' ? 'เบอร์โทรต้องเริ่มต้นด้วย 0' : 'Thai phone must start with 0');
           return;
         }
         const postalDigits = postalCode.replace(/\D/g, '');
         if (postalDigits.length !== 5) {
-          setError('Postal code must be exactly 5 digits');
+          setError(t('validation_postal_code'));
           return;
         }
 
@@ -1768,11 +2373,16 @@
       };
 
       // Handle proof screenshot file selection
+      const MAX_PROOF_SIZE = 10 * 1024 * 1024; // 10MB max
       const handleProofSelect = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-          setError('Please upload an image file (screenshot of your payment)');
+          setError(lang === 'th' ? 'กรุณาอัพโหลดไฟล์รูปภาพ (ภาพหน้าจอการชำระเงิน)' : 'Please upload an image file (screenshot of your payment)');
+          return;
+        }
+        if (file.size > MAX_PROOF_SIZE) {
+          setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
           return;
         }
         setError('');
@@ -1782,10 +2392,47 @@
         reader.readAsDataURL(file);
       };
 
-      // Upload proof to Supabase Storage and submit orders
-      const handleSubmitWithProof = async () => {
-        if (!proofFile) {
-          setError('Please upload your payment screenshot first');
+      // Handle drag and drop for payment proof
+      const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(true);
+      };
+
+      const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+      };
+
+      const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          // Create a synthetic event object to reuse handleProofSelect logic
+          const file = files[0];
+          if (!file.type.startsWith('image/')) {
+            setError(lang === 'th' ? 'กรุณาอัพโหลดไฟล์รูปภาพ (ภาพหน้าจอการชำระเงิน)' : 'Please upload an image file (screenshot of your payment)');
+            return;
+          }
+          if (file.size > MAX_PROOF_SIZE) {
+            setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
+            return;
+          }
+          setError('');
+          setProofFile(file);
+          const reader = new FileReader();
+          reader.onload = (ev) => setProofPreview(ev.target.result);
+          reader.readAsDataURL(file);
+        }
+      };
+
+      // Submit order (supports both PromptPay and COD)
+      const handleSubmitOrder = async () => {
+        if (paymentMethod === 'promptpay' && !proofFile) {
+          setError(lang === 'th' ? 'กรุณาอัพโหลดภาพหน้าจอการชำระเงินก่อน' : 'Please upload your payment screenshot first');
           return;
         }
 
@@ -1793,60 +2440,106 @@
         setError('');
 
         try {
-          // Validate product stock
-          for (const item of cart) {
-            const { data, error } = await supabase
-              .from('listings')
-              .select('quantity_available')
-              .eq('id', item.product.id)
-              .single();
+          // Batch validate product stock availability
+          const productIds = cart.map(item => item.product.id);
+          const { data: availabilityData, error: availError } = await supabase
+            .from('listings')
+            .select('id, quantity_available')
+            .in('id', productIds);
 
-            if (error || !data) {
+          if (availError || !availabilityData) {
+            setError('Failed to verify product availability.');
+            setLoading(false);
+            return;
+          }
+
+          const availabilityMap = Object.fromEntries(
+            availabilityData.map(listing => [listing.id, listing.quantity_available])
+          );
+
+          for (const item of cart) {
+            const quantity = availabilityMap[item.product.id];
+            if (quantity === undefined) {
               setError(`Product "${item.product.title}" no longer available.`);
               setLoading(false);
               return;
             }
-            if (data.quantity_available < item.quantity) {
-              setError(`Only ${data.quantity_available} of "${item.product.title}" available.`);
+            if (quantity < item.quantity) {
+              setError(`Only ${quantity} of "${item.product.title}" available.`);
               setLoading(false);
               return;
             }
           }
 
-          // Upload payment proof screenshot
-          const fileExt = proofFile.name.split('.').pop() || 'jpg';
-          const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-          const filePath = `proofs/${fileName}`;
+          let proofUrl = '';
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('payment-proofs')
-            .upload(filePath, proofFile, { cacheControl: '3600', upsert: false });
+          // Upload payment proof only for PromptPay
+          if (paymentMethod === 'promptpay' && proofFile) {
+            const fileExt = proofFile.name.split('.').pop() || 'jpg';
+            const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+            const filePath = `proofs/${fileName}`;
 
-          if (uploadError) {
-            console.error('Upload error:', uploadError);
-            throw new Error('Failed to upload payment screenshot. Please try again.');
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('payment-proofs')
+              .upload(filePath, proofFile, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              throw new Error('Failed to upload payment screenshot. Please try again.');
+            }
+
+            const { data: urlData } = supabase.storage
+              .from('payment-proofs')
+              .getPublicUrl(filePath);
+
+            proofUrl = urlData?.publicUrl || '';
           }
 
-          const { data: urlData } = supabase.storage
-            .from('payment-proofs')
-            .getPublicUrl(filePath);
+          // Fetch fresh prices from server in a single batched query to prevent client-side price tampering
+          const { data: freshListings, error: priceErr } = await supabase
+            .from('listings')
+            .select('id, price, seller_id, title, is_available')
+            .in('id', productIds);
 
-          const proofUrl = urlData?.publicUrl || '';
+          if (priceErr || !freshListings) {
+            throw new Error('Could not verify prices for your cart items');
+          }
 
-          // Group items by seller
+          const priceMap = Object.fromEntries(
+            freshListings.map(listing => [listing.id, listing])
+          );
+
+          const verifiedCart = [];
+          for (const item of cart) {
+            const freshListing = priceMap[item.product.id];
+            if (!freshListing) {
+              throw new Error(`Could not verify price for "${item.product.title}"`);
+            }
+            if (freshListing.is_available === false) {
+              throw new Error(`"${item.product.title}" is no longer available`);
+            }
+            verifiedCart.push({
+              ...item,
+              verifiedPrice: parseFloat(freshListing.price),
+              verifiedSellerId: freshListing.seller_id,
+              verifiedTitle: freshListing.title,
+            });
+          }
+
+          // Group items by seller using verified data
           const sellerOrders = {};
-          cart.forEach(item => {
-            const sellerId = item.product.seller_id;
+          verifiedCart.forEach(item => {
+            const sellerId = item.verifiedSellerId;
             if (!sellerOrders[sellerId]) sellerOrders[sellerId] = [];
             sellerOrders[sellerId].push({
               listing_id: item.product.id,
-              title: item.product.title,
-              price: item.product.price,
+              title: item.verifiedTitle,
+              price: item.verifiedPrice,
               quantity: item.quantity,
             });
           });
 
-          const sanitize = (str) => str ? str.replace(/[<>]/g, '') : '';
+          const sanitize = (str) => str ? str.replace(/[<>"'`\\]/g, '').trim() : '';
 
           // Create an order for each seller
           for (const [sellerId, items] of Object.entries(sellerOrders)) {
@@ -1865,8 +2558,8 @@
                 postal_code: postalCode,
                 delivery_notes: sanitize(notes || ''),
                 seller_id: sellerId,
-                payment_method: 'promptpay',
-                payment_proof_url: proofUrl,
+                payment_method: paymentMethod,
+                payment_proof_url: proofUrl || null,
                 status: 'pending',
               }]);
 
@@ -1876,7 +2569,7 @@
             }
           }
 
-          onPlaceOrder({ name, phone, address, district, province, postalCode, notes, paymentMethod: 'promptpay', total });
+          onPlaceOrder({ name, phone, address, district, province, postalCode, notes, paymentMethod, total });
         } catch (err) {
           setError(err.message || 'Failed to place order. Please try again.');
           setLoading(false);
@@ -1887,8 +2580,8 @@
       const StepIndicator = () => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: isMobile ? 24 : 40 }}>
           {[
-            { num: 1, label: 'Delivery Info' },
-            { num: 2, label: 'Pay & Confirm' },
+            { num: 1, label: t('step_delivery') },
+            { num: 2, label: t('step_pay') },
           ].map((s, i) => (
             <React.Fragment key={s.num}>
               {i > 0 && (
@@ -1931,7 +2624,7 @@
           ))}
           <div style={{ borderTop: `1px solid ${colors.blush}`, paddingTop: 12, marginTop: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 700, color: colors.dark }}>Total</span>
+              <span style={{ fontWeight: 700, color: colors.dark }}>{t('checkout_total')}</span>
               <span style={{ fontSize: 24, fontWeight: 800, color: colors.primary }}>฿{total.toFixed(0)}</span>
             </div>
           </div>
@@ -1950,7 +2643,7 @@
               boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
               fontFamily: 'Plus Jakarta Sans, sans-serif',
             }}>
-              ← {step === 1 ? 'Back to Cart' : 'Back to Delivery Info'}
+              ← {step === 1 ? t('back_cart') : t('back_delivery')}
             </button>
 
             <h2 style={{ fontSize: isMobile ? 24 : 36, fontWeight: 800, color: colors.dark, marginBottom: 8, textAlign: 'center' }}>
@@ -1966,9 +2659,9 @@
               <OrderSummary />
 
               {error && (
-                <div style={{
-                  padding: '12px 16px', background: '#FFE5E5', borderRadius: 10,
-                  color: '#E74C3C', fontSize: 14, marginBottom: 20, textAlign: 'center',
+                <div role="alert" style={{
+                  padding: '12px 16px', background: colors.errorBg, borderRadius: 10,
+                  color: colors.error, fontSize: 14, marginBottom: 20, textAlign: 'center',
                 }}>
                   {error}
                 </div>
@@ -1983,18 +2676,26 @@
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
                       {t('checkout_name')} *
                     </label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)} style={inputStyle}
-                      onFocus={e => e.target.style.borderColor = colors.primary}
-                      onBlur={e => e.target.style.borderColor = colors.blush} />
+                    <input type="text" value={name} onChange={e => { setName(e.target.value); validateField('name', e.target.value); }}
+                      aria-invalid={!!fieldErrors.name}
+                      aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+                      style={{ ...inputStyle, borderColor: fieldErrors.name ? colors.error : inputStyle.borderColor }}
+                      onFocus={e => e.target.style.borderColor = fieldErrors.name ? colors.error : colors.primary}
+                      onBlur={e => { e.target.style.borderColor = fieldErrors.name ? colors.error : colors.blush; validateField('name', name); }} />
+                    {fieldErrors.name && <span id="name-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.name}</span>}
                   </div>
 
                   <div style={{ marginBottom: 20 }}>
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
                       {t('checkout_phone')} *
                     </label>
-                    <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="08X-XXX-XXXX" style={inputStyle}
-                      onFocus={e => e.target.style.borderColor = colors.primary}
-                      onBlur={e => e.target.style.borderColor = colors.blush} />
+                    <input type="tel" inputMode="tel" value={phone} onChange={e => { setPhone(e.target.value); validateField('phone', e.target.value); }} placeholder={lang === 'th' ? '08X-XXX-XXXX หรือ 02-XXX-XXXX' : '08X-XXX-XXXX or 02-XXX-XXXX'}
+                      aria-invalid={!!fieldErrors.phone}
+                      aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
+                      style={{ ...inputStyle, borderColor: fieldErrors.phone ? colors.error : inputStyle.borderColor }}
+                      onFocus={e => e.target.style.borderColor = fieldErrors.phone ? colors.error : colors.primary}
+                      onBlur={e => { e.target.style.borderColor = fieldErrors.phone ? colors.error : colors.blush; validateField('phone', phone); }} />
+                    {fieldErrors.phone && <span id="phone-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.phone}</span>}
                   </div>
 
                   <div style={{ marginBottom: 20 }}>
@@ -2003,8 +2704,11 @@
                     </label>
                     <textarea value={address} onChange={e => setAddress(e.target.value)} rows={2}
                       placeholder="House number, street, building..." style={{ ...inputStyle, resize: 'vertical' }}
+                      aria-invalid={!!fieldErrors.address}
+                      aria-describedby={fieldErrors.address ? 'address-error' : undefined}
                       onFocus={e => e.target.style.borderColor = colors.primary}
                       onBlur={e => e.target.style.borderColor = colors.blush} />
+                    {fieldErrors.address && <span id="address-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.address}</span>}
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 20 }}>
@@ -2013,16 +2717,22 @@
                         {t('checkout_district')} *
                       </label>
                       <input type="text" value={district} onChange={e => setDistrict(e.target.value)} style={inputStyle}
+                        aria-invalid={!!fieldErrors.district}
+                        aria-describedby={fieldErrors.district ? 'district-error' : undefined}
                         onFocus={e => e.target.style.borderColor = colors.primary}
                         onBlur={e => e.target.style.borderColor = colors.blush} />
+                      {fieldErrors.district && <span id="district-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.district}</span>}
                     </div>
                     <div>
                       <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
                         {t('checkout_province')} *
                       </label>
                       <input type="text" value={province} onChange={e => setProvince(e.target.value)} style={inputStyle}
+                        aria-invalid={!!fieldErrors.province}
+                        aria-describedby={fieldErrors.province ? 'province-error' : undefined}
                         onFocus={e => e.target.style.borderColor = colors.primary}
                         onBlur={e => e.target.style.borderColor = colors.blush} />
+                      {fieldErrors.province && <span id="province-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.province}</span>}
                     </div>
                   </div>
 
@@ -2030,9 +2740,13 @@
                     <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
                       {t('checkout_postal')} *
                     </label>
-                    <input type="text" value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="10XXX" style={inputStyle}
-                      onFocus={e => e.target.style.borderColor = colors.primary}
-                      onBlur={e => e.target.style.borderColor = colors.blush} />
+                    <input type="text" value={postalCode} onChange={e => { setPostalCode(e.target.value); validateField('postalCode', e.target.value); }} placeholder="10XXX"
+                      aria-invalid={!!fieldErrors.postalCode}
+                      aria-describedby={fieldErrors.postalCode ? 'postalCode-error' : undefined}
+                      style={{ ...inputStyle, borderColor: fieldErrors.postalCode ? colors.error : inputStyle.borderColor }}
+                      onFocus={e => e.target.style.borderColor = fieldErrors.postalCode ? colors.error : colors.primary}
+                      onBlur={e => { e.target.style.borderColor = fieldErrors.postalCode ? colors.error : colors.blush; validateField('postalCode', postalCode); }} />
+                    {fieldErrors.postalCode && <span id="postalCode-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.postalCode}</span>}
                   </div>
 
                   <div style={{ marginBottom: 32 }}>
@@ -2058,9 +2772,38 @@
                 </form>
               )}
 
-              {/* ========== STEP 2: QR Payment + Screenshot Upload ========== */}
+              {/* ========== STEP 2: Payment Method + Submit ========== */}
               {step === 2 && (
                 <div>
+                  {/* Payment Method Selector */}
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 16 }}>{t('select_payment')}</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                    {[
+                      { id: 'promptpay', icon: '📱', label: t('promptpay_option'), desc: t('promptpay_desc') },
+                      { id: 'cod', icon: '💵', label: t('cod_option'), desc: t('cod_desc') },
+                    ].map(method => (
+                      <button
+                        key={method.id}
+                        type="button"
+                        onClick={() => { setPaymentMethod(method.id); setError(''); }}
+                        style={{
+                          padding: 16, borderRadius: 16, cursor: 'pointer',
+                          border: paymentMethod === method.id ? `3px solid ${colors.primary}` : `2px solid ${colors.blush}`,
+                          background: paymentMethod === method.id ? '#E8F5E9' : colors.white,
+                          textAlign: 'center', transition: 'all 0.3s',
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        }}
+                      >
+                        <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>{method.icon}</span>
+                        <span style={{ fontWeight: 700, fontSize: 14, color: colors.dark, display: 'block' }}>{method.label}</span>
+                        <span style={{ fontSize: 12, color: colors.gray }}>{method.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* PromptPay QR Section (only shown when PromptPay selected) */}
+                  {paymentMethod === 'promptpay' && (
+                  <div>
                   {/* QR Code Display */}
                   <div style={{
                     background: 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)',
@@ -2116,20 +2859,26 @@
                     />
 
                     {!proofPreview ? (
-                      <button type="button" onClick={() => fileInputRef.current?.click()} style={{
-                        width: '100%', padding: 32, borderRadius: 16,
-                        border: `3px dashed ${colors.blush}`, background: 'transparent',
-                        cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', gap: 12, fontFamily: 'Plus Jakarta Sans, sans-serif',
-                        transition: 'all 0.3s',
-                      }}
-                        onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.background = colors.mint; }}
-                        onMouseOut={e => { e.currentTarget.style.borderColor = colors.blush; e.currentTarget.style.background = 'transparent'; }}
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          width: '100%', padding: 32, borderRadius: 16,
+                          border: `3px dashed ${dragActive ? colors.primary : colors.blush}`,
+                          background: dragActive ? colors.mint : 'transparent',
+                          cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                          alignItems: 'center', gap: 12, fontFamily: 'Plus Jakarta Sans, sans-serif',
+                          transition: 'all 0.3s',
+                        }}
+                        onMouseOver={e => { if (!dragActive) { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.background = colors.mint; } }}
+                        onMouseOut={e => { if (!dragActive) { e.currentTarget.style.borderColor = colors.blush; e.currentTarget.style.background = 'transparent'; } }}
                       >
                         <span style={{ fontSize: 40 }}>📷</span>
-                        <span style={{ fontWeight: 600, color: colors.dark, fontSize: 16 }}>Tap to upload screenshot</span>
-                        <span style={{ fontSize: 13, color: colors.gray }}>Accepts any image format</span>
-                      </button>
+                        <span style={{ fontWeight: 600, color: colors.dark, fontSize: 16 }}>{t('upload_drag')}</span>
+                        <span style={{ fontSize: 13, color: colors.gray }}>{t('upload_or_click')}</span>
+                      </div>
                     ) : (
                       <div>
                         <div style={{
@@ -2154,17 +2903,17 @@
                           background: colors.white, color: colors.gray,
                           fontSize: 13, cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
                         }}>
-                          Choose different image
+                          {t('choose_different')}
                         </button>
                       </div>
                     )}
                   </div>
 
-                  {/* Submit Button */}
+                  {/* PromptPay Submit Button */}
                   <button
                     type="button"
                     disabled={loading || !proofFile}
-                    onClick={handleSubmitWithProof}
+                    onClick={handleSubmitOrder}
                     style={{
                       width: '100%', padding: isMobile ? '16px 24px' : '20px 40px', borderRadius: 30, minHeight: 44,
                       border: 'none',
@@ -2176,8 +2925,43 @@
                       transition: 'all 0.3s',
                     }}
                   >
-                    {loading ? 'Submitting Order...' : proofFile ? `Confirm Order — ฿${total.toFixed(0)}` : 'Upload screenshot to continue'}
+                    {loading ? t('submitting') : proofFile ? `${t('confirm_order')} — ฿${total.toFixed(0)}` : t('upload_to_continue')}
                   </button>
+                  </div>
+                  </div>
+                  )}
+
+                  {/* COD Section */}
+                  {paymentMethod === 'cod' && (
+                    <div>
+                      <div style={{
+                        background: '#FFF8E1', borderRadius: 16, padding: 24, marginBottom: 24,
+                        border: '2px solid #FFD54F', textAlign: 'center',
+                      }}>
+                        <span style={{ fontSize: 48, display: 'block', marginBottom: 12 }}>💵</span>
+                        <h4 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 8 }}>{t('cod_option')}</h4>
+                        <p style={{ color: colors.gray, fontSize: 14 }}>{t('cod_desc')}</p>
+                        <p style={{ color: colors.primary, fontWeight: 700, fontSize: 24, marginTop: 16 }}>฿{total.toFixed(0)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={handleSubmitOrder}
+                        style={{
+                          width: '100%', padding: isMobile ? '16px 24px' : '20px 40px', borderRadius: 30, minHeight: 44,
+                          border: 'none',
+                          background: loading ? colors.gray : colors.gradient1,
+                          color: colors.white, fontWeight: 700, fontSize: isMobile ? 16 : 18,
+                          cursor: loading ? 'not-allowed' : 'pointer',
+                          boxShadow: !loading ? '0 8px 30px rgba(45, 125, 70, 0.4)' : 'none',
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
+                          transition: 'all 0.3s',
+                        }}
+                      >
+                        {loading ? t('submitting') : `${t('checkout_place')} — ฿${total.toFixed(0)}`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -2206,7 +2990,7 @@
       render() {
         if (this.state.hasError) {
           return (
-            <div style={{
+            <div role="alert" style={{
               minHeight: '100vh',
               display: 'flex',
               flexDirection: 'column',
@@ -2215,12 +2999,12 @@
               background: colors.cream,
               padding: 24,
             }}>
-              <span style={{ fontSize: 80, marginBottom: 20 }}>⚠️</span>
+              <span style={{ fontSize: 80, marginBottom: 20 }} aria-hidden="true">⚠️</span>
               <h1 style={{ fontSize: 32, fontWeight: 800, color: colors.dark, marginBottom: 16, textAlign: 'center' }}>
-                Something went wrong
+                {t('error_generic')}
               </h1>
               <p style={{ fontSize: 16, color: colors.gray, marginBottom: 32, textAlign: 'center', maxWidth: 500 }}>
-                We apologize for the inconvenience. Please reload the page to continue.
+                {t('error_apologize')}
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -2315,14 +3099,23 @@
             }}>
               <span style={{ fontSize: 28 }}>✅</span>
               <div style={{ textAlign: 'left' }}>
-                <span style={{ fontWeight: 700, color: colors.dark, display: 'block' }}>Payment Proof Received</span>
-                <span style={{ fontSize: 13, color: colors.gray }}>Your order is being processed. The seller will contact you soon.</span>
+                <span style={{ fontWeight: 700, color: colors.dark, display: 'block' }}>{t('payment_proof_received')}</span>
+                <span style={{ fontSize: 13, color: colors.gray }}>{t('payment_proof_processing')}</span>
               </div>
             </div>
 
-            <p style={{ color: colors.gray, marginBottom: 32, fontSize: 14 }}>
+            <p style={{ color: colors.gray, marginBottom: 24, fontSize: 14 }}>
               {t('order_vendor_contact')} 🌿
             </p>
+
+            {/* Share your order */}
+            <div style={{ marginBottom: 32 }}>
+              <ShareButtons
+                url="https://siamclones.com/"
+                text={t('share_order_text')}
+                t={t}
+              />
+            </div>
 
             <button onClick={onContinueShopping} style={{
               padding: '18px 36px', borderRadius: 30,
@@ -2367,7 +3160,7 @@
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 60 }}>
               <h2 style={{ fontSize: isMobile ? 28 : 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>{t('vendors_title')} 🌿</h2>
-              <p style={{ fontSize: 18, color: colors.gray }}>Trusted clone suppliers, seed banks, and bud producers across Thailand</p>
+              <p style={{ fontSize: 18, color: colors.gray }}>{t('vendors_subtitle')}</p>
             </div>
 
             {loading ? (
@@ -2381,8 +3174,8 @@
                 ))}
               </div>
             ) : error ? (
-              <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
-                <span style={{ fontSize: 64 }}>⚠️</span>
+              <div role="alert" style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
+                <span style={{ fontSize: 64 }} aria-hidden="true">⚠️</span>
                 <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>{error}</h3>
                 <button
                   onClick={() => window.location.reload()}
@@ -2399,13 +3192,13 @@
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                   }}
                 >
-                  Retry
+                  {t('retry')}
                 </button>
               </div>
             ) : vendors.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 80, background: colors.white, borderRadius: 24 }}>
                 <span style={{ fontSize: 64 }}>🌱</span>
-                <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>Vendors Coming Soon!</h3>
+                <h3 style={{ fontSize: 24, fontWeight: 700, color: colors.dark, marginTop: 20 }}>{t('vendors_coming')}</h3>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
@@ -2415,7 +3208,7 @@
                       {vendor.profile_photo_url ? (
                         <img src={vendor.profile_photo_url} alt={vendor.business_name || 'Vendor'} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
-                        <span style={{ fontSize: 48 }}>🌻</span>
+                        <span style={{ fontSize: 48 }}>🌿</span>
                       )}
                     </div>
                     <h3 style={{ fontSize: 22, fontWeight: 700, color: colors.dark }}>{vendor.farm_name || vendor.display_name}</h3>
@@ -2432,20 +3225,23 @@
     // =============================================
     // HOW IT WORKS
     // =============================================
-    const HowItWorksPage = ({ t = (key) => key }) => (
-      <section style={{ minHeight: '100vh', padding: '120px 24px 80px', background: colors.white }}>
+    const HowItWorksPage = ({ t = (key) => key }) => {
+      const isMobile = useIsMobile();
+      return (
+      <section style={{ minHeight: '100vh', padding: isMobile ? '80px 16px 40px' : '120px 24px 80px', background: colors.white }}>
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 80 }}>
-            <h2 style={{ fontSize: 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>{t('how_title')} ✨</h2>
-            <p style={{ fontSize: 18, color: colors.gray }}>Get quality clones, seeds, and buds with just a few clicks</p>
+          {/* Steps */}
+          <div style={{ textAlign: 'center', marginBottom: isMobile ? 40 : 80 }}>
+            <h2 style={{ fontSize: isMobile ? 28 : 48, fontWeight: 800, color: colors.dark, marginBottom: 16 }}>{t('how_title')} <span aria-hidden="true">✨</span></h2>
+            <p style={{ fontSize: 18, color: colors.gray }}>{t('hero_subtitle')}</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 40, marginBottom: isMobile ? 48 : 80 }}>
             {[
-              { icon: '🔍', title: 'Browse', desc: 'Explore clones, seeds, and buds from verified vendors' },
-              { icon: '🛒', title: 'Order', desc: 'Add to cart and checkout with your address' },
-              { icon: '💵', title: 'Pay on Delivery', desc: 'Pay cash when your order arrives' },
-              { icon: '🌱', title: 'Grow', desc: 'Everything you need for successful cultivation!' },
+              { icon: '🔍', title: t('delivery_how_1').split('.')[0] || 'Browse', desc: t('products_subtitle') },
+              { icon: '🛒', title: t('delivery_how_2').split('.')[0] || 'Order', desc: t('delivery_how_2') },
+              { icon: '💵', title: t('cod_option'), desc: t('cod_desc') + ' / ' + t('promptpay_desc') },
+              { icon: '🌱', title: t('delivery_how_3').split('—')[0] || 'Receive', desc: t('delivery_how_3') },
             ].map((step, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.gradient1, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 30px rgba(45, 125, 70, 0.3)' }}>
@@ -2457,9 +3253,46 @@
               </div>
             ))}
           </div>
+
+          {/* Delivery Coverage */}
+          <div style={{
+            background: 'linear-gradient(135deg, #E8F5E9, #FFF8E1)', borderRadius: 24,
+            padding: isMobile ? 24 : 40, textAlign: 'center', marginBottom: isMobile ? 48 : 80,
+          }}>
+            <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🚛</span>
+            <h3 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: colors.dark, marginBottom: 8 }}>{t('delivery_how_title')}</h3>
+            <p style={{ fontSize: 16, color: colors.gray }}>{t('landing_coverage')}</p>
+          </div>
+
+          {/* FAQ */}
+          <div style={{ marginBottom: isMobile ? 48 : 80 }}>
+            <h3 style={{ fontSize: isMobile ? 22 : 32, fontWeight: 800, color: colors.dark, marginBottom: 24, textAlign: 'center' }}>{t('faq_title')}</h3>
+            <Accordion items={[
+              { q: t('faq_q1'), a: t('faq_a1') },
+              { q: t('faq_q2'), a: t('faq_a2') },
+              { q: t('faq_q3'), a: t('faq_a3') },
+              { q: t('faq_q4'), a: t('faq_a4') },
+            ]} t={t} />
+          </div>
+
+          {/* Returns */}
+          <div style={{
+            background: colors.cream, borderRadius: 20, padding: isMobile ? 24 : 32,
+            display: 'flex', alignItems: 'center', gap: 16, marginBottom: isMobile ? 48 : 80,
+            flexWrap: 'wrap', justifyContent: 'center',
+          }}>
+            <span style={{ fontSize: 40 }}>🔄</span>
+            <div>
+              <h4 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 4 }}>{t('returns_title')}</h4>
+              <p style={{ fontSize: 14, color: colors.gray }}>{t('returns_desc')}</p>
+            </div>
+          </div>
+
+          {/* Lead Capture */}
+          <RestockAlert t={t} />
         </div>
       </section>
-    );
+    ); };
 
     // =============================================
     // ABOUT PAGE
@@ -2473,10 +3306,10 @@
           <div style={{ background: colors.white, borderRadius: isMobile ? 20 : 32, padding: isMobile ? 28 : 60, boxShadow: '0 10px 40px rgba(45, 125, 70, 0.15)', textAlign: 'center' }}>
             <span style={{ fontSize: 80 }}>🌿</span>
             <p style={{ fontSize: 20, color: colors.dark, lineHeight: 1.8, marginTop: 32 }}>
-              SiamClones connects cannabis cultivators in Thailand with verified clone vendors, seed banks, and craft bud suppliers.
+              {t('about_p1')}
             </p>
             <p style={{ fontSize: 17, color: colors.gray, lineHeight: 1.8, marginTop: 24 }}>
-              We believe every grower deserves access to quality genetics and premium products. By connecting you directly with trusted vendors, you get the best clones, seeds, and buds at fair prices.
+              {t('about_p2')}
             </p>
           </div>
         </div>
@@ -2547,6 +3380,7 @@
       });
       const [orderDetails, setOrderDetails] = useState(null);
       const [showToast, setShowToast] = useState(false);
+      const [toastMessage, setToastMessage] = useState('');
 
       useEffect(() => {
         try { localStorage.setItem('siamclones_cart', JSON.stringify(cart)); } catch {}
@@ -2558,25 +3392,31 @@
       const navigateTo = (page, data) => {
         setCurrentPage(page);
         window.history.pushState({ page, data }, '', `#${page}`);
+        // Analytics: track page views
+        trackEvent('page_view', { page });
       };
 
       const handleSelectProduct = (product) => {
         setSelectedProduct(product);
         navigateTo('product-detail', { product });
+        trackEvent('view_listing', { listing_id: product.id, category: product.category, price: product.price });
       };
 
       const handleAddToCart = (product, quantity) => {
+        const maxAvailable = product.quantity_available || 999;
         const existing = cart.findIndex(item => item.product.id === product.id);
         if (existing >= 0) {
           const newCart = [...cart];
-          newCart[existing].quantity += quantity;
+          const newQty = Math.min(newCart[existing].quantity + quantity, maxAvailable);
+          newCart[existing] = { ...newCart[existing], quantity: newQty };
           setCart(newCart);
         } else {
-          setCart([...cart, { product, quantity }]);
+          setCart([...cart, { product, quantity: Math.min(quantity, maxAvailable) }]);
         }
-        // FIX 5: Show toast notification
+        setToastMessage(t('add_to_cart') + '!');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2000);
+        trackEvent('add_to_cart', { listing_id: product.id, quantity, price: product.price });
       };
 
       const handleUpdateQuantity = (index, quantity) => {
@@ -2584,7 +3424,8 @@
           setCart(cart.filter((_, i) => i !== index));
         } else {
           const newCart = [...cart];
-          newCart[index].quantity = quantity;
+          const maxAvailable = newCart[index].product.quantity_available || 999;
+          newCart[index] = { ...newCart[index], quantity: Math.min(quantity, maxAvailable) };
           setCart(newCart);
         }
       };
@@ -2594,6 +3435,12 @@
       };
 
       const handlePlaceOrder = (details) => {
+        trackEvent('order_placed', {
+          order_value: details.total,
+          payment_method: details.paymentMethod,
+          seller_count: new Set(cart.map(i => i.product.seller_id)).size,
+          items_count: cart.length,
+        });
         setOrderDetails({ ...details, items: [...cart] });
         setCart([]);
         try { localStorage.removeItem('siamclones_cart'); } catch {}
@@ -2613,7 +3460,33 @@
           }
         };
         window.addEventListener('popstate', handlePopState);
-        window.history.replaceState({ page: 'home' }, '', '#home');
+
+        // Deep link support: ?listing=ID or #page
+        const params = new URLSearchParams(window.location.search);
+        const listingId = params.get('listing');
+        const hash = window.location.hash.replace('#', '');
+        if (listingId) {
+          // Fetch the listing and navigate to product detail
+          supabase.from('listings').select('*, profiles(display_name, farm_name, location, phone, promptpay_id)').eq('id', listingId).single()
+            .then(({ data }) => {
+              if (data) {
+                setSelectedProduct(data);
+                setCurrentPage('product-detail');
+                trackEvent('deep_link', { listing_id: listingId });
+              } else {
+                setCurrentPage('products');
+              }
+            });
+        } else if (hash && hash !== 'home') {
+          setCurrentPage(hash);
+          window.history.replaceState({ page: hash }, '', `#${hash}`);
+        } else {
+          window.history.replaceState({ page: 'home' }, '', '#home');
+        }
+
+        // Track initial page view
+        trackEvent('page_view', { page: listingId ? 'product-detail' : (hash || 'home') });
+
         return () => window.removeEventListener('popstate', handlePopState);
       }, []);
 
@@ -2626,8 +3499,8 @@
           case 'home': return <HeroSection onNavigate={navigateTo} t={t} />;
           case 'products': return <ProductsPage onSelectProduct={handleSelectProduct} t={t} />;
           case 'product-detail': return <ProductDetailPage product={selectedProduct} onBack={() => navigateTo('products')} onAddToCart={handleAddToCart} t={t} />;
-          case 'cart': return <CartPage cart={cart} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onCheckout={() => navigateTo('checkout')} onContinueShopping={() => navigateTo('products')} t={t} />;
-          case 'checkout': return <CheckoutPage cart={cart} onPlaceOrder={handlePlaceOrder} onBack={() => navigateTo('cart')} t={t} />;
+          case 'cart': return <CartPage cart={cart} onUpdateQuantity={handleUpdateQuantity} onRemove={handleRemoveFromCart} onCheckout={() => { navigateTo('checkout'); trackEvent('begin_checkout', { cart_value: cart.reduce((s,i) => s + i.product.price * i.quantity, 0), items_count: cart.length }); }} onContinueShopping={() => navigateTo('products')} t={t} />;
+          case 'checkout': return <CheckoutPage cart={cart} onPlaceOrder={handlePlaceOrder} onBack={() => navigateTo('cart')} t={t} lang={lang} />;
           case 'order-confirmation': return <OrderConfirmationPage order={orderDetails} onContinueShopping={() => navigateTo('products')} t={t} />;
           case 'growers': return <VendorsPage t={t} />;
           case 'how-it-works': return <HowItWorksPage t={t} />;
@@ -2644,7 +3517,7 @@
             {renderPage()}
           </main>
           <Footer onNavigate={navigateTo} />
-          <Toast message="Added to cart!" visible={showToast} />
+          <Toast message={toastMessage || t('add_to_cart') + '!'} visible={showToast} />
         </div>
       );
     };

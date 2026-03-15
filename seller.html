@@ -265,7 +265,28 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Sanitization function for user input
-    const sanitize = (str) => str ? str.replace(/[<>]/g, '') : '';
+    const sanitize = (str) => str ? str.replace(/[<>"'`\\]/g, '').trim() : '';
+
+    // CSV Export Utility Function
+    const exportToCSV = (data, columns, filename) => {
+      const header = columns.map(c => c.label).join(',');
+      const rows = data.map(row =>
+        columns.map(c => {
+          let val = c.accessor(row);
+          if (val === null || val === undefined) val = '';
+          val = String(val).replace(/"/g, '""');
+          if (val.includes(',') || val.includes('"') || val.includes('\n')) val = `"${val}"`;
+          return val;
+        }).join(',')
+      );
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    };
 
     const { useState, useEffect, useCallback } = React;
     // =============================================
@@ -298,6 +319,7 @@
       lightGray: '#8A9A8A',
       white: '#FFFFFF',
       error: '#E74C3C',
+      errorBg: '#FFE5E5',
       success: '#27AE60',
       gradient1: 'linear-gradient(135deg, #2D7D46 0%, #4CAF50 100%)',
       gradient2: 'linear-gradient(135deg, #7B4F9E 0%, #2D7D46 100%)',
@@ -305,9 +327,308 @@
     };
 
     const shadows = {
+      soft: '0 2px 12px rgba(0, 0, 0, 0.08)',
       sm: '0 2px 8px rgba(45, 125, 70, 0.15)',
       md: '0 4px 20px rgba(45, 125, 70, 0.2)',
       lg: '0 8px 40px rgba(45, 125, 70, 0.25)',
+    };
+
+    // =============================================
+    // TRANSLATIONS (i18n)
+    // =============================================
+    const translations = {
+      en: {
+        // Auth/Login
+        sign_in: 'Sign In 🌿',
+        create_account: 'Create Account 🌱',
+        email: 'Email',
+        password: 'Password',
+        confirm_password: 'Confirm Password',
+        signing_in: 'Signing in...',
+        creating_account: 'Creating account...',
+
+        // Setup/Onboarding
+        setup_required: 'Setup Required',
+        setup_required_desc: 'To use this app, please complete your seller profile first.',
+        setup_profile: 'Setup Profile',
+        step_basics: "Let's start with the basics 🌿",
+        step_basics_sub: 'Tell us about yourself',
+        display_name: 'Display Name',
+        farm_name: 'Farm / Business Name',
+        phone: 'Phone Number',
+        bio: 'Short Bio',
+        step_operation: 'Tell us about your operation ☀️',
+        step_operation_sub: 'This helps buyers find you',
+        location: 'Province / Location',
+        website: 'Website URL',
+        step_final: 'Final touches ✨',
+        step_final_sub: 'Connect with your customers',
+        line_id: 'LINE ID',
+        order_notifications: 'Order Notifications',
+        notification_email: 'Notification Email',
+        promptpay_section: 'PromptPay Payment',
+        promptpay_id: 'PromptPay ID',
+        btn_back: '← Back',
+        btn_continue: 'Continue →',
+        btn_complete: 'Complete Setup 🎉',
+        btn_skip: 'Skip for now →',
+
+        // Dashboard
+        greeting: 'Hey, {name}! 👋',
+        welcome_dashboard: 'Welcome to your seller dashboard',
+        sign_out: 'Sign Out',
+
+        // Stats
+        stat_listings: 'Listings',
+        stat_new_orders: 'New Orders',
+        stat_total_orders: 'Total Orders',
+
+        // Actions
+        new_listing: '+ New Listing',
+        edit_profile: '✏️ Edit Profile',
+
+        // Tabs
+        tab_listings: '📦 Listings',
+        tab_orders: '🛒 Orders',
+        tab_analytics: '📊 Analytics',
+
+        // Listing form
+        edit_listing: 'Edit Listing ✏️',
+        create_listing: 'Create Listing 🌱',
+        listing_title: 'Title',
+        listing_desc: 'Description',
+        listing_category: 'Category',
+        listing_price: 'Price (THB)',
+        listing_price_unit: 'Price Unit',
+        listing_quantity: 'Quantity Available',
+        listing_strain: 'Strain Name',
+        listing_photos: 'Photos',
+        upload_photo: '📷 Upload Photo',
+        save_listing: 'Save Listing',
+        saving: 'Saving...',
+        listing_created: 'Listing created successfully! Redirecting...',
+        cancel: 'Cancel',
+
+        // Listing cards
+        status_active: '✓ Active',
+        status_hidden: 'Hidden',
+        btn_edit: '✏️ Edit',
+        btn_hide: '👁️ Hide',
+        btn_show: '👁️ Show',
+        btn_delete: '🗑️ Delete',
+        listing_hidden_msg: 'Listing hidden from buyers',
+        listing_shown_msg: 'Listing is now visible!',
+        per_unit: 'per unit',
+
+        // Orders section
+        filter_status: 'Filter by Status:',
+        all_orders: 'All Orders',
+        status_pending: '⏳ Pending',
+        status_confirmed: '✅ Confirmed',
+        status_shipped: '📦 Shipped',
+        status_delivered: '✅ Delivered',
+        status_cancelled: '✕ Cancelled',
+        no_orders: 'No orders yet',
+        no_orders_sub: 'Orders will appear here when customers purchase your listings',
+        order_items: 'Items:',
+        order_total: 'Total:',
+        order_customer: 'Customer:',
+        order_phone: 'Phone:',
+        order_address: 'Address:',
+        order_payment: 'Payment:',
+        btn_confirm: '✅ Confirm',
+        btn_ship: '📦 Mark Shipped',
+        btn_deliver: '✅ Delivered',
+        btn_cancel_order: '✕ Cancel',
+        search_orders: 'Search by name, phone, or order ID...',
+
+        // Analytics
+        analytics_revenue: 'Total Revenue',
+        analytics_orders_count: 'Orders',
+        analytics_avg_order: 'Avg Order',
+        analytics_daily: 'Orders by Day (Last 7 Days)',
+        analytics_top: 'Top 3 Products',
+        analytics_status: 'Orders by Status',
+
+        // Empty states
+        no_listings: "You haven't created any listings yet",
+        no_listings_sub: 'Create your first listing to start selling!',
+        create_first: 'Create Your First Listing 🌱',
+
+        // Modals
+        confirm_delete: 'Are you sure you want to delete this listing? This action cannot be undone.',
+        confirm_logout: 'Are you sure you want to sign out?',
+        confirm_cancel_order: 'Are you sure you want to cancel this order? This action cannot be undone.',
+        btn_confirm_yes: 'Yes, Delete',
+        btn_confirm_logout: 'Yes, Sign Out',
+        btn_cancel_modal: 'Cancel',
+
+        // Error states
+        error_generic: 'Something went wrong',
+        error_reload: 'Refresh Page',
+        retry: 'Retry',
+
+        // CSV Export
+        export_csv: 'Export CSV',
+        export_listings: 'Export Listings',
+        export_orders: 'Export Orders',
+      },
+      th: {
+        // Auth/Login
+        sign_in: 'เข้าสู่ระบบ 🌿',
+        create_account: 'สร้างบัญชี 🌱',
+        email: 'อีเมล',
+        password: 'รหัสผ่าน',
+        confirm_password: 'ยืนยันรหัสผ่าน',
+        signing_in: 'กำลังเข้าสู่ระบบ...',
+        creating_account: 'กำลังสร้างบัญชี...',
+
+        // Setup/Onboarding
+        setup_required: 'ต้องตั้งค่า',
+        setup_required_desc: 'กรุณาตั้งค่าโปรไฟล์ผู้ขายก่อนใช้งาน',
+        setup_profile: 'ตั้งค่าโปรไฟล์',
+        step_basics: 'เริ่มต้นกัน 🌿',
+        step_basics_sub: 'บอกเราเกี่ยวกับตัวคุณ',
+        display_name: 'ชื่อที่แสดง',
+        farm_name: 'ชื่อฟาร์ม / ธุรกิจ',
+        phone: 'เบอร์โทรศัพท์',
+        bio: 'ข้อมูลสั้นๆ',
+        step_operation: 'บอกเราเกี่ยวกับกิจการของคุณ ☀️',
+        step_operation_sub: 'ช่วยให้ผู้ซื้อค้นพบคุณ',
+        location: 'จังหวัด / ที่ตั้ง',
+        website: 'เว็บไซต์',
+        step_final: 'ขั้นตอนสุดท้าย ✨',
+        step_final_sub: 'เชื่อมต่อกับลูกค้าของคุณ',
+        line_id: 'ไลน์ไอดี',
+        order_notifications: 'การแจ้งเตือนออเดอร์',
+        notification_email: 'อีเมลรับแจ้งเตือน',
+        promptpay_section: 'ชำระเงิน PromptPay',
+        promptpay_id: 'หมายเลข PromptPay',
+        btn_back: '← กลับ',
+        btn_continue: 'ต่อไป →',
+        btn_complete: 'ตั้งค่าเสร็จสิ้น 🎉',
+        btn_skip: 'ข้ามไปก่อน →',
+
+        // Dashboard
+        greeting: 'สวัสดี, {name}! 👋',
+        welcome_dashboard: 'ยินดีต้อนรับสู่แดชบอร์ดผู้ขาย',
+        sign_out: 'ออกจากระบบ',
+
+        // Stats
+        stat_listings: 'รายการ',
+        stat_new_orders: 'ออเดอร์ใหม่',
+        stat_total_orders: 'ออเดอร์ทั้งหมด',
+
+        // Actions
+        new_listing: '+ รายการใหม่',
+        edit_profile: '✏️ แก้ไขโปรไฟล์',
+
+        // Tabs
+        tab_listings: '📦 รายการ',
+        tab_orders: '🛒 ออเดอร์',
+        tab_analytics: '📊 สถิติ',
+
+        // Listing form
+        edit_listing: 'แก้ไขรายการ ✏️',
+        create_listing: 'สร้างรายการ 🌱',
+        listing_title: 'ชื่อ',
+        listing_desc: 'รายละเอียด',
+        listing_category: 'หมวดหมู่',
+        listing_price: 'ราคา (บาท)',
+        listing_price_unit: 'หน่วยราคา',
+        listing_quantity: 'จำนวนที่มี',
+        listing_strain: 'ชื่อสายพันธุ์',
+        listing_photos: 'รูปภาพ',
+        upload_photo: '📷 อัพโหลดรูป',
+        save_listing: 'บันทึกรายการ',
+        saving: 'กำลังบันทึก...',
+        listing_created: 'สร้างรายการสำเร็จ! กำลังเปลี่ยนหน้า...',
+        cancel: 'ยกเลิก',
+
+        // Listing cards
+        status_active: '✓ เปิดขาย',
+        status_hidden: 'ซ่อน',
+        btn_edit: '✏️ แก้ไข',
+        btn_hide: '👁️ ซ่อน',
+        btn_show: '👁️ แสดง',
+        btn_delete: '🗑️ ลบ',
+        listing_hidden_msg: 'ซ่อนรายการจากผู้ซื้อแล้ว',
+        listing_shown_msg: 'รายการแสดงอยู่แล้ว!',
+        per_unit: 'ต่อหน่วย',
+
+        // Orders section
+        filter_status: 'กรองตามสถานะ:',
+        all_orders: 'ออเดอร์ทั้งหมด',
+        status_pending: '⏳ รอดำเนินการ',
+        status_confirmed: '✅ ยืนยันแล้ว',
+        status_shipped: '📦 จัดส่งแล้ว',
+        status_delivered: '✅ ส่งถึงแล้ว',
+        status_cancelled: '✕ ยกเลิก',
+        no_orders: 'ยังไม่มีออเดอร์',
+        no_orders_sub: 'ออเดอร์จะแสดงที่นี่เมื่อลูกค้าสั่งซื้อ',
+        order_items: 'รายการ:',
+        order_total: 'รวม:',
+        order_customer: 'ลูกค้า:',
+        order_phone: 'โทร:',
+        order_address: 'ที่อยู่:',
+        order_payment: 'การชำระ:',
+        btn_confirm: '✅ ยืนยัน',
+        btn_ship: '📦 จัดส่งแล้ว',
+        btn_deliver: '✅ ส่งถึงแล้ว',
+        btn_cancel_order: '✕ ยกเลิก',
+        search_orders: 'ค้นหาด้วยชื่อ เบอร์โทร หรือรหัสออเดอร์...',
+
+        // Analytics
+        analytics_revenue: 'รายได้ทั้งหมด',
+        analytics_orders_count: 'ออเดอร์',
+        analytics_avg_order: 'เฉลี่ยต่อออเดอร์',
+        analytics_daily: 'ออเดอร์ตามวัน (7 วันล่าสุด)',
+        analytics_top: 'สินค้าขายดี 3 อันดับ',
+        analytics_status: 'ออเดอร์ตามสถานะ',
+
+        // Empty states
+        no_listings: 'คุณยังไม่มีรายการ',
+        no_listings_sub: 'สร้างรายการแรกเพื่อเริ่มขาย!',
+        create_first: 'สร้างรายการแรก 🌱',
+
+        // Modals
+        confirm_delete: 'คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้',
+        confirm_logout: 'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?',
+        confirm_cancel_order: 'คุณแน่ใจหรือไม่ว่าต้องการยกเลิกออเดอร์นี้?',
+        btn_confirm_yes: 'ใช่ ลบเลย',
+        btn_confirm_logout: 'ใช่ ออกจากระบบ',
+        btn_cancel_modal: 'ยกเลิก',
+
+        // Error states
+        error_generic: 'เกิดข้อผิดพลาด',
+        error_reload: 'รีเฟรชหน้า',
+        retry: 'ลองอีกครั้ง',
+
+        // CSV Export
+        export_csv: 'ส่งออก CSV',
+        export_listings: 'ส่งออกรายการ',
+        export_orders: 'ส่งออกออเดอร์',
+      }
+    };
+
+    // =============================================
+    // LANGUAGE HOOK
+    // =============================================
+    const useLanguage = () => {
+      const [lang, setLang] = useState(() => {
+        try { return localStorage.getItem('siamclones_lang') || 'en'; } catch { return 'en'; }
+      });
+      const t = (key, vars) => {
+        let str = translations[lang]?.[key] || translations.en[key] || key;
+        if (vars) Object.keys(vars).forEach(k => { str = str.replace(`{${k}}`, vars[k]); });
+        return str;
+      };
+      const toggleLang = () => {
+        const next = lang === 'en' ? 'th' : 'en';
+        setLang(next);
+        try { localStorage.setItem('siamclones_lang', next); } catch {}
+      };
+      return { lang, t, toggleLang };
     };
 
     // =============================================
@@ -697,6 +1018,7 @@
     const ImageUpload = ({ images, onImagesChange, maxImages = 5, sellerId }) => {
       const [uploading, setUploading] = useState(false);
       const [uploadError, setUploadError] = useState('');
+      const [imgErrors, setImgErrors] = useState(new Set());
 
       const handleUpload = async (e) => {
         const files = Array.from(e.target.files);
@@ -712,6 +1034,13 @@
           // Validate it's an image
           if (!file.type.startsWith('image/')) {
             setUploadError('Please select an image file.');
+            setUploading(false);
+            return;
+          }
+
+          // Validate file size
+          if (file.size > 5 * 1024 * 1024) {
+            setUploadError('File too large (max 5MB)');
             setUploading(false);
             return;
           }
@@ -736,7 +1065,8 @@
               .from('images')
               .getPublicUrl(filePath);
 
-            newImages.push(publicUrl);
+            // Add cache-busting param to ensure fresh image loads
+            newImages.push(publicUrl + '?t=' + Date.now());
           } catch (err) {
             setUploadError(`Upload failed: ${err.message}`);
             setUploading(false);
@@ -751,6 +1081,12 @@
       const removeImage = (index) => {
         const newImages = images.filter((_, i) => i !== index);
         onImagesChange(newImages);
+      };
+
+      const handleImageError = (index) => {
+        const newErrors = new Set(imgErrors);
+        newErrors.add(index);
+        setImgErrors(newErrors);
       };
 
       return (
@@ -768,7 +1104,7 @@
           {uploadError && (
             <div style={{
               padding: '12px 16px',
-              background: '#FFE5E5',
+              background: colors.errorBg,
               borderRadius: 10,
               color: colors.error,
               fontSize: 13,
@@ -792,18 +1128,33 @@
                   boxShadow: shadows.sm,
                 }}
               >
-                <img
-                  src={url}
-                  alt={`Product ${index + 1}`}
-                  style={{
+                {!imgErrors.has(index) ? (
+                  <img
+                    src={url}
+                    alt={`Product ${index + 1}`}
+                    loading="lazy"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                    onError={() => handleImageError(index)}
+                  />
+                ) : (
+                  <div style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                />
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 40,
+                  }}>
+                    🌿
+                  </div>
+                )}
                 <button
                   onClick={() => removeImage(index)}
                   style={{
@@ -897,14 +1248,23 @@
       { value: 'buds', label: '🌿 Buds' },
     ];
 
-    const PRICE_UNITS = [
-      { value: 'per_clone', label: 'Per Clone' },
-      { value: 'per_pack', label: 'Per Pack' },
-      { value: 'per_seed', label: 'Per Seed' },
-      { value: 'per_gram', label: 'Per Gram' },
-      { value: 'per_ounce', label: 'Per Ounce' },
-      { value: 'each', label: 'Each' },
+    const PRICE_UNITS_ALL = [
+      { value: 'per_clone', label: 'Per Clone', categories: ['clones'] },
+      { value: 'per_pack', label: 'Per Pack', categories: ['clones', 'seeds'] },
+      { value: 'per_seed', label: 'Per Seed', categories: ['seeds'] },
+      { value: 'per_gram', label: 'Per Gram (g)', categories: ['buds'] },
+      { value: 'per_ounce', label: 'Per Ounce (oz)', categories: ['buds'] },
+      { value: 'per_100g', label: 'Per 100 Grams', categories: ['buds'] },
+      { value: 'each', label: 'Each', categories: ['clones', 'seeds', 'buds'] },
     ];
+    // Legacy constant for backward compatibility
+    const PRICE_UNITS = PRICE_UNITS_ALL;
+
+    // Get filtered price units based on category
+    const getPriceUnitsForCategory = (category) => {
+      if (!category) return PRICE_UNITS_ALL;
+      return PRICE_UNITS_ALL.filter(u => u.categories.includes(category));
+    };
 
     const GROWING_METHODS = [
       { value: 'indoor', label: 'Indoor' },
@@ -978,6 +1338,7 @@
     };
 
     const AuthScreen = ({ onAuthSuccess }) => {
+      const { t } = useLanguage();
       const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
@@ -987,6 +1348,7 @@
 
       const handleSubmit = async (e) => {
         e.preventDefault();
+        if (loading) return; // Prevent double submission
         setError('');
         setLoading(true);
 
@@ -1125,7 +1487,7 @@
                 className="animate-shake"
                 style={{
                   padding: '12px 16px',
-                  background: '#FFE5E5',
+                  background: colors.errorBg,
                   borderRadius: 10,
                   color: colors.error,
                   fontSize: 14,
@@ -1140,7 +1502,7 @@
             {/* Form */}
             <form onSubmit={handleSubmit}>
               <Input
-                label="Email"
+                label={t('email')}
                 type="email"
                 value={email}
                 onChange={setEmail}
@@ -1150,7 +1512,7 @@
               />
               <div style={{ marginBottom: 20 }}>
                 <Input
-                  label="Password"
+                  label={t('password')}
                   type="password"
                   value={password}
                   onChange={setPassword}
@@ -1190,7 +1552,7 @@
               </div>
               {mode === 'signup' && (
                 <Input
-                  label="Confirm Password"
+                  label={t('confirm_password')}
                   type="password"
                   value={confirmPassword}
                   onChange={setConfirmPassword}
@@ -1206,7 +1568,7 @@
                 loading={loading}
                 style={{ marginTop: 12 }}
               >
-                {mode === 'signin' ? 'Sign In 🌿' : 'Create Account 🌱'}
+                {mode === 'signin' ? t('sign_in') : t('create_account')}
               </Button>
             </form>
           </Card>
@@ -1219,6 +1581,7 @@
     // =============================================
 
     const ProfileSetupScreen = ({ user, onComplete, existingProfile }) => {
+      const { t } = useLanguage();
       const isMobile = useIsMobile();
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
@@ -1253,6 +1616,12 @@
           return;
         }
 
+        // Validate file size
+        if (file.size > 5 * 1024 * 1024) {
+          setError('File too large (max 5MB)');
+          return;
+        }
+
         setError('');
         setUploadingPhoto(true);
         const fileExt = file.name.split('.').pop();
@@ -1278,6 +1647,7 @@
       };
 
       const handleSubmit = async () => {
+        if (loading) return; // Prevent double submission
         setError('');
 
         // Validate display name length
@@ -1322,22 +1692,22 @@
 
         const profileData = {
           user_id: user.id,
-          display_name: finalDisplayName,
+          display_name: sanitize(finalDisplayName),
           email: user.email,
-          phone: phone.trim() || null,
-          location: location.trim() || null,
-          bio: bio.trim() || null,
+          phone: sanitize(phone) || null,
+          location: sanitize(location) || null,
+          bio: sanitize(bio) || null,
           profile_photo_url: profilePhotoUrl || null,
-          farm_name: farmName.trim() || null,
+          farm_name: sanitize(farmName) || null,
           farm_size: farmSize || null,
           years_experience: yearsExperience ? parseInt(yearsExperience) : null,
           growing_methods: growingMethods.length > 0 ? growingMethods : null,
           certifications: certifications.length > 0 ? certifications : null,
-          website_url: websiteUrl.trim() || null,
-          instagram_handle: instagramHandle.trim() || null,
-          notification_email: notificationEmail.trim() || null,
-          line_notify_token: lineNotifyToken.trim() || null,
-          promptpay_id: promptpayId.trim() || null,
+          website_url: sanitize(websiteUrl) || null,
+          instagram_handle: sanitize(instagramHandle) || null,
+          notification_email: sanitize(notificationEmail) || null,
+          line_notify_token: sanitize(lineNotifyToken) || null,
+          promptpay_id: sanitize(promptpayId) || null,
         };
 
         try {
@@ -1365,10 +1735,10 @@
       const renderStep1 = () => (
         <>
           <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 8, color: colors.dark }}>
-            Let's start with the basics 🌿
+            {t('step_basics')}
           </h2>
           <p style={{ color: colors.gray, marginBottom: 28 }}>
-            Tell us about yourself
+            {t('step_basics_sub')}
           </p>
 
           {/* Profile Photo */}
@@ -1386,7 +1756,7 @@
               position: 'relative',
             }}>
               {profilePhotoUrl ? (
-                <img src={profilePhotoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={profilePhotoUrl} alt="Profile" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <span style={{ fontSize: 48 }}>🌿</span>
               )}
@@ -1414,21 +1784,21 @@
           </div>
 
           <Input
-            label="Your Name"
+            label={t('display_name')}
             value={displayName}
             onChange={setDisplayName}
             placeholder="John Smith (optional)"
             icon="👤"
           />
           <Input
-            label="Brand/Business Name"
+            label={t('farm_name')}
             value={farmName}
             onChange={setFarmName}
             placeholder="Sunny Meadows Farm"
             icon="🏡"
           />
           <Input
-            label="Location"
+            label={t('location')}
             value={location}
             onChange={setLocation}
             placeholder="Portland, Oregon"
@@ -1440,10 +1810,10 @@
       const renderStep2 = () => (
         <>
           <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 8, color: colors.dark }}>
-            Tell us about your operation ☀️
+            {t('step_operation')}
           </h2>
           <p style={{ color: colors.gray, marginBottom: 28 }}>
-            This helps buyers find you
+            {t('step_operation_sub')}
           </p>
 
           <Select
@@ -1482,10 +1852,10 @@
       const renderStep3 = () => (
         <>
           <h2 style={{ fontSize: isMobile ? 18 : 24, fontWeight: 700, marginBottom: 8, color: colors.dark }}>
-            Final touches ✨
+            {t('step_final')}
           </h2>
           <p style={{ color: colors.gray, marginBottom: 28 }}>
-            Connect with your customers
+            {t('step_final_sub')}
           </p>
 
           <div style={{ marginBottom: 20 }}>
@@ -1510,7 +1880,7 @@
           </div>
 
           <Input
-            label="Phone Number"
+            label={t('phone')}
             type="tel"
             value={phone}
             onChange={setPhone}
@@ -1519,7 +1889,7 @@
           />
 
           <Input
-            label="Website"
+            label={t('website')}
             type="url"
             value={websiteUrl}
             onChange={setWebsiteUrl}
@@ -1542,14 +1912,14 @@
             borderTop: `1px solid ${colors.blush}`,
           }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 4 }}>
-              Order Notifications
+              {t('order_notifications')}
             </h3>
             <p style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>
               Get notified when a customer places an order
             </p>
 
             <Input
-              label="Notification Email"
+              label={t('notification_email')}
               type="email"
               value={notificationEmail}
               onChange={setNotificationEmail}
@@ -1558,7 +1928,7 @@
             />
 
             <Input
-              label="LINE Notify Token"
+              label={t('line_id')}
               value={lineNotifyToken}
               onChange={setLineNotifyToken}
               placeholder="Your LINE Notify access token (optional)"
@@ -1576,14 +1946,14 @@
             borderTop: `1px solid ${colors.blush}`,
           }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 4 }}>
-              PromptPay Payment
+              {t('promptpay_section')}
             </h3>
             <p style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>
               Let customers pay you instantly via QR code
             </p>
 
             <Input
-              label="PromptPay ID"
+              label={t('promptpay_id')}
               value={promptpayId}
               onChange={setPromptpayId}
               placeholder="Phone number (08X-XXX-XXXX) or citizen ID"
@@ -1633,7 +2003,7 @@
                   className="animate-shake"
                   style={{
                     padding: '12px 16px',
-                    background: '#FFE5E5',
+                    background: colors.errorBg,
                     borderRadius: 10,
                     color: colors.error,
                     fontSize: 14,
@@ -1655,7 +2025,7 @@
                     onClick={() => setStep(step - 1)}
                     style={{ flex: 1 }}
                   >
-                    ← Back
+                    {t('btn_back')}
                   </Button>
                 )}
                 {step < totalSteps ? (
@@ -1663,7 +2033,7 @@
                     onClick={() => setStep(step + 1)}
                     style={{ flex: 1 }}
                   >
-                    Continue →
+                    {t('btn_continue')}
                   </Button>
                 ) : (
                   <Button
@@ -1671,7 +2041,7 @@
                     loading={loading}
                     style={{ flex: 1 }}
                   >
-                    Complete Setup 🎉
+                    {t('btn_complete')}
                   </Button>
                 )}
               </div>
@@ -1691,7 +2061,7 @@
                     fontFamily: 'Plus Jakarta Sans, sans-serif',
                   }}
                 >
-                  Skip for now →
+                  {t('btn_skip')}
                 </button>
               </div>
             </Card>
@@ -1705,6 +2075,7 @@
     // =============================================
 
     const CreateListingScreen = ({ profile, onBack, onSuccess, editingListing }) => {
+      const { t } = useLanguage();
       const isMobile = useIsMobile();
       const [loading, setLoading] = useState(false);
       const [error, setError] = useState('');
@@ -1742,7 +2113,7 @@
           setError('Description must be 2000 characters or less');
           return;
         }
-        if (!price || parseFloat(price) <= 0) {
+        if (!price || parseFloat(price) < 0.01) {
           setError('Please enter a valid price greater than 0');
           return;
         }
@@ -1771,8 +2142,8 @@
 
         try {
           const listingData = {
-            title: title.trim(),
-            description: description.trim() || null,
+            title: sanitize(title),
+            description: sanitize(description) || null,
             category: category,
             price: parseFloat(price),
             price_unit: priceUnit,
@@ -1836,7 +2207,7 @@
                 }}
               >←</button>
               <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.dark }}>
-                {editingListing ? 'Edit Listing ✏️' : 'Create Listing 🌱'}
+                {editingListing ? t('edit_listing') : t('create_listing')}
               </h1>
             </div>
 
@@ -1846,7 +2217,7 @@
                   className="animate-shake"
                   style={{
                     padding: '12px 16px',
-                    background: '#FFE5E5',
+                    background: colors.errorBg,
                     borderRadius: 10,
                     color: colors.error,
                     fontSize: 14,
@@ -1874,7 +2245,7 @@
                   }}
                 >
                   <span style={{ fontSize: 18 }}>✓</span>
-                  Listing created successfully! Redirecting...
+                  {t('listing_created')}
                 </div>
               )}
 
@@ -1896,7 +2267,12 @@
                       <button
                         key={cat.value}
                         type="button"
-                        onClick={() => setCategory(cat.value)}
+                        onClick={() => {
+                          setCategory(cat.value);
+                          // Reset price unit if not valid for new category
+                          const validUnits = getPriceUnitsForCategory(cat.value).map(u => u.value);
+                          if (priceUnit && !validUnits.includes(priceUnit)) setPriceUnit('');
+                        }}
                         style={{
                           padding: '16px 12px',
                           borderRadius: 12,
@@ -1931,7 +2307,7 @@
               />
 
               <Input
-                label="Title"
+                label={t('listing_title')}
                 value={title}
                 onChange={setTitle}
                 placeholder="Describe your product"
@@ -1939,26 +2315,28 @@
               />
 
               <Input
-                label="Price"
+                label={t('listing_price')}
                 type="number"
                 value={price}
                 onChange={setPrice}
                 placeholder="50"
                 required
                 icon="฿"
+                min="0.01"
+                step="0.01"
               />
 
               <Select
-                label="Price Unit"
+                label={t('listing_price_unit')}
                 value={priceUnit}
                 onChange={setPriceUnit}
-                options={PRICE_UNITS}
+                options={getPriceUnitsForCategory(category)}
                 placeholder="Select price unit"
                 required
               />
 
               <Input
-                label="Quantity Available"
+                label={t('listing_quantity')}
                 type="number"
                 value={quantity}
                 onChange={setQuantity}
@@ -1966,7 +2344,7 @@
               />
 
               <Select
-                label="Growing Method"
+                label={t('listing_strain')}
                 value={growingMethod}
                 onChange={setGrowingMethod}
                 options={GROWING_METHODS}
@@ -1974,7 +2352,7 @@
               />
 
               <Input
-                label="Description"
+                label={t('listing_desc')}
                 multiline
                 rows={4}
                 value={description}
@@ -1988,7 +2366,7 @@
                 fullWidth
                 style={{ marginTop: 12 }}
               >
-                {editingListing ? 'Update Listing 📝' : 'Publish Listing 🚀'}
+                {loading ? t('saving') : t('save_listing')}
               </Button>
             </Card>
           </div>
@@ -2001,6 +2379,7 @@
     // =============================================
 
     const ListingCard = ({ listing, onEdit, onToggleAvailability, onDelete }) => {
+      const { t } = useLanguage();
       return (
         <Card hover style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 16 }}>
@@ -2020,6 +2399,7 @@
                 <img
                   src={listing.images[0]}
                   alt={listing.title}
+                  loading="lazy"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
@@ -2048,7 +2428,7 @@
                   background: listing.is_available ? colors.mint : colors.lightGray,
                   color: listing.is_available ? colors.dark : colors.white,
                 }}>
-                  {listing.is_available ? '✓ Active' : 'Hidden'}
+                  {listing.is_available ? t('status_active') : t('status_hidden')}
                 </span>
               </div>
 
@@ -2058,7 +2438,7 @@
                 color: colors.primary,
               }}>
                 ฿{parseFloat(listing.price).toFixed(0)}
-                <span style={{ fontSize: 14, fontWeight: 400, color: colors.gray }}> per unit</span>
+                <span style={{ fontSize: 14, fontWeight: 400, color: colors.gray }}> {t('per_unit')}</span>
               </p>
               {listing.quantity_available && (
                 <p style={{ fontSize: 13, color: colors.gray, marginTop: 4 }}>
@@ -2081,14 +2461,14 @@
               onClick={() => onEdit(listing)}
               style={{ flex: 1, padding: '10px 16px', fontSize: 14 }}
             >
-              ✏️ Edit
+              {t('btn_edit')}
             </Button>
             <Button
               variant="ghost"
               onClick={() => onToggleAvailability(listing)}
               style={{ flex: 1, padding: '10px 16px', fontSize: 14 }}
             >
-              {listing.is_available ? '👁️ Hide' : '👁️ Show'}
+              {listing.is_available ? t('btn_hide') : t('btn_show')}
             </Button>
             <Button
               variant="ghost"
@@ -2107,6 +2487,7 @@
     // =============================================
 
     const DashboardScreen = ({ user, profile, onLogout, onEditProfile, onCreateListing, onEditListing }) => {
+      const { t } = useLanguage();
       const isMobile = useIsMobile();
       const [listings, setListings] = useState([]);
       const [orders, setOrders] = useState([]);
@@ -2116,7 +2497,9 @@
       const [activeTab, setActiveTab] = useState('listings'); // 'listings', 'orders', or 'analytics'
       const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
       const [deleteConfirm, setDeleteConfirm] = useState({ show: false, listing: null });
+      const [cancelConfirm, setCancelConfirm] = useState({ show: false, orderId: null });
       const [statusFilter, setStatusFilter] = useState('all'); // for filtering orders by status
+      const [orderSearch, setOrderSearch] = useState(''); // for searching orders by customer name, phone, or order ID
 
       const fetchListings = async () => {
         const { data, error } = await supabase
@@ -2272,7 +2655,7 @@
                     onMouseOver={(e) => e.target.style.background = 'rgba(255,255,255,0.3)'}
                     onMouseOut={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
                   >
-                    Sign Out
+                    {t('sign_out')}
                   </button>
                 </div>
               </div>
@@ -2289,17 +2672,17 @@
                   overflow: 'hidden',
                 }}>
                   {profile.profile_photo_url ? (
-                    <img src={profile.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={profile.profile_photo_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <span style={{ fontSize: 28 }}>🌿</span>
                   )}
                 </div>
                 <div>
                   <h1 style={{ fontSize: 24, fontWeight: 700, color: colors.white, marginBottom: 4 }}>
-                    Hey, {profile.display_name}! 👋
+                    {t('greeting', { name: profile.display_name })}
                   </h1>
                   <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
-                    {profile.farm_name || profile.location || 'Welcome to your seller dashboard'}
+                    {profile.farm_name || profile.location || t('welcome_dashboard')}
                   </p>
                 </div>
               </div>
@@ -2313,19 +2696,19 @@
                 <p style={{ fontSize: 32, fontWeight: 800, color: colors.primary, marginBottom: 4 }}>
                   {listings.length}
                 </p>
-                <p style={{ fontSize: 14, color: colors.gray }}>Listings</p>
+                <p style={{ fontSize: 14, color: colors.gray }}>{t('stat_listings')}</p>
               </Card>
               <Card style={{ textAlign: 'center', padding: 20 }}>
                 <p style={{ fontSize: 32, fontWeight: 800, color: colors.secondary, marginBottom: 4 }}>
                   {orders.filter(o => o.status === 'pending').length}
                 </p>
-                <p style={{ fontSize: 14, color: colors.gray }}>New Orders</p>
+                <p style={{ fontSize: 14, color: colors.gray }}>{t('stat_new_orders')}</p>
               </Card>
               <Card style={{ textAlign: 'center', padding: 20 }}>
                 <p style={{ fontSize: 32, fontWeight: 800, color: colors.mint, marginBottom: 4 }}>
                   {orders.length}
                 </p>
-                <p style={{ fontSize: 14, color: colors.gray }}>Total Orders</p>
+                <p style={{ fontSize: 14, color: colors.gray }}>{t('stat_total_orders')}</p>
               </Card>
             </div>
 
@@ -2339,14 +2722,14 @@
                 }}
                 style={{ flex: 1 }}
               >
-                + New Listing
+                {t('new_listing')}
               </Button>
               <Button
                 variant="secondary"
                 onClick={onEditProfile}
                 style={{ flex: 1 }}
               >
-                ✏️ Edit Profile
+                {t('edit_profile')}
               </Button>
             </div>
 
@@ -2355,41 +2738,47 @@
               <button
                 onClick={() => setActiveTab('listings')}
                 style={{
-                  flex: 1,
-                  padding: '14px 20px',
+                  flex: isMobile ? '1 1 calc(33.33% - 6px)' : 1,
+                  padding: isMobile ? '12px 8px' : '14px 20px',
                   borderRadius: 12,
                   border: 'none',
                   background: activeTab === 'listings' ? colors.gradient1 : colors.white,
                   color: activeTab === 'listings' ? colors.white : colors.dark,
                   fontWeight: 600,
-                  fontSize: 16,
+                  fontSize: isMobile ? 13 : 16,
                   cursor: 'pointer',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
-                  minWidth: isMobile ? '48%' : 'auto',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                📦 Listings ({listings.length})
+                {t('tab_listings')} ({listings.length})
               </button>
               <button
                 onClick={() => setActiveTab('orders')}
                 style={{
-                  flex: 1,
-                  padding: '14px 20px',
+                  flex: isMobile ? '1 1 calc(33.33% - 6px)' : 1,
+                  padding: isMobile ? '12px 8px' : '14px 20px',
                   borderRadius: 12,
                   border: 'none',
                   background: activeTab === 'orders' ? colors.gradient1 : colors.white,
                   color: activeTab === 'orders' ? colors.white : colors.dark,
                   fontWeight: 600,
-                  fontSize: 16,
+                  fontSize: isMobile ? 13 : 16,
                   cursor: 'pointer',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                   position: 'relative',
-                  minWidth: isMobile ? '48%' : 'auto',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                🛒 Orders ({orders.length})
+                {t('tab_orders')} ({orders.length})
                 {orders.filter(o => o.status === 'pending').length > 0 && (
                   <span style={{
                     position: 'absolute',
@@ -2413,21 +2802,24 @@
               <button
                 onClick={() => setActiveTab('analytics')}
                 style={{
-                  flex: 1,
-                  padding: '14px 20px',
+                  flex: isMobile ? '1 1 calc(33.33% - 6px)' : 1,
+                  padding: isMobile ? '12px 8px' : '14px 20px',
                   borderRadius: 12,
                   border: 'none',
                   background: activeTab === 'analytics' ? colors.gradient1 : colors.white,
                   color: activeTab === 'analytics' ? colors.white : colors.dark,
                   fontWeight: 600,
-                  fontSize: 16,
+                  fontSize: isMobile ? 13 : 16,
                   cursor: 'pointer',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
-                  minWidth: isMobile ? '48%' : 'auto',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                📊 Analytics
+                {t('tab_analytics')}
               </button>
             </div>
 
@@ -2435,31 +2827,148 @@
             {activeTab === 'orders' ? (
               /* Orders Tab */
               <div style={{ marginBottom: 32 }}>
-                {/* Status Filter Dropdown */}
+                {/* Search and Status Filter */}
                 {orders.length > 0 && (
-                  <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <label style={{ fontWeight: 600, color: colors.dark, fontSize: 14 }}>Filter by Status:</label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      style={{
-                        padding: '10px 16px',
-                        borderRadius: 8,
-                        border: `1px solid ${colors.gray}`,
-                        background: colors.white,
-                        color: colors.dark,
-                        fontWeight: 500,
-                        fontSize: 14,
-                        cursor: 'pointer',
-                        fontFamily: 'Plus Jakarta Sans, sans-serif',
+                  <div style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {/* Search Input */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="text"
+                        placeholder={t('search_orders')}
+                        value={orderSearch}
+                        onChange={(e) => setOrderSearch(e.target.value)}
+                        style={{
+                          flex: 1,
+                          padding: '10px 16px',
+                          borderRadius: 8,
+                          border: `1px solid ${colors.gray}`,
+                          background: colors.white,
+                          color: colors.dark,
+                          fontSize: 14,
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        }}
+                      />
+                      {orderSearch && (
+                        <button
+                          onClick={() => setOrderSearch('')}
+                          style={{
+                            padding: '10px 12px',
+                            borderRadius: 8,
+                            border: `1px solid ${colors.gray}`,
+                            background: colors.white,
+                            color: colors.gray,
+                            fontWeight: 600,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            fontFamily: 'Plus Jakarta Sans, sans-serif',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = colors.lightGray;
+                            e.target.style.color = colors.dark;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = colors.white;
+                            e.target.style.color = colors.gray;
+                          }}
+                          title="Clear search"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Status Filter Dropdown */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <label style={{ fontWeight: 600, color: colors.dark, fontSize: 14 }}>{t('filter_status')}</label>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        style={{
+                          padding: '10px 16px',
+                          borderRadius: 8,
+                          border: `1px solid ${colors.gray}`,
+                          background: colors.white,
+                          color: colors.dark,
+                          fontWeight: 500,
+                          fontSize: 14,
+                          cursor: 'pointer',
+                          fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        }}
+                      >
+                        <option value="all">{t('all_orders')}</option>
+                        <option value="pending">{t('status_pending')}</option>
+                        <option value="confirmed">{t('status_confirmed')}</option>
+                        <option value="shipped">{t('status_shipped')}</option>
+                        <option value="delivered">{t('status_delivered')}</option>
+                        <option value="cancelled">{t('status_cancelled')}</option>
+                      </select>
+                      {statusFilter !== 'all' && (
+                        <button
+                          onClick={() => setStatusFilter('all')}
+                          style={{
+                            padding: '10px 12px',
+                            borderRadius: 8,
+                            border: `1px solid ${colors.gray}`,
+                            background: colors.white,
+                            color: colors.gray,
+                            fontWeight: 600,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            fontFamily: 'Plus Jakarta Sans, sans-serif',
+                            transition: 'all 0.2s ease',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = colors.lightGray;
+                            e.target.style.color = colors.dark;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = colors.white;
+                            e.target.style.color = colors.gray;
+                          }}
+                          title="Clear status filter"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Export Orders Button */}
+                {orders.length > 0 && (
+                  <div style={{ marginBottom: 20 }}>
+                    <Button
+                      onClick={() => {
+                        const filteredOrders = orders.filter(order => {
+                          const statusMatch = statusFilter === 'all' || order.status === statusFilter;
+                          if (!orderSearch) {
+                            return statusMatch;
+                          }
+                          const searchLower = orderSearch.toLowerCase();
+                          const customerNameMatch = order.customer_name && order.customer_name.toLowerCase().includes(searchLower);
+                          const customerPhoneMatch = order.customer_phone && order.customer_phone.includes(orderSearch);
+                          const orderIdMatch = order.id && order.id.toString().includes(orderSearch);
+                          return statusMatch && (customerNameMatch || customerPhoneMatch || orderIdMatch);
+                        });
+
+                        const columns = [
+                          { label: 'Order ID', accessor: (o) => o.id },
+                          { label: 'Customer Name', accessor: (o) => o.customer_name },
+                          { label: 'Phone', accessor: (o) => o.customer_phone },
+                          { label: 'Status', accessor: (o) => o.status },
+                          { label: 'Total', accessor: (o) => `฿${parseFloat(o.total).toFixed(2)}` },
+                          { label: 'Items', accessor: (o) => Array.isArray(o.items) ? o.items.map(item => item.title).join(', ') : '' },
+                          { label: 'Date', accessor: (o) => new Date(o.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) }
+                        ];
+
+                        const timestamp = new Date().toLocaleDateString('th-TH');
+                        exportToCSV(filteredOrders, columns, `orders_${timestamp}.csv`);
                       }}
+                      style={{ padding: '12px 20px', fontSize: 14 }}
                     >
-                      <option value="all">All Orders</option>
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
+                      {t('export_orders')}
+                    </Button>
                   </div>
                 )}
 
@@ -2472,15 +2981,30 @@
                   <Card style={{ textAlign: 'center', padding: 48 }}>
                     <div style={{ fontSize: 64, marginBottom: 16 }}>📭</div>
                     <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.dark, marginBottom: 8 }}>
-                      No orders yet
+                      {t('no_orders')}
                     </h3>
                     <p style={{ color: colors.gray }}>
-                      When customers order your products, they'll appear here!
+                      {t('no_orders_sub')}
                     </p>
                   </Card>
                 ) : (
                   orders
-                    .filter(order => statusFilter === 'all' || order.status === statusFilter)
+                    .filter(order => {
+                      // Filter by status
+                      const statusMatch = statusFilter === 'all' || order.status === statusFilter;
+
+                      // Filter by search term
+                      if (!orderSearch) {
+                        return statusMatch;
+                      }
+
+                      const searchLower = orderSearch.toLowerCase();
+                      const customerNameMatch = order.customer_name && order.customer_name.toLowerCase().includes(searchLower);
+                      const customerPhoneMatch = order.customer_phone && order.customer_phone.includes(orderSearch);
+                      const orderIdMatch = order.id && order.id.toString().includes(orderSearch);
+
+                      return statusMatch && (customerNameMatch || customerPhoneMatch || orderIdMatch);
+                    })
                     .map(order => (
                     <Card key={order.id} style={{ marginBottom: 16, padding: 24 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
@@ -2493,16 +3017,18 @@
                             background: order.status === 'pending' ? colors.accent :
                                        order.status === 'confirmed' ? colors.primary :
                                        order.status === 'shipped' ? colors.lavender :
-                                       order.status === 'delivered' ? colors.mint : colors.lightGray,
+                                       order.status === 'delivered' ? colors.mint :
+                                       order.status === 'cancelled' ? colors.error : colors.lightGray,
                             color: order.status === 'pending' ? colors.dark : colors.white,
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 6,
                           }}>
-                            {order.status === 'pending' ? '🆕 Pending' :
-                             order.status === 'confirmed' ? '✓ Confirmed' :
-                             order.status === 'shipped' ? '📮 Shipped' :
-                             order.status === 'delivered' ? '✅ Delivered' : order.status}
+                            {order.status === 'pending' ? t('status_pending') :
+                             order.status === 'confirmed' ? t('status_confirmed') :
+                             order.status === 'shipped' ? t('status_shipped') :
+                             order.status === 'delivered' ? t('status_delivered') :
+                             order.status === 'cancelled' ? t('status_cancelled') : order.status}
                           </span>
                           <p style={{ fontSize: 12, color: colors.gray, marginTop: 8 }}>
                             {new Date(order.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -2548,25 +3074,33 @@
                             onClick={() => updateOrderStatus(order.id, 'confirmed')}
                             style={{ flex: 1, padding: '12px 16px', fontSize: 14 }}
                           >
-                            ✓ Confirm Order
+                            {t('btn_confirm')}
                           </Button>
                           <Button
                             variant="ghost"
-                            onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                            onClick={() => setCancelConfirm({ show: true, orderId: order.id })}
                             style={{ padding: '12px 16px', fontSize: 14, color: colors.error }}
                           >
-                            Cancel
+                            {t('btn_cancel_order')}
                           </Button>
                         </div>
                       )}
                       {order.status === 'confirmed' && (
-                        <Button
-                          onClick={() => updateOrderStatus(order.id, 'shipped')}
-                          fullWidth
-                          style={{ padding: '12px 16px', fontSize: 14 }}
-                        >
-                          📮 Mark as Shipped
-                        </Button>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <Button
+                            onClick={() => updateOrderStatus(order.id, 'shipped')}
+                            style={{ flex: 1, padding: '12px 16px', fontSize: 14 }}
+                          >
+                            {t('btn_ship')}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => setCancelConfirm({ show: true, orderId: order.id })}
+                            style={{ padding: '12px 16px', fontSize: 14, color: colors.error }}
+                          >
+                            {t('btn_cancel_order')}
+                          </Button>
+                        </div>
                       )}
                       {order.status === 'shipped' && (
                         <Button
@@ -2575,7 +3109,7 @@
                           fullWidth
                           style={{ padding: '12px 16px', fontSize: 14 }}
                         >
-                          ✅ Mark as Delivered
+                          {t('btn_deliver')}
                         </Button>
                       )}
                       {order.status === 'delivered' && (
@@ -2609,7 +3143,7 @@
                     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 16, marginBottom: 24 }}>
                       {/* Total Revenue */}
                       <Card style={{ padding: 20 }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Revenue</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('analytics_revenue')}</p>
                         <p style={{ fontSize: 32, fontWeight: 800, color: colors.primary, marginBottom: 4 }}>
                           ฿{orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0).toFixed(0)}
                         </p>
@@ -2618,7 +3152,7 @@
 
                       {/* Total Orders */}
                       <Card style={{ padding: 20 }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Orders</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('analytics_orders_count')}</p>
                         <p style={{ fontSize: 32, fontWeight: 800, color: colors.secondary, marginBottom: 4 }}>
                           {orders.length}
                         </p>
@@ -2636,7 +3170,7 @@
 
                       {/* Average Order Value */}
                       <Card style={{ padding: 20 }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Avg Order Value</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('analytics_avg_order')}</p>
                         <p style={{ fontSize: 32, fontWeight: 800, color: colors.lavender, marginBottom: 4 }}>
                           ฿{orders.length > 0 ? (orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) / orders.length).toFixed(0) : 0}
                         </p>
@@ -2647,7 +3181,7 @@
                     {/* Orders by Day Chart */}
                     {orders.length > 0 && (
                       <Card style={{ padding: 24, marginBottom: 24 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 20 }}>Orders by Day (Last 7 Days)</h3>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 20 }}>{t('analytics_daily')}</h3>
                         {(() => {
                           const last7Days = Array.from({length: 7}, (_, i) => {
                             const d = new Date();
@@ -2686,7 +3220,7 @@
                     {/* Top Listings */}
                     {orders.length > 0 && (
                       <Card style={{ padding: 24, marginBottom: 24 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 20 }}>Top 3 Products</h3>
+                        <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 20 }}>{t('analytics_top')}</h3>
                         {(() => {
                           const itemCounts = {};
                           orders.forEach(order => {
@@ -2781,6 +3315,31 @@
               /* Listings Tab */
               <div style={{ marginBottom: 32 }}>
 
+              {/* Export Listings Button */}
+              {listings.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <Button
+                    onClick={() => {
+                      const columns = [
+                        { label: 'Title', accessor: (l) => l.title },
+                        { label: 'Category', accessor: (l) => l.category },
+                        { label: 'Price', accessor: (l) => `฿${parseFloat(l.price).toFixed(2)}` },
+                        { label: 'Price Unit', accessor: (l) => l.price_unit },
+                        { label: 'Quantity', accessor: (l) => l.quantity },
+                        { label: 'Status', accessor: (l) => l.is_available ? 'Active' : 'Hidden' },
+                        { label: 'Created Date', accessor: (l) => new Date(l.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) }
+                      ];
+
+                      const timestamp = new Date().toLocaleDateString('th-TH');
+                      exportToCSV(listings, columns, `listings_${timestamp}.csv`);
+                    }}
+                    style={{ padding: '12px 20px', fontSize: 14 }}
+                  >
+                    {t('export_listings')}
+                  </Button>
+                </div>
+              )}
+
               {loading ? (
                 <Card style={{ textAlign: 'center', padding: 40 }}>
                   <Spinner size={32} />
@@ -2790,13 +3349,13 @@
                 <Card style={{ textAlign: 'center', padding: 48 }}>
                   <div className="animate-float" style={{ fontSize: 64, marginBottom: 16 }}>🌱</div>
                   <h3 style={{ fontSize: 20, fontWeight: 600, color: colors.dark, marginBottom: 8 }}>
-                    You haven't created any listings yet
+                    {t('no_listings')}
                   </h3>
                   <p style={{ color: colors.gray, marginBottom: 24 }}>
-                    Create your first listing and start selling products to customers!
+                    {t('no_listings_sub')}
                   </p>
                   <Button onClick={onCreateListing}>
-                    Create Your First Listing 🚀
+                    {t('create_first')}
                   </Button>
                 </Card>
               ) : (
@@ -2817,27 +3376,42 @@
           {/* Delete Listing Confirmation Modal */}
           <ConfirmModal
             show={deleteConfirm.show}
-            title="Delete Listing?"
-            message={`Are you sure you want to delete "${deleteConfirm.listing?.title}"? This action cannot be undone.`}
+            title={t('confirm_delete')}
+            message={`${t('confirm_delete')} "${deleteConfirm.listing?.title}"`}
             onConfirm={confirmDelete}
             onCancel={() => setDeleteConfirm({ show: false, listing: null })}
-            confirmText="Delete"
-            cancelText="Keep It"
+            confirmText={t('btn_confirm_yes')}
+            cancelText={t('btn_cancel_modal')}
             isDangerous={true}
           />
 
           {/* Logout Confirmation Modal */}
           <ConfirmModal
             show={showLogoutConfirm}
-            title="Sign Out?"
-            message="Are you sure you want to sign out? You'll need to sign in again to access your vendor dashboard."
+            title={t('confirm_logout')}
+            message={t('confirm_logout')}
             onConfirm={() => {
               setShowLogoutConfirm(false);
               onLogout();
             }}
             onCancel={() => setShowLogoutConfirm(false)}
-            confirmText="Sign Out"
-            cancelText="Stay"
+            confirmText={t('btn_confirm_logout')}
+            cancelText={t('btn_cancel_modal')}
+          />
+
+          {/* Order Cancellation Confirmation Modal */}
+          <ConfirmModal
+            show={cancelConfirm.show}
+            title={t('confirm_cancel_order')}
+            message={t('confirm_cancel_order')}
+            onConfirm={() => {
+              updateOrderStatus(cancelConfirm.orderId, 'cancelled');
+              setCancelConfirm({ show: false, orderId: null });
+            }}
+            onCancel={() => setCancelConfirm({ show: false, orderId: null })}
+            confirmText={t('btn_cancel_order')}
+            cancelText={t('btn_cancel_modal')}
+            isDangerous={true}
           />
         </div>
       );

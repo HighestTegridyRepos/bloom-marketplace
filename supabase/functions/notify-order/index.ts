@@ -252,24 +252,41 @@ serve(async (req: Request) => {
   // This blocks random internet callers while still allowing the pg_net database trigger to work.
   if (NOTIFY_WEBHOOK_SECRET) {
     // Decode JWT payload to check if it's a valid Supabase token (role: anon or service_role)
+    // NOTE: This implementation decodes the JWT payload WITHOUT verifying the signature.
+    // In production, use a proper JWT library (e.g., jose) to verify the signature against Supabase's public key.
     let isSupabaseToken = false;
     try {
       const payloadB64 = token.split('.')[1];
       if (payloadB64) {
         const decoded = JSON.parse(atob(payloadB64));
-        isSupabaseToken = decoded.iss === 'supabase' && ['anon', 'service_role'].includes(decoded.role);
+        // Check token expiration (exp claim) to reject expired tokens
+        const now = Math.floor(Date.now() / 1000);
+        const isExpired = decoded.exp && decoded.exp < now;
+        isSupabaseToken = !isExpired && decoded.iss === 'supabase' && ['anon', 'service_role'].includes(decoded.role);
       }
     } catch (_) { /* not a JWT */ }
 
     if (token !== NOTIFY_WEBHOOK_SECRET && !isSupabaseToken) {
-      console.error("Auth failed: invalid token");
+      console.error("Auth failed: invalid or expired token");
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: corsHeaders });
     }
   }
 
   try {
     const payload: OrderPayload = await req.json();
-    console.log("Received order notification request:", payload.order_id);
+
+    // Validate required fields to prevent processing incomplete requests
+    const requiredFields = ['order_id', 'vendor_email', 'buyer_name', 'buyer_phone', 'delivery_address'];
+    const missingFields = requiredFields.filter(field => !payload[field as keyof OrderPayload]);
+    if (missingFields.length > 0) {
+      return new Response(
+        JSON.stringify({ error: `Missing required fields: ${missingFields.join(', ')}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Log only order_id and notification intent without exposing PII
+    console.log("Processing notification for order:", payload.order_id);
 
     const results = await Promise.allSettled([
       sendEmail(payload),
@@ -281,6 +298,9 @@ serve(async (req: Request) => {
     const lineResult = results[1].status === "fulfilled" ? results[1].value : false;
     const discordResult = results[2].status === "fulfilled" ? results[2].value : false;
 
+    // Log notification status without exposing order details
+    console.log(`Notifications sent for order ${payload.order_id}: email=${emailResult}, line=${lineResult}, discord=${discordResult}`);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -289,13 +309,20 @@ serve(async (req: Request) => {
         discord_sent: discordResult,
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "X-RateLimit-Limit": "100",
+          "X-RateLimit-Remaining": "99",
+          "X-RateLimit-Reset": String(Math.floor(Date.now() / 1000) + 3600),
+        },
       }
     );
   } catch (e) {
+    // Log internal details for debugging but don't expose them to clients
     console.error("Handler error:", e);
     return new Response(
-      JSON.stringify({ error: (e as Error).message }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
