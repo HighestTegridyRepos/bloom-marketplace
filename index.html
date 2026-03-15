@@ -771,7 +771,9 @@
     // ANALYTICS TRACKING (lightweight)
     // =============================================
     // Map database price_unit value to translated display label
-    const getPriceUnitLabel = (priceUnit, t) => {
+    // Map database price_unit value to translated display label
+    // Falls back to category-smart default if price_unit is null (legacy listings)
+    const getPriceUnitLabel = (priceUnit, t, category) => {
       const unitMap = {
         per_clone: 'per_clone',
         per_pack: 'per_pack',
@@ -782,7 +784,11 @@
         each: 'each',
       };
       const key = unitMap[priceUnit];
-      return key ? t(key) : t('per_unit');
+      if (key) return t(key);
+      // Smart fallback based on category for legacy listings without price_unit
+      const categoryDefaults = { clones: 'per_clone', seeds: 'per_seed', buds: 'per_gram' };
+      const fallbackKey = categoryDefaults[category];
+      return fallbackKey ? t(fallbackKey) : t('each');
     };
 
     const trackEvent = (eventName, data = {}) => {
@@ -1536,7 +1542,7 @@
           {/* Price */}
           <p style={{ fontSize: 22, fontWeight: 800, color: colors.primary, whiteSpace: 'nowrap' }}>
             ฿{parseFloat(listing.price).toFixed(0)}
-            <span style={{ fontSize: 12, fontWeight: 400, color: colors.gray }}>/{getPriceUnitLabel(listing.price_unit, t)}</span>
+            <span style={{ fontSize: 12, fontWeight: 400, color: colors.gray }}>/{getPriceUnitLabel(listing.price_unit, t, listing.category)}</span>
           </p>
         </div>
       </article>
@@ -2044,7 +2050,7 @@
 
                 <p style={{ fontSize: 48, fontWeight: 800, color: colors.primary, marginBottom: 24 }}>
                   ฿{parseFloat(product.price).toFixed(0)}
-                  <span style={{ fontSize: 18, fontWeight: 400, color: colors.gray }}> {getPriceUnitLabel(product.price_unit, t)}</span>
+                  <span style={{ fontSize: 18, fontWeight: 400, color: colors.gray }}> {getPriceUnitLabel(product.price_unit, t, product.category)}</span>
                 </p>
 
                 {product.description && (
@@ -2212,7 +2218,7 @@
                       {/* Details - on mobile, spans full width below image */}
                       <div style={{ gridColumn: isMobile ? '1 / -1' : undefined }}>
                         <h4 style={{ fontSize: isMobile ? 14 : 18, fontWeight: 600, color: colors.dark, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.product.title}</h4>
-                        <p style={{ fontSize: isMobile ? 12 : 14, color: colors.gray, marginTop: 4 }}>฿{parseFloat(item.product.price).toFixed(0)} {getPriceUnitLabel(item.product.price_unit, t)}</p>
+                        <p style={{ fontSize: isMobile ? 12 : 14, color: colors.gray, marginTop: 4 }}>฿{parseFloat(item.product.price).toFixed(0)} {getPriceUnitLabel(item.product.price_unit, t, item.product.category)}</p>
                       </div>
 
                       {/* Quantity - right side on mobile */}
