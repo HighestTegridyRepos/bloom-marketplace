@@ -1,6 +1,6 @@
 // SiamClones Service Worker — Network-only for HTML, cache for static assets
 // Version bump: increment this on each deploy for cache busting
-const CACHE_VERSION = 7;
+const CACHE_VERSION = 8;
 const CACHE_NAME = `siamclones-v${CACHE_VERSION}`;
 
 // Only cache non-HTML assets — HTML is always fetched from network
@@ -87,14 +87,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-only for CDN scripts — do NOT cache these
-  if (
-    url.hostname === 'cdnjs.cloudflare.com' ||
-    url.hostname === 'cdn.jsdelivr.net' ||
-    url.hostname === 'unpkg.com' ||
-    url.hostname === 'fonts.googleapis.com' ||
-    url.hostname === 'fonts.gstatic.com'
-  ) {
+  // Network-only for external resources (fonts, any remaining CDN)
+  // All JS libs are now self-hosted, but fonts still come from Google
+  if (url.hostname !== self.location.hostname && !url.hostname.includes('supabase')) {
     event.respondWith(fetch(request));
     return;
   }
