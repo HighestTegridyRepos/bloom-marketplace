@@ -3,6 +3,7 @@ import { colors } from '../../shared/theme';
 import { useIsMobile } from '../../shared/hooks/useIsMobile';
 import { supabase } from '../../shared/supabase';
 import { optimizeImage } from '../../shared/imageUtils';
+import { QRCODE_DATA_URI } from '../../shared/qrcode';
 
 // =============================================
 // CHECKOUT PAGE — Multi-step: Info → QR Payment → Screenshot Upload → Auto-submit
@@ -455,7 +456,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                   background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
                   boxShadow: '0 4px 20px rgba(26, 77, 176, 0.15)',
                 }}>
-                  <img src="/QRCODE.jpg" alt="PromptPay QR Code" style={{
+                  <img src={QRCODE_DATA_URI} alt="PromptPay QR Code" style={{
                     width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
                     borderRadius: 12, objectFit: 'contain',
                   }} />
