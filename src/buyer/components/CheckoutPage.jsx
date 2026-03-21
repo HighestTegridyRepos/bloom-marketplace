@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { colors } from '../../shared/theme';
 import { useIsMobile } from '../../shared/hooks/useIsMobile';
 import { supabase } from '../../shared/supabase';
@@ -155,20 +156,24 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
   const isCrypto = ['btc', 'eth', 'sol'].includes(paymentMethod);
   const selectedCrypto = isCrypto ? CRYPTO_WALLETS[paymentMethod] : null;
 
-  // Generate QR code URL for crypto addresses (free API, no deps)
-  const cryptoQrUrl = useMemo(() => {
-    if (!isCrypto || !selectedCrypto) return null;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(selectedCrypto.address)}&bgcolor=ffffff&color=000000&margin=10`;
-  }, [paymentMethod]);
-
-  // QR code loading/error states
+  // Generate QR code as data URI client-side (no external API, no CSP issues)
+  const [cryptoQrUrl, setCryptoQrUrl] = useState(null);
   const [qrLoaded, setQrLoaded] = useState(false);
   const [qrError, setQrError] = useState(false);
 
-  // Reset QR states when payment method changes
   useEffect(() => {
+    setCryptoQrUrl(null);
     setQrLoaded(false);
     setQrError(false);
+    if (!isCrypto || !selectedCrypto) return;
+    QRCode.toDataURL(selectedCrypto.address, {
+      width: 250,
+      margin: 2,
+      color: { dark: '#000000', light: '#ffffff' },
+      errorCorrectionLevel: 'M',
+    })
+      .then(url => { setCryptoQrUrl(url); setQrLoaded(true); })
+      .catch(() => setQrError(true));
   }, [paymentMethod]);
 
   // Track copy state for UX feedback
@@ -799,46 +804,42 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                   </p>
 
                   {/* QR Code */}
-                  {cryptoQrUrl && (
-                    <div style={{
-                      background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
-                      boxShadow: `0 4px 20px ${selectedCrypto.color}20`, marginBottom: 20,
-                      minWidth: isMobile ? 200 : 250, minHeight: isMobile ? 200 : 250,
-                      position: 'relative',
-                    }}>
-                      {!qrLoaded && !qrError && (
-                        <div style={{
-                          width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          color: colors.gray, fontSize: 14,
-                        }}>
-                          Loading QR...
-                        </div>
-                      )}
-                      {qrError && (
-                        <div style={{
-                          width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
-                          color: colors.gray, fontSize: 13, textAlign: 'center', padding: 16,
-                        }}>
-                          <span style={{ fontSize: 32, marginBottom: 8 }}>📷</span>
-                          <span>{lang === 'th' ? 'ไม่สามารถโหลด QR ได้' : 'QR code unavailable'}</span>
-                          <span style={{ fontSize: 11, marginTop: 4 }}>{lang === 'th' ? 'กรุณาคัดลอกที่อยู่ด้านล่าง' : 'Please copy the address below'}</span>
-                        </div>
-                      )}
+                  <div style={{
+                    background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
+                    boxShadow: `0 4px 20px ${selectedCrypto.color}20`, marginBottom: 20,
+                    minWidth: isMobile ? 200 : 250, minHeight: isMobile ? 200 : 250,
+                  }}>
+                    {!qrLoaded && !qrError && (
+                      <div style={{
+                        width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: colors.gray, fontSize: 14,
+                      }}>
+                        {lang === 'th' ? 'กำลังสร้าง QR...' : 'Generating QR...'}
+                      </div>
+                    )}
+                    {qrError && (
+                      <div style={{
+                        width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
+                        color: colors.gray, fontSize: 13, textAlign: 'center', padding: 16,
+                      }}>
+                        <span style={{ fontSize: 32, marginBottom: 8 }}>📷</span>
+                        <span>{lang === 'th' ? 'ไม่สามารถสร้าง QR ได้' : 'QR code unavailable'}</span>
+                        <span style={{ fontSize: 11, marginTop: 4 }}>{lang === 'th' ? 'กรุณาคัดลอกที่อยู่ด้านล่าง' : 'Please copy the address below'}</span>
+                      </div>
+                    )}
+                    {cryptoQrUrl && (
                       <img
                         src={cryptoQrUrl}
                         alt={`${selectedCrypto.symbol} wallet QR code`}
-                        onLoad={() => setQrLoaded(true)}
-                        onError={() => setQrError(true)}
                         style={{
                           width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
                           borderRadius: 12, objectFit: 'contain',
-                          display: qrLoaded && !qrError ? 'block' : 'none',
                         }}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Wallet Address + Copy */}
                   <div style={{
