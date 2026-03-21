@@ -32,9 +32,14 @@ interface OrderPayload {
 }
 
 function formatPaymentMethod(method: string): string {
-  if (method === 'promptpay') return 'PromptPay';
-  if (method === 'cod') return 'Cash on Delivery';
-  return method || 'Not specified';
+  const methods: Record<string, string> = {
+    promptpay: 'PromptPay',
+    cod: 'Cash on Delivery',
+    btc: '₿ Bitcoin (BTC)',
+    eth: 'Ξ Ethereum (ETH)',
+    sol: '◎ Solana (SOL)',
+  };
+  return methods[method] || method || 'Not specified';
 }
 
 function formatItemsList(items: any): string {
@@ -70,7 +75,13 @@ async function sendEmail(payload: OrderPayload): Promise<boolean> {
           <p style="margin: 0 0 8px;"><strong>Delivery:</strong> ${payload.delivery_address}</p>
           <p style="margin: 0 0 8px;"><strong>Total:</strong> ฿${payload.total_amount}</p>
           <p style="margin: 0 0 8px;"><strong>Payment:</strong> ${paymentMethodDisplay}</p>
-          ${payload.payment_proof_url ? `<p style="margin: 0;"><strong>Payment Proof:</strong> <a href="${payload.payment_proof_url}" style="color: #2D7D46;">View Screenshot</a></p>` : ''}
+          ${payload.payment_proof_url ? `
+            <p style="margin: 0 0 12px;"><strong>Payment Proof:</strong></p>
+            <a href="${payload.payment_proof_url}" target="_blank" style="display: inline-block;">
+              <img src="${payload.payment_proof_url}" alt="Payment proof screenshot" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #e0e0e0;" />
+            </a>
+            <p style="margin: 8px 0 0; font-size: 12px;"><a href="${payload.payment_proof_url}" style="color: #2D7D46;" target="_blank">Open full image →</a></p>
+          ` : ''}
         </div>
 
         <div style="background: #E8F5E9; padding: 16px; border-radius: 12px; margin: 20px 0;">

@@ -620,16 +620,20 @@ export const DashboardScreen = ({ user, profile, onLogout, onEditProfile, onCrea
                   {/* Payment Method & Proof */}
                   <div style={{
                     marginBottom: 16, padding: 16, borderRadius: 12,
-                    background: order.payment_method === 'promptpay'
-                      ? 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)'
-                      : colors.cream,
-                    border: order.payment_method === 'promptpay' ? '1px solid #B8D4FE' : `1px solid ${colors.blush}`,
+                    background: ['btc','eth','sol'].includes(order.payment_method)
+                      ? `linear-gradient(135deg, ${{'btc':'#F7931A','eth':'#627EEA','sol':'#9945FF'}[order.payment_method]}08 0%, ${{'btc':'#F7931A','eth':'#627EEA','sol':'#9945FF'}[order.payment_method]}15 100%)`
+                      : order.payment_method === 'promptpay'
+                        ? 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)'
+                        : colors.cream,
+                    border: ['btc','eth','sol'].includes(order.payment_method)
+                      ? `1px solid ${{'btc':'#F7931A','eth':'#627EEA','sol':'#9945FF'}[order.payment_method]}40`
+                      : order.payment_method === 'promptpay' ? '1px solid #B8D4FE' : `1px solid ${colors.blush}`,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: order.payment_proof_url ? 12 : 0 }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: colors.dark }}>
-                        💳 {order.payment_method === 'promptpay' ? t('payment_method_promptpay') : t('payment_method_cod')}
+                        {{'btc':'₿','eth':'Ξ','sol':'◎'}[order.payment_method] || '💳'} {t(`payment_method_${order.payment_method}`) || order.payment_method}
                       </span>
-                      {order.payment_method === 'promptpay' && (
+                      {order.payment_method !== 'cod' && (
                         <span style={{
                           fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
                           background: order.payment_proof_url ? '#C8E6C9' : '#FFF3CD',
@@ -894,7 +898,10 @@ export const DashboardScreen = ({ user, profile, onLogout, onEditProfile, onCrea
                     {(() => {
                       const paymentBreakdown = {
                         cod: { label: 'PromptPay (Legacy)', amount: 0 },
-                        promptpay: { label: 'PromptPay', amount: 0 }
+                        promptpay: { label: 'PromptPay', amount: 0 },
+                        btc: { label: 'Bitcoin (BTC)', amount: 0 },
+                        eth: { label: 'Ethereum (ETH)', amount: 0 },
+                        sol: { label: 'Solana (SOL)', amount: 0 },
                       };
                       orders.forEach(order => {
                         const method = (order.payment_method || 'cod').toLowerCase();

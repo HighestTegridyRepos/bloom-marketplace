@@ -21,7 +21,7 @@ COMMENT ON COLUMN profiles.promptpay_id IS 'PromptPay phone number or citizen ID
 ALTER TABLE orders
   ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'cod';
 
-COMMENT ON COLUMN orders.payment_method IS 'Payment method: cod (cash on delivery) or promptpay';
+COMMENT ON COLUMN orders.payment_method IS 'Payment method: promptpay, btc, eth, sol, or cod (legacy)';
 
 
 -- ============================================================
@@ -128,6 +128,8 @@ BEGIN
     'vendor_name', COALESCE(vendor_record.farm_name, vendor_record.display_name),
     'vendor_email', COALESCE(vendor_record.notification_email, vendor_record.email),
     'line_notify_token', vendor_record.line_notify_token,
+    'payment_method', NEW.payment_method,
+    'payment_proof_url', NEW.payment_proof_url,
     'created_at', NEW.created_at
   );
 
@@ -162,20 +164,20 @@ CREATE TRIGGER on_new_order_notify
 -- These policies allow authenticated users to upload listing images too.
 
 -- Allow authenticated users to upload to listings/ folder
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-SELECT 'Allow listing image uploads', 'images', 'INSERT',
-  '(auth.role() = ''authenticated'' AND (storage.foldername(name))[1] = ''listings'')'
-WHERE NOT EXISTS (
-  SELECT 1 FROM storage.policies WHERE name = 'Allow listing image uploads'
-);
+CREATE POLICY "Allow listing image uploads"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'listings');
 
--- Note: If the above INSERT fails due to schema differences,
--- run this instead in the Supabase Dashboard → Storage → images bucket → Policies:
---
--- Policy name: Allow listing image uploads
--- Operation: INSERT
--- Target roles: authenticated
--- Policy: (storage.foldername(name))[1] = 'listings'
+-- Allow authenticated users to upload to profiles/ folder (avatar photos)
+CREATE POLICY "Allow profile photo uploads"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'profiles');
+
+-- Allow authenticated users to update/overwrite their profile photos
+CREATE POLICY "Allow profile photo updates"
+ON storage.objects FOR UPDATE TO authenticated
+USING (bucket_id = 'images' AND (storage.foldername(name))[1] = 'profiles')
+WITH CHECK (bucket_id = 'images' AND (storage.foldername(name))[1] = 'profiles');
 
 
 -- ============================================================

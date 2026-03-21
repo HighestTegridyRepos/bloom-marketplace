@@ -1,9 +1,119 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import { colors } from '../../shared/theme';
 import { useIsMobile } from '../../shared/hooks/useIsMobile';
 import { supabase } from '../../shared/supabase';
 import { optimizeImage } from '../../shared/imageUtils';
 import { QRCODE_DATA_URI } from '../../shared/qrcode';
+import { getProvinceNames, getDistrictNames } from '../lib/thailandLocations';
+
+// =============================================
+// Autocomplete input component for provinces and districts
+// =============================================
+const AutocompleteInput = ({ value, onChange, suggestions, placeholder, inputStyle, colors, fieldError, errorId, onFocus: parentOnFocus, onBlur: parentOnBlur }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
+  const wrapperRef = useRef(null);
+  const listRef = useRef(null);
+
+  const filtered = useMemo(() => {
+    if (!value || value.length === 0) return suggestions;
+    const lower = value.toLowerCase();
+    // Exact match → hide dropdown
+    if (suggestions.some(s => s.toLowerCase() === lower)) return [];
+    return suggestions.filter(s => s.toLowerCase().includes(lower));
+  }, [value, suggestions]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightIndex >= 0 && listRef.current) {
+      const item = listRef.current.children[highlightIndex];
+      if (item) item.scrollIntoView({ block: 'nearest' });
+    }
+  }, [highlightIndex]);
+
+  const handleKeyDown = (e) => {
+    if (!showDropdown || filtered.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIndex(prev => Math.min(prev + 1, filtered.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIndex(prev => Math.max(prev - 1, 0));
+    } else if (e.key === 'Enter' && highlightIndex >= 0) {
+      e.preventDefault();
+      onChange(filtered[highlightIndex]);
+      setShowDropdown(false);
+      setHighlightIndex(-1);
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
+    }
+  };
+
+  return (
+    <div ref={wrapperRef} style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={value}
+        onChange={e => { onChange(e.target.value); setShowDropdown(true); setHighlightIndex(-1); }}
+        onFocus={e => { setShowDropdown(true); if (parentOnFocus) parentOnFocus(e); }}
+        onBlur={e => { if (parentOnBlur) parentOnBlur(e); }}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        autoComplete="off"
+        style={{ ...inputStyle, borderColor: fieldError ? colors.error : inputStyle.borderColor }}
+        aria-invalid={!!fieldError}
+        aria-describedby={fieldError ? errorId : undefined}
+        aria-autocomplete="list"
+        role="combobox"
+        aria-expanded={showDropdown && filtered.length > 0}
+      />
+      {showDropdown && filtered.length > 0 && (
+        <ul
+          ref={listRef}
+          role="listbox"
+          style={{
+            position: 'absolute', top: '100%', left: 0, right: 0,
+            maxHeight: 220, overflowY: 'auto', background: '#fff',
+            border: `2px solid ${colors.primary}`, borderTop: 'none',
+            borderRadius: '0 0 12px 12px', margin: 0, padding: 0,
+            listStyle: 'none', zIndex: 1000,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          }}
+        >
+          {filtered.slice(0, 50).map((item, i) => (
+            <li
+              key={item}
+              role="option"
+              aria-selected={i === highlightIndex}
+              onMouseDown={(e) => { e.preventDefault(); onChange(item); setShowDropdown(false); }}
+              onMouseEnter={() => setHighlightIndex(i)}
+              style={{
+                padding: '10px 16px', cursor: 'pointer', fontSize: 15,
+                fontFamily: 'Plus Jakarta Sans, sans-serif',
+                background: i === highlightIndex ? colors.mint : '#fff',
+                color: colors.dark,
+                borderBottom: i < filtered.length - 1 ? `1px solid ${colors.cream}` : 'none',
+              }}
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 // =============================================
 // CHECKOUT PAGE — Multi-step: Info → QR Payment → Screenshot Upload → Auto-submit
@@ -25,8 +135,41 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
   const [proofPreview, setProofPreview] = useState(null);
   const [proofFile, setProofFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const paymentMethod = 'promptpay';
+  const [paymentMethod, setPaymentMethod] = useState('promptpay');
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // Crypto wallet addresses
+  const CRYPTO_WALLETS = {
+    btc: { label: 'Bitcoin (BTC)', symbol: 'BTC', address: 'bc1qmtwnd93qgtf3tganunljff9s442yjrwfuv0v0c', color: '#F7931A', icon: '₿', networkNote: 'Bitcoin mainnet only' },
+    eth: { label: 'Ethereum (ETH)', symbol: 'ETH', address: '0xe99a9dfFF458d0c4D00DB0C0076e3C5949c821e7', color: '#627EEA', icon: 'Ξ', networkNote: 'ERC-20 (Ethereum mainnet)' },
+    sol: { label: 'Solana (SOL)', symbol: 'SOL', address: 'gNW9878ih9AL2j5r2F8u6mGKiAQX7vuGqWWawvP9Lu2', color: '#9945FF', icon: '◎', networkNote: 'Solana mainnet only' },
+  };
+
+  const PAYMENT_METHODS = [
+    { id: 'promptpay', label: lang === 'th' ? 'พร้อมเพย์' : 'PromptPay', icon: '🏦', desc: lang === 'th' ? 'สแกน QR จ่ายผ่านแอปธนาคาร' : 'Scan QR via Thai banking app' },
+    { id: 'btc', label: 'Bitcoin', icon: '₿', desc: 'BTC', color: '#F7931A' },
+    { id: 'eth', label: 'Ethereum', icon: 'Ξ', desc: 'ETH', color: '#627EEA' },
+    { id: 'sol', label: 'Solana', icon: '◎', desc: 'SOL', color: '#9945FF' },
+  ];
+
+  const isCrypto = ['btc', 'eth', 'sol'].includes(paymentMethod);
+  const selectedCrypto = isCrypto ? CRYPTO_WALLETS[paymentMethod] : null;
+
+  // Generate QR code URL for crypto addresses (free API, no deps)
+  const cryptoQrUrl = useMemo(() => {
+    if (!isCrypto || !selectedCrypto) return null;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(selectedCrypto.address)}&bgcolor=ffffff&color=000000&margin=10`;
+  }, [paymentMethod]);
+
+  // Track copy state for UX feedback
+  const [copied, setCopied] = useState(false);
+  const handleCopyAddress = useCallback(() => {
+    if (!selectedCrypto) return;
+    navigator.clipboard?.writeText(selectedCrypto.address).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [selectedCrypto]);
   const fileInputRef = useRef(null);
 
   const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
@@ -258,13 +401,16 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
     return rawFile;
   };
 
-  // Submit order (PromptPay QR only)
+  // Submit order (PromptPay QR or Crypto)
   const handleSubmitOrder = async () => {
     // Prevent double-submit while Supabase calls are in-flight
     if (loading) return;
 
-    if (paymentMethod === 'promptpay' && !proofFile) {
-      setError(lang === 'th' ? 'กรุณาอัพโหลดภาพหน้าจอการชำระเงินก่อน' : 'Please upload your payment screenshot first');
+    if (!proofFile) {
+      const msg = isCrypto
+        ? (lang === 'th' ? 'กรุณาอัพโหลดภาพหน้าจอการโอนคริปโตก่อน' : 'Please upload your crypto transfer screenshot first')
+        : (lang === 'th' ? 'กรุณาอัพโหลดภาพหน้าจอการชำระเงินก่อน' : 'Please upload your payment screenshot first');
+      setError(msg);
       return;
     }
 
@@ -276,8 +422,8 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
 
       let proofUrl = '';
 
-      // Upload payment proof only for PromptPay
-      if (paymentMethod === 'promptpay' && proofFile) {
+      // Upload payment proof (PromptPay or Crypto — both require screenshot)
+      if (proofFile) {
         // Step 1: Prepare the file (optimize + ensure valid MIME)
         const preparedFile = await prepareFileForUpload(proofFile);
 
@@ -498,25 +644,35 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 20 }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
-                    {t('checkout_district')} *
+                    {t('checkout_province')} *
                   </label>
-                  <input type="text" value={district} onChange={e => setDistrict(e.target.value)} style={inputStyle}
-                    aria-invalid={!!fieldErrors.district}
-                    aria-describedby={fieldErrors.district ? 'district-error' : undefined}
-                    onFocus={e => e.target.style.borderColor = colors.primary}
-                    onBlur={e => e.target.style.borderColor = colors.blush} />
-                  {fieldErrors.district && <span id="district-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.district}</span>}
+                  <AutocompleteInput
+                    value={province}
+                    onChange={(val) => { setProvince(val); if (val !== province) setDistrict(''); }}
+                    suggestions={getProvinceNames(lang)}
+                    placeholder={lang === 'th' ? 'พิมพ์ชื่อจังหวัด...' : 'Type province name...'}
+                    inputStyle={inputStyle}
+                    colors={colors}
+                    fieldError={fieldErrors.province}
+                    errorId="province-error"
+                  />
+                  {fieldErrors.province && <span id="province-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.province}</span>}
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 600, color: colors.dark }}>
-                    {t('checkout_province')} *
+                    {t('checkout_district')} *
                   </label>
-                  <input type="text" value={province} onChange={e => setProvince(e.target.value)} style={inputStyle}
-                    aria-invalid={!!fieldErrors.province}
-                    aria-describedby={fieldErrors.province ? 'province-error' : undefined}
-                    onFocus={e => e.target.style.borderColor = colors.primary}
-                    onBlur={e => e.target.style.borderColor = colors.blush} />
-                  {fieldErrors.province && <span id="province-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.province}</span>}
+                  <AutocompleteInput
+                    value={district}
+                    onChange={setDistrict}
+                    suggestions={getDistrictNames(province, lang)}
+                    placeholder={lang === 'th' ? 'พิมพ์ชื่ออำเภอ/เขต...' : 'Type district name...'}
+                    inputStyle={inputStyle}
+                    colors={colors}
+                    fieldError={fieldErrors.district}
+                    errorId="district-error"
+                  />
+                  {fieldErrors.district && <span id="district-error" style={{ color: colors.error, fontSize: 12, marginTop: 4, display: 'block' }} role="alert">{fieldErrors.district}</span>}
                 </div>
               </div>
 
@@ -559,44 +715,156 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
           {/* ========== STEP 2: Payment Method + Submit ========== */}
           {step === 2 && (
             <div>
-              {/* PromptPay QR Payment */}
-              <div>
-              {/* QR Code Display */}
+              {/* Payment Method Selector */}
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.dark, marginBottom: 16 }}>
+                {t('select_payment')}
+              </h3>
               <div style={{
-                background: 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)',
-                borderRadius: 20, padding: isMobile ? 20 : 32, marginBottom: 24,
-                textAlign: 'center', border: '2px solid #B8D4FE',
+                display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+                gap: 10, marginBottom: 24,
               }}>
-                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1A4DB0', marginBottom: 8 }}>
-                  📱 Scan to Pay via PromptPay
-                </h3>
-                <p style={{ fontSize: 14, color: colors.gray, marginBottom: 20 }}>
-                  Open your banking app, scan the QR code below, and transfer the exact amount.
-                </p>
-
-                {/* Static QR Code Image */}
-                <div style={{
-                  background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
-                  boxShadow: '0 4px 20px rgba(26, 77, 176, 0.15)',
-                }}>
-                  <img src={QRCODE_DATA_URI} alt="PromptPay QR Code" style={{
-                    width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
-                    borderRadius: 12, objectFit: 'contain',
-                  }} />
-                </div>
-
-                <p style={{ fontSize: 24, fontWeight: 800, color: '#1A4DB0', marginTop: 16 }}>
-                  ฿{total.toFixed(2)}
-                </p>
+                {PAYMENT_METHODS.map(pm => (
+                  <button
+                    key={pm.id}
+                    type="button"
+                    onClick={() => { setPaymentMethod(pm.id); setProofFile(null); setProofPreview(null); setError(''); }}
+                    style={{
+                      padding: '14px 8px', borderRadius: 14, cursor: 'pointer',
+                      border: paymentMethod === pm.id ? `2px solid ${pm.color || colors.primary}` : `2px solid ${colors.blush}`,
+                      background: paymentMethod === pm.id ? (pm.color ? `${pm.color}10` : colors.mint) : colors.white,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      fontFamily: 'Plus Jakarta Sans, sans-serif',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <span style={{ fontSize: 24 }}>{pm.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: paymentMethod === pm.id ? (pm.color || colors.primary) : colors.dark }}>{pm.label}</span>
+                    <span style={{ fontSize: 11, color: colors.gray }}>{pm.desc}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* Screenshot Upload */}
+              {/* ---- PromptPay QR Section ---- */}
+              {paymentMethod === 'promptpay' && (
+                <div style={{
+                  background: 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)',
+                  borderRadius: 20, padding: isMobile ? 20 : 32, marginBottom: 24,
+                  textAlign: 'center', border: '2px solid #B8D4FE',
+                }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1A4DB0', marginBottom: 8 }}>
+                    📱 {lang === 'th' ? 'สแกนเพื่อชำระผ่านพร้อมเพย์' : 'Scan to Pay via PromptPay'}
+                  </h3>
+                  <p style={{ fontSize: 14, color: colors.gray, marginBottom: 20 }}>
+                    {lang === 'th' ? 'เปิดแอปธนาคาร สแกน QR ด้านล่าง แล้วโอนจำนวนเงินที่ถูกต้อง' : 'Open your banking app, scan the QR code below, and transfer the exact amount.'}
+                  </p>
+                  <div style={{
+                    background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
+                    boxShadow: '0 4px 20px rgba(26, 77, 176, 0.15)',
+                  }}>
+                    <img src={QRCODE_DATA_URI} alt="PromptPay QR Code" style={{
+                      width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
+                      borderRadius: 12, objectFit: 'contain',
+                    }} />
+                  </div>
+                  <p style={{ fontSize: 24, fontWeight: 800, color: '#1A4DB0', marginTop: 16 }}>
+                    ฿{total.toFixed(2)}
+                  </p>
+                </div>
+              )}
+
+              {/* ---- Crypto Wallet Section ---- */}
+              {isCrypto && selectedCrypto && (
+                <div style={{
+                  background: `linear-gradient(135deg, ${selectedCrypto.color}08 0%, ${selectedCrypto.color}15 100%)`,
+                  borderRadius: 20, padding: isMobile ? 20 : 32, marginBottom: 24,
+                  textAlign: 'center', border: `2px solid ${selectedCrypto.color}40`,
+                }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 800, color: selectedCrypto.color, marginBottom: 8 }}>
+                    {selectedCrypto.icon} {lang === 'th' ? `ชำระด้วย ${selectedCrypto.label}` : `Pay with ${selectedCrypto.label}`}
+                  </h3>
+                  <p style={{ fontSize: 14, color: colors.gray, marginBottom: 20 }}>
+                    {lang === 'th'
+                      ? `สแกน QR หรือคัดลอกที่อยู่ด้านล่าง ส่ง ${selectedCrypto.symbol} แล้วอัพโหลดภาพหน้าจอยืนยัน`
+                      : `Scan the QR or copy the address below. Send ${selectedCrypto.symbol}, then upload a screenshot.`}
+                  </p>
+
+                  {/* QR Code */}
+                  {cryptoQrUrl && (
+                    <div style={{
+                      background: '#fff', borderRadius: 16, padding: 20, display: 'inline-block',
+                      boxShadow: `0 4px 20px ${selectedCrypto.color}20`, marginBottom: 20,
+                    }}>
+                      <img src={cryptoQrUrl} alt={`${selectedCrypto.symbol} wallet QR code`} style={{
+                        width: isMobile ? 200 : 250, height: isMobile ? 200 : 250,
+                        borderRadius: 12, objectFit: 'contain',
+                      }} />
+                    </div>
+                  )}
+
+                  {/* Wallet Address + Copy */}
+                  <div style={{
+                    background: '#fff', borderRadius: 16, padding: '16px 20px', marginBottom: 16,
+                    boxShadow: `0 4px 20px ${selectedCrypto.color}20`,
+                    display: 'inline-block', maxWidth: '100%',
+                  }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      {selectedCrypto.symbol} {lang === 'th' ? 'ที่อยู่กระเป๋า' : 'Wallet Address'}
+                    </p>
+                    <p style={{
+                      fontSize: isMobile ? 10 : 13, fontFamily: 'monospace', color: colors.dark,
+                      wordBreak: 'break-all', fontWeight: 600, margin: 0, lineHeight: 1.6,
+                      userSelect: 'all', padding: '8px 12px', background: colors.cream, borderRadius: 8,
+                    }}>
+                      {selectedCrypto.address}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCopyAddress}
+                      style={{
+                        marginTop: 12, padding: '10px 24px', borderRadius: 20,
+                        border: copied ? `2px solid ${colors.primary}` : `2px solid ${selectedCrypto.color}40`,
+                        background: copied ? colors.mint : `${selectedCrypto.color}10`,
+                        color: copied ? colors.primary : selectedCrypto.color,
+                        fontSize: 14, fontWeight: 700,
+                        cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {copied
+                        ? (lang === 'th' ? '✓ คัดลอกแล้ว!' : '✓ Copied!')
+                        : (lang === 'th' ? '📋 คัดลอกที่อยู่' : '📋 Copy Address')}
+                    </button>
+                  </div>
+
+                  {/* Network warning */}
+                  <div style={{
+                    background: '#FFF3CD', borderRadius: 12, padding: '10px 16px', marginTop: 8,
+                    display: 'inline-block',
+                  }}>
+                    <p style={{ fontSize: 12, color: '#856404', margin: 0, fontWeight: 600 }}>
+                      ⚠️ {selectedCrypto.networkNote} — {lang === 'th' ? 'ส่งผิดเครือข่ายอาจทำให้สูญเสียเงิน' : 'Sending on wrong network may result in lost funds'}
+                    </p>
+                  </div>
+
+                  <p style={{ fontSize: 24, fontWeight: 800, color: selectedCrypto.color, marginTop: 16 }}>
+                    ฿{total.toFixed(0)} <span style={{ fontSize: 14, color: colors.gray, fontWeight: 400 }}>
+                      ({lang === 'th' ? 'เทียบเท่าในสกุล' : 'equivalent in'} {selectedCrypto.symbol})
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {/* ---- Screenshot Upload (shared for all methods) ---- */}
               <div style={{ marginBottom: 24 }}>
                 <h4 style={{ fontSize: 16, fontWeight: 700, color: colors.dark, marginBottom: 12 }}>
-                  📸 Upload Payment Screenshot
+                  📸 {isCrypto
+                    ? (lang === 'th' ? 'อัพโหลดภาพหน้าจอการโอน' : 'Upload Transfer Screenshot')
+                    : (lang === 'th' ? 'อัพโหลดภาพหน้าจอการชำระเงิน' : 'Upload Payment Screenshot')}
                 </h4>
                 <p style={{ fontSize: 13, color: colors.gray, marginBottom: 16 }}>
-                  After paying, take a screenshot of the confirmation and upload it below.
+                  {isCrypto
+                    ? (lang === 'th' ? 'หลังโอนคริปโตแล้ว ถ่ายภาพหน้าจอยืนยันการทำรายการแล้วอัพโหลดด้านล่าง' : 'After sending crypto, take a screenshot of the transaction confirmation and upload it below.')
+                    : (lang === 'th' ? 'หลังชำระเงินแล้ว ถ่ายภาพหน้าจอยืนยันแล้วอัพโหลดด้านล่าง' : 'After paying, take a screenshot of the confirmation and upload it below.')}
                 </p>
 
                 <input
@@ -616,13 +884,13 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                     onClick={() => fileInputRef.current?.click()}
                     style={{
                       width: '100%', padding: 32, borderRadius: 16,
-                      border: `3px dashed ${dragActive ? colors.primary : colors.blush}`,
+                      border: `3px dashed ${dragActive ? (selectedCrypto?.color || colors.primary) : colors.blush}`,
                       background: dragActive ? colors.mint : 'transparent',
                       cursor: 'pointer', display: 'flex', flexDirection: 'column',
                       alignItems: 'center', gap: 12, fontFamily: 'Plus Jakarta Sans, sans-serif',
                       transition: 'all 0.3s',
                     }}
-                    onMouseOver={e => { if (!dragActive) { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.background = colors.mint; } }}
+                    onMouseOver={e => { if (!dragActive) { e.currentTarget.style.borderColor = selectedCrypto?.color || colors.primary; e.currentTarget.style.background = colors.mint; } }}
                     onMouseOut={e => { if (!dragActive) { e.currentTarget.style.borderColor = colors.blush; e.currentTarget.style.background = 'transparent'; } }}
                   >
                     <span style={{ fontSize: 40 }}>📷</span>
@@ -633,15 +901,15 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                   <div>
                     <div style={{
                       position: 'relative', display: 'inline-block',
-                      borderRadius: 16, overflow: 'hidden', border: `3px solid ${colors.primary}`,
-                      boxShadow: '0 4px 20px rgba(45, 125, 70, 0.2)',
+                      borderRadius: 16, overflow: 'hidden', border: `3px solid ${selectedCrypto?.color || colors.primary}`,
+                      boxShadow: `0 4px 20px ${selectedCrypto ? selectedCrypto.color + '30' : 'rgba(45, 125, 70, 0.2)'}`,
                     }}>
                       <img src={proofPreview} alt="Payment proof" style={{
                         maxWidth: '100%', maxHeight: 300, display: 'block',
                       }} />
                       <div style={{
                         position: 'absolute', top: 8, right: 8,
-                        background: colors.primary, color: '#fff',
+                        background: selectedCrypto?.color || colors.primary, color: '#fff',
                         borderRadius: '50%', width: 28, height: 28,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 16, fontWeight: 700,
@@ -659,7 +927,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                 )}
               </div>
 
-              {/* PromptPay Submit Button */}
+              {/* Submit Button */}
               <button
                 type="button"
                 disabled={loading || !proofFile}
@@ -667,17 +935,16 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                 style={{
                   width: '100%', padding: isMobile ? '16px 24px' : '20px 40px', borderRadius: 30, minHeight: 44,
                   border: 'none',
-                  background: (!proofFile || loading) ? colors.gray : colors.gradient1,
+                  background: (!proofFile || loading) ? colors.gray : (selectedCrypto ? `linear-gradient(135deg, ${selectedCrypto.color}, ${selectedCrypto.color}CC)` : colors.gradient1),
                   color: colors.white, fontWeight: 700, fontSize: isMobile ? 16 : 18,
                   cursor: (!proofFile || loading) ? 'not-allowed' : 'pointer',
-                  boxShadow: proofFile && !loading ? '0 8px 30px rgba(45, 125, 70, 0.4)' : 'none',
+                  boxShadow: proofFile && !loading ? `0 8px 30px ${selectedCrypto ? selectedCrypto.color + '60' : 'rgba(45, 125, 70, 0.4)'}` : 'none',
                   fontFamily: 'Plus Jakarta Sans, sans-serif',
                   transition: 'all 0.3s',
                 }}
               >
                 {loading ? t('submitting') : proofFile ? `${t('confirm_order')} — ฿${total.toFixed(0)}` : t('upload_to_continue')}
               </button>
-              </div>
             </div>
           )}
         </div>
