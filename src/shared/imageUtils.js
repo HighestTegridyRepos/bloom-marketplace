@@ -2,11 +2,35 @@
  * SiamClones — Client-side image optimization utilities
  * Resizes, compresses, and converts images before upload to Supabase Storage.
  * Dramatically reduces upload size and page load times on mobile.
+ *
+ * CRITICAL PATH: Payment proof uploads MUST succeed or customers lose money.
+ * Every function here is defensive — always returns a usable file, never throws.
  */
 
 /**
+ * Detect actual WebP encoding support (not just toBlob existence).
+ * Caches result after first call.
+ */
+let _webpSupported = null;
+function detectWebPEncode() {
+  if (_webpSupported !== null) return _webpSupported;
+  try {
+    const c = document.createElement('canvas');
+    c.width = 1;
+    c.height = 1;
+    _webpSupported = c.toDataURL('image/webp').startsWith('data:image/webp');
+  } catch {
+    _webpSupported = false;
+  }
+  return _webpSupported;
+}
+
+/**
  * Resize and compress an image file client-side before upload.
- * Returns a new File object (or Blob) that's optimized.
+ * Returns a new File object that's optimized.
+ *
+ * GUARANTEES: Always resolves with a valid {file, width, height}.
+ * Never rejects. If anything fails, returns the original file unchanged.
  *
  * @param {File} file - Original image file from input
  * @param {Object} options
@@ -24,113 +48,135 @@ export async function optimizeImage(file, options = {}) {
     format = null,
   } = options;
 
-  // Skip non-image files
-  if (!file.type.startsWith('image/')) {
-    return { file, width: 0, height: 0 };
+  const fallback = { file, width: 0, height: 0 };
+
+  try {
+    // Skip non-image files
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      return fallback;
+    }
+
+    // Skip SVGs — they don't need rasterization
+    if (file.type === 'image/svg+xml') {
+      return fallback;
+    }
+
+    // Skip tiny files (< 50KB) — not worth processing
+    if (file.size < 50 * 1024) {
+      return fallback;
+    }
+
+    // HEIC/HEIF: most browsers can't decode these via Image element.
+    // Don't attempt canvas processing — just return the original.
+    // The upload handler will convert HEIC to JPEG if needed.
+    if (file.type === 'image/heic' || file.type === 'image/heif' ||
+        file.name?.toLowerCase().endsWith('.heic') || file.name?.toLowerCase().endsWith('.heif')) {
+      return fallback;
+    }
+
+    return await new Promise((resolve) => {
+      // Timeout: if image processing takes > 10s, bail with original file
+      const timeout = setTimeout(() => {
+        console.warn('[optimizeImage] Timed out after 10s, using original file');
+        resolve(fallback);
+      }, 10000);
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(url);
+
+        try {
+          let { width, height } = img;
+
+          // Calculate new dimensions maintaining aspect ratio
+          if (width > maxWidth || height > maxHeight) {
+            const ratio = Math.min(maxWidth / width, maxHeight / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          // If image is already small enough and file is under 500KB, skip
+          if (width === img.width && height === img.height && file.size < 500 * 1024) {
+            resolve({ file, width, height });
+            return;
+          }
+
+          // Use regular canvas (more reliable across browsers than OffscreenCanvas
+          // for image encoding, especially on mobile Safari and Android WebViews)
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            console.warn('[optimizeImage] Canvas 2D context unavailable, using original');
+            resolve(fallback);
+            return;
+          }
+
+          // Enable high-quality downscaling
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Determine output format — use JPEG as safe default.
+          // Only use WebP if we've verified the browser can actually encode it.
+          const useWebP = !format && detectWebPEncode();
+          const outputFormat = format || (useWebP ? 'image/webp' : 'image/jpeg');
+          const outputQuality = quality;
+
+          canvas.toBlob(
+            (blob) => {
+              try {
+                if (!blob || blob.size === 0) {
+                  console.warn('[optimizeImage] toBlob returned empty, using original');
+                  resolve(fallback);
+                  return;
+                }
+
+                const ext = outputFormat === 'image/webp' ? 'webp' : 'jpg';
+                // Sanitize filename: strip problematic chars, ensure extension
+                const baseName = (file.name || 'proof').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const newName = `${baseName}.${ext}`;
+                const optimized = new File([blob], newName, { type: outputFormat });
+
+                // Only use optimized if it's actually smaller
+                if (optimized.size > 0 && optimized.size < file.size) {
+                  resolve({ file: optimized, width, height });
+                } else {
+                  resolve({ file, width: img.width, height: img.height });
+                }
+              } catch (e) {
+                console.warn('[optimizeImage] Error creating optimized File:', e);
+                resolve(fallback);
+              }
+            },
+            outputFormat,
+            outputQuality
+          );
+        } catch (e) {
+          console.warn('[optimizeImage] Error in canvas processing:', e);
+          resolve(fallback);
+        }
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(url);
+        console.warn('[optimizeImage] Image decode failed, using original file');
+        resolve(fallback);
+      };
+
+      img.src = url;
+    });
+  } catch (e) {
+    // Absolute last resort — if anything at all throws, return original
+    console.warn('[optimizeImage] Unexpected error, using original file:', e);
+    return fallback;
   }
-
-  // Skip SVGs — they don't need rasterization
-  if (file.type === 'image/svg+xml') {
-    return { file, width: 0, height: 0 };
-  }
-
-  // Skip tiny files (< 50KB) — not worth processing
-  if (file.size < 50 * 1024) {
-    return { file, width: 0, height: 0 };
-  }
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-
-      let { width, height } = img;
-
-      // Calculate new dimensions maintaining aspect ratio
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-
-      // If image is already small enough and file is under 500KB, skip
-      if (width === img.width && height === img.height && file.size < 500 * 1024) {
-        resolve({ file, width, height });
-        return;
-      }
-
-      // Use OffscreenCanvas if available (better performance, works in workers)
-      const canvas = typeof OffscreenCanvas !== 'undefined'
-        ? new OffscreenCanvas(width, height)
-        : document.createElement('canvas');
-
-      if (!(canvas instanceof OffscreenCanvas)) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      const ctx = canvas.getContext('2d');
-
-      // Enable high-quality downscaling
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Determine output format
-      const supportsWebP = typeof canvas.toBlob !== 'undefined';
-      const outputFormat = format || (supportsWebP ? 'image/webp' : 'image/jpeg');
-      const outputQuality = quality;
-
-      // Convert to blob
-      if (canvas instanceof OffscreenCanvas) {
-        canvas.convertToBlob({ type: outputFormat, quality: outputQuality })
-          .then(blob => {
-            const ext = outputFormat === 'image/webp' ? 'webp' : 'jpg';
-            const newName = file.name.replace(/\.[^.]+$/, `.${ext}`);
-            const optimized = new File([blob], newName, { type: outputFormat });
-
-            // Only use optimized if it's actually smaller
-            if (optimized.size < file.size) {
-              resolve({ file: optimized, width, height });
-            } else {
-              resolve({ file, width: img.width, height: img.height });
-            }
-          })
-          .catch(() => resolve({ file, width: img.width, height: img.height }));
-      } else {
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              resolve({ file, width: img.width, height: img.height });
-              return;
-            }
-            const ext = outputFormat === 'image/webp' ? 'webp' : 'jpg';
-            const newName = file.name.replace(/\.[^.]+$/, `.${ext}`);
-            const optimized = new File([blob], newName, { type: outputFormat });
-
-            // Only use optimized if it's actually smaller
-            if (optimized.size < file.size) {
-              resolve({ file: optimized, width, height });
-            } else {
-              resolve({ file, width: img.width, height: img.height });
-            }
-          },
-          outputFormat,
-          outputQuality
-        );
-      }
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      // Fall back to original file on decode error
-      resolve({ file, width: 0, height: 0 });
-    };
-
-    img.src = url;
-  });
 }
 
 /**

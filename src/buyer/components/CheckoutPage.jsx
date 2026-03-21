@@ -100,23 +100,48 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
   };
 
   // Handle proof screenshot file selection
-  const MAX_PROOF_SIZE = 10 * 1024 * 1024; // 10MB max
+  const MAX_PROOF_SIZE = 15 * 1024 * 1024; // 15MB max (generous for banking app screenshots)
+  const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/bmp', 'image/gif'];
+  const ACCEPTED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.bmp', '.gif', '.jfif'];
+
+  const isImageFile = (file) => {
+    // Check MIME type first
+    if (file.type && file.type.startsWith('image/')) return true;
+    // Some banking apps don't set MIME type — check extension as fallback
+    const ext = '.' + (file.name || '').split('.').pop()?.toLowerCase();
+    return ACCEPTED_EXTENSIONS.includes(ext);
+  };
+
   const handleProofSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
+    if (!isImageFile(file)) {
       setError(lang === 'th' ? 'กรุณาอัพโหลดไฟล์รูปภาพ (ภาพหน้าจอการชำระเงิน)' : 'Please upload an image file (screenshot of your payment)');
       return;
     }
     if (file.size > MAX_PROOF_SIZE) {
-      setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
+      setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 15MB)' : 'File too large. Maximum size is 15MB.');
       return;
     }
     setError('');
     setProofFile(file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setProofPreview(ev.target.result);
-    reader.readAsDataURL(file);
+    // Generate preview — wrap in try/catch because FileReader can fail on some mobile browsers
+    try {
+      const reader = new FileReader();
+      reader.onload = (ev) => setProofPreview(ev.target.result);
+      reader.onerror = () => {
+        // Preview failed but file is still valid for upload — show generic thumbnail
+        setProofPreview('data:image/svg+xml,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e8f5e9" width="200" height="200"/><text x="100" y="90" text-anchor="middle" font-size="48">📷</text><text x="100" y="130" text-anchor="middle" font-size="14" fill="#2D7D46">Image selected</text></svg>'
+        ));
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      // FileReader not available or crashed — still allow upload
+      setProofPreview('data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e8f5e9" width="200" height="200"/><text x="100" y="90" text-anchor="middle" font-size="48">📷</text><text x="100" y="130" text-anchor="middle" font-size="14" fill="#2D7D46">Image selected</text></svg>'
+      ));
+    }
   };
 
   // Handle drag and drop for payment proof
@@ -139,20 +164,98 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (!file.type.startsWith('image/')) {
+      if (!isImageFile(file)) {
         setError(lang === 'th' ? 'กรุณาอัพโหลดไฟล์รูปภาพ (ภาพหน้าจอการชำระเงิน)' : 'Please upload an image file (screenshot of your payment)');
         return;
       }
       if (file.size > MAX_PROOF_SIZE) {
-        setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
+        setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 15MB)' : 'File too large. Maximum size is 15MB.');
         return;
       }
       setError('');
       setProofFile(file);
-      const reader = new FileReader();
-      reader.onload = (ev) => setProofPreview(ev.target.result);
-      reader.readAsDataURL(file);
+      try {
+        const reader = new FileReader();
+        reader.onload = (ev) => setProofPreview(ev.target.result);
+        reader.onerror = () => {
+          setProofPreview('data:image/svg+xml,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e8f5e9" width="200" height="200"/><text x="100" y="90" text-anchor="middle" font-size="48">📷</text><text x="100" y="130" text-anchor="middle" font-size="14" fill="#2D7D46">Image selected</text></svg>'
+          ));
+        };
+        reader.readAsDataURL(file);
+      } catch {
+        setProofPreview('data:image/svg+xml,' + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#e8f5e9" width="200" height="200"/><text x="100" y="90" text-anchor="middle" font-size="48">📷</text><text x="100" y="130" text-anchor="middle" font-size="14" fill="#2D7D46">Image selected</text></svg>'
+        ));
+      }
     }
+  };
+
+  // ---- Upload helpers with retry ----
+
+  /**
+   * Upload a file to Supabase Storage with retry logic.
+   * Critical path — customers have already paid when this runs.
+   * Retries up to 3 times with exponential backoff.
+   */
+  const uploadWithRetry = async (filePath, fileToUpload, retries = 3) => {
+    let lastError = null;
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const contentType = fileToUpload.type || 'image/jpeg';
+        const { data, error } = await supabase.storage
+          .from('payment-proofs')
+          .upload(filePath, fileToUpload, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType,
+          });
+        if (!error) return { data, error: null };
+        lastError = error;
+        console.warn(`[Upload] Attempt ${attempt}/${retries} failed:`, error.message || error);
+      } catch (e) {
+        lastError = e;
+        console.warn(`[Upload] Attempt ${attempt}/${retries} exception:`, e.message || e);
+      }
+      // Exponential backoff: 1s, 2s, 4s
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+      }
+    }
+    return { data: null, error: lastError };
+  };
+
+  /**
+   * Prepare a file for upload — optimize if possible, ensure valid MIME type.
+   * Returns a File that's guaranteed safe to upload.
+   */
+  const prepareFileForUpload = async (rawFile) => {
+    // 1. Try to optimize the image (resize/compress)
+    try {
+      const { file: optimized } = await optimizeImage(rawFile, {
+        maxWidth: 1200,
+        maxHeight: 1600,
+        quality: 0.85,
+      });
+      // Verify the optimized file is valid
+      if (optimized && optimized.size > 0) {
+        return optimized;
+      }
+    } catch (e) {
+      console.warn('[prepareFile] Optimization failed, using original:', e);
+    }
+
+    // 2. If optimization returned the same file or failed, ensure it has a valid type
+    //    Some banking apps download screenshots without proper MIME types
+    if (!rawFile.type || !rawFile.type.startsWith('image/')) {
+      // Infer type from extension or default to JPEG
+      const ext = (rawFile.name || '').split('.').pop()?.toLowerCase();
+      const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic' };
+      const inferredType = mimeMap[ext] || 'image/jpeg';
+      return new File([rawFile], rawFile.name || 'payment-proof.jpg', { type: inferredType });
+    }
+
+    return rawFile;
   };
 
   // Submit order (PromptPay QR only)
@@ -175,30 +278,46 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
 
       // Upload payment proof only for PromptPay
       if (paymentMethod === 'promptpay' && proofFile) {
-        // Optimize proof image client-side before upload
-        const { file: optimizedProof } = await optimizeImage(proofFile, {
-          maxWidth: 1200,
-          maxHeight: 1600,
-          quality: 0.85,
-        });
+        // Step 1: Prepare the file (optimize + ensure valid MIME)
+        const preparedFile = await prepareFileForUpload(proofFile);
 
-        const fileExt = optimizedProof.name.split('.').pop() || 'jpg';
+        // Step 2: Generate unique file path
+        const fileExt = (preparedFile.name || 'proof.jpg').split('.').pop() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         const filePath = `proofs/${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('payment-proofs')
-          .upload(filePath, optimizedProof, { cacheControl: '3600', upsert: false });
+        // Step 3: Upload with retry (3 attempts, exponential backoff)
+        const { error: uploadError } = await uploadWithRetry(filePath, preparedFile);
 
         if (uploadError) {
-          throw new Error('Failed to upload payment screenshot. Please try again.');
+          // If optimized file failed, try uploading the raw original as last resort
+          console.warn('[Checkout] Optimized upload failed, trying raw original...');
+          const rawExt = (proofFile.name || 'proof.jpg').split('.').pop() || 'jpg';
+          const rawFileName = `${Date.now()}-raw-${Math.random().toString(36).substr(2, 9)}.${rawExt}`;
+          const rawFilePath = `proofs/${rawFileName}`;
+
+          const rawUpload = await uploadWithRetry(rawFilePath, proofFile, 2);
+          if (rawUpload.error) {
+            const detail = rawUpload.error?.message || rawUpload.error?.statusCode || 'Unknown error';
+            console.error('[Checkout] All upload attempts failed:', detail);
+            throw new Error(
+              lang === 'th'
+                ? `อัพโหลดภาพไม่สำเร็จ กรุณาลองใหม่ (${detail})`
+                : `Failed to upload payment screenshot. Please try again. (${detail})`
+            );
+          }
+          // Raw upload succeeded — get its URL
+          const { data: rawUrlData } = supabase.storage
+            .from('payment-proofs')
+            .getPublicUrl(rawFilePath);
+          proofUrl = rawUrlData?.publicUrl || '';
+        } else {
+          // Optimized upload succeeded
+          const { data: urlData } = supabase.storage
+            .from('payment-proofs')
+            .getPublicUrl(filePath);
+          proofUrl = urlData?.publicUrl || '';
         }
-
-        const { data: urlData } = supabase.storage
-          .from('payment-proofs')
-          .getPublicUrl(filePath);
-
-        proofUrl = urlData?.publicUrl || '';
       }
 
       // Atomic order placement — validates stock, decrements inventory, and inserts orders
@@ -227,12 +346,16 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
         if (msg.includes('no longer available') || msg.includes('Only ') || msg.includes('not found')) {
           throw new Error(msg);
         }
-        throw new Error('Failed to place order. Please try again.');
+        throw new Error(
+          lang === 'th'
+            ? 'ไม่สามารถสั่งซื้อได้ กรุณาลองใหม่'
+            : 'Failed to place order. Please try again.'
+        );
       }
 
       onPlaceOrder({ name, phone, address, district, province, postalCode, notes, paymentMethod, total });
     } catch (err) {
-      setError(err.message || 'Failed to place order. Please try again.');
+      setError(err.message || (lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'Something went wrong. Please try again.'));
       setLoading(false);
     }
   };
@@ -479,7 +602,8 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif,.jfif"
+                  capture="environment"
                   onChange={handleProofSelect}
                   style={{ display: 'none' }}
                 />

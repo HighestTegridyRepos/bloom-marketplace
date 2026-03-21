@@ -617,6 +617,78 @@ export const DashboardScreen = ({ user, profile, onLogout, onEditProfile, onCrea
                     )}
                   </div>
 
+                  {/* Payment Method & Proof */}
+                  <div style={{
+                    marginBottom: 16, padding: 16, borderRadius: 12,
+                    background: order.payment_method === 'promptpay'
+                      ? 'linear-gradient(135deg, #E8F0FE 0%, #F0F7FF 100%)'
+                      : colors.cream,
+                    border: order.payment_method === 'promptpay' ? '1px solid #B8D4FE' : `1px solid ${colors.blush}`,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: order.payment_proof_url ? 12 : 0 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: colors.dark }}>
+                        💳 {order.payment_method === 'promptpay' ? t('payment_method_promptpay') : t('payment_method_cod')}
+                      </span>
+                      {order.payment_method === 'promptpay' && (
+                        <span style={{
+                          fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+                          background: order.payment_proof_url ? '#C8E6C9' : '#FFF3CD',
+                          color: order.payment_proof_url ? '#2E7D32' : '#856404',
+                        }}>
+                          {order.payment_proof_url ? `✅ ${t('payment_proof_verified')}` : `⏳ ${t('payment_proof_none')}`}
+                        </span>
+                      )}
+                    </div>
+
+                    {order.payment_proof_url && (
+                      <div>
+                        <a
+                          href={order.payment_proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 12,
+                            textDecoration: 'none', color: 'inherit',
+                            padding: 10, borderRadius: 10, background: 'rgba(255,255,255,0.8)',
+                            border: `1px solid ${colors.blush}`, cursor: 'pointer',
+                            transition: 'box-shadow 0.2s',
+                          }}
+                          onMouseOver={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(45,125,70,0.15)'}
+                          onMouseOut={e => e.currentTarget.style.boxShadow = 'none'}
+                        >
+                          <img
+                            src={order.payment_proof_url}
+                            alt="Payment proof"
+                            style={{
+                              width: 56, height: 56, borderRadius: 8,
+                              objectFit: 'cover', border: `1px solid ${colors.blush}`,
+                              flexShrink: 0,
+                            }}
+                            onError={e => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div style={{
+                            width: 56, height: 56, borderRadius: 8,
+                            background: colors.cream, display: 'none',
+                            alignItems: 'center', justifyContent: 'center',
+                            fontSize: 24, flexShrink: 0,
+                          }}>📷</div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: '#1A4DB0' }}>
+                              📸 {t('payment_proof_view')}
+                            </p>
+                            <p style={{ fontSize: 12, color: colors.gray, marginTop: 2 }}>
+                              {t('payment_proof')} — ฿{parseFloat(order.total).toFixed(0)}
+                            </p>
+                          </div>
+                          <span style={{ fontSize: 18, color: colors.gray }}>↗</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Actions */}
                   {order.status === 'pending' && (
                     <div style={{ display: 'flex', gap: 10 }}>
