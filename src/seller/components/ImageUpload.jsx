@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { supabase } from '../../shared/supabase';
 import { colors, shadows } from '../../shared/theme';
-import { optimizeImage } from '../../shared/imageUtils';
+import { optimizeImage, convertHeicToJpeg } from '../../shared/imageUtils';
 import { Spinner } from './ui/Spinner';
 
 export const ImageUpload = ({ images, onImagesChange, maxImages = 5, sellerId }) => {
@@ -24,24 +24,32 @@ export const ImageUpload = ({ images, onImagesChange, maxImages = 5, sellerId })
       const file = files[i];
       if (newImages.length >= maxImages) break;
 
-      // Validate it's an image
-      if (!file.type.startsWith('image/')) {
-        setUploadError('Please select an image file.');
+      // Validate it's an accepted image format
+      const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+      const acceptedExts = /\.(jpg|jpeg|png|webp|heic|heif)$/i;
+      const typeOk = file.type && acceptedTypes.includes(file.type.toLowerCase());
+      const extOk = acceptedExts.test(file.name || '');
+      if (!typeOk && !extOk) {
+        setUploadError('Please select a JPG, PNG, WebP, or HEIC image.');
         setUploading(false);
         return;
       }
 
       // Validate original file size (generous limit since we'll optimize)
-      if (file.size > 20 * 1024 * 1024) {
-        setUploadError('File too large (max 20MB before optimization)');
+      if (file.size > 8 * 1024 * 1024) {
+        setUploadError('File too large (max 8MB)');
         setUploading(false);
         return;
       }
 
       try {
+        // Convert HEIC/HEIF to JPEG first (iPhones default to HEIC)
+        setUploadProgress(`Converting ${i + 1}/${totalFiles}...`);
+        const convertedFile = await convertHeicToJpeg(file);
+
         // Client-side optimization: resize to max 1200px and compress
         setUploadProgress(`Optimizing ${i + 1}/${totalFiles}...`);
-        const { file: optimizedFile } = await optimizeImage(file, {
+        const { file: optimizedFile } = await optimizeImage(convertedFile, {
           maxWidth: 1200,
           maxHeight: 1200,
           quality: 0.82,

@@ -23,6 +23,12 @@ ALTER TABLE orders
 
 COMMENT ON COLUMN orders.payment_method IS 'Payment method: promptpay, btc, eth, sol, or cod (legacy)';
 
+-- Add email-safe payment proof URL (smaller JPEG optimized for email embedding)
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS payment_proof_email_url TEXT;
+
+COMMENT ON COLUMN orders.payment_proof_email_url IS 'Email-optimized JPEG proof image (800x600, <200KB) for inline email display. Falls back to payment_proof_url if null.';
+
 
 -- ============================================================
 -- 2. RATE LIMITING: ORDERS (max 10 orders per hour per buyer)

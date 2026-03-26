@@ -4,7 +4,7 @@ import { colors } from '../../shared/theme';
 import { useIsMobile } from '../../shared/hooks/useIsMobile';
 import { useLanguage } from '../hooks/useLanguage';
 import { sanitize } from '../lib/utils';
-import { optimizeImage } from '../../shared/imageUtils';
+import { optimizeImage, convertHeicToJpeg } from '../../shared/imageUtils';
 import { FARM_SIZES, GROWING_METHODS, CERTIFICATIONS } from '../lib/priceUnits';
 import { Card } from './ui/Card';
 import { Input } from './ui/Input';
@@ -38,19 +38,24 @@ export const ProfileSetupScreen = ({ user, onComplete, existingProfile }) => {
   const [promptpayId, setPromptpayId] = useState(existingProfile?.promptpay_id || '');
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
+  const [photoStatus, setPhotoStatus] = useState('');
+
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate it's an image
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file.');
+    // Validate it's an accepted image format
+    const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+    const typeOk = file.type && acceptedTypes.includes(file.type.toLowerCase());
+    const extOk = /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name || '');
+    if (!typeOk && !extOk) {
+      setError('Please select a JPG, PNG, WebP, or HEIC image.');
       return;
     }
 
     // Validate file size (generous limit — we optimize client-side)
-    if (file.size > 20 * 1024 * 1024) {
-      setError('File too large (max 20MB)');
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large (max 5MB)');
       return;
     }
 
@@ -58,13 +63,19 @@ export const ProfileSetupScreen = ({ user, onComplete, existingProfile }) => {
     setUploadingPhoto(true);
 
     try {
+      // Convert HEIC/HEIF to JPEG first (iPhones default to HEIC)
+      setPhotoStatus('Converting...');
+      const convertedFile = await convertHeicToJpeg(file);
+
       // Client-side optimization: resize profile photos to 400x400 max
-      const { file: optimizedFile } = await optimizeImage(file, {
+      setPhotoStatus('Optimizing...');
+      const { file: optimizedFile } = await optimizeImage(convertedFile, {
         maxWidth: 400,
         maxHeight: 400,
         quality: 0.85,
       });
 
+      setPhotoStatus('Uploading...');
       const fileExt = optimizedFile.name.split('.').pop() || 'webp';
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `profiles/${fileName}`;
@@ -91,6 +102,7 @@ export const ProfileSetupScreen = ({ user, onComplete, existingProfile }) => {
       setError(`Upload failed: ${err.message}`);
     }
     setUploadingPhoto(false);
+    setPhotoStatus('');
   };
 
   const handleSubmit = async () => {
@@ -226,7 +238,7 @@ export const ProfileSetupScreen = ({ user, onComplete, existingProfile }) => {
             style={{ display: 'none' }}
             disabled={uploadingPhoto}
           />
-          {uploadingPhoto ? 'Uploading...' : '📷 Upload Photo'}
+          {uploadingPhoto ? (photoStatus || 'Uploading...') : '📷 Upload Photo'}
         </label>
       </div>
 

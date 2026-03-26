@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { colors } from '../../shared/theme';
 import { useIsMobile } from '../../shared/hooks/useIsMobile';
 import { supabase } from '../../shared/supabase';
-import { optimizeImage } from '../../shared/imageUtils';
+import { optimizeImage, convertHeicToJpeg } from '../../shared/imageUtils';
 import { QRCODE_DATA_URI } from '../../shared/qrcode';
 import { getProvinceNames, getDistrictNames } from '../lib/thailandLocations';
 
@@ -132,7 +132,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [uploadingProof, setUploadingProof] = useState(false);
+  const [proofStatus, setProofStatus] = useState(''); // '', 'converting', 'optimizing', 'uploading'
   const [proofPreview, setProofPreview] = useState(null);
   const [proofFile, setProofFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -258,13 +258,13 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
   };
 
   // Handle proof screenshot file selection
-  const MAX_PROOF_SIZE = 15 * 1024 * 1024; // 15MB max (generous for banking app screenshots)
-  const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/bmp', 'image/gif'];
-  const ACCEPTED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.bmp', '.gif', '.jfif'];
+  const MAX_PROOF_SIZE = 10 * 1024 * 1024; // 10MB max (PromptPay screenshots are rarely >3MB)
+  const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+  const ACCEPTED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'];
 
   const isImageFile = (file) => {
-    // Check MIME type first
-    if (file.type && file.type.startsWith('image/')) return true;
+    // Check MIME type against allowlist
+    if (file.type && ACCEPTED_IMAGE_TYPES.includes(file.type.toLowerCase())) return true;
     // Some banking apps don't set MIME type — check extension as fallback
     const ext = '.' + (file.name || '').split('.').pop()?.toLowerCase();
     return ACCEPTED_EXTENSIONS.includes(ext);
@@ -278,7 +278,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
       return;
     }
     if (file.size > MAX_PROOF_SIZE) {
-      setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 15MB)' : 'File too large. Maximum size is 15MB.');
+      setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
       return;
     }
     setError('');
@@ -327,7 +327,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
         return;
       }
       if (file.size > MAX_PROOF_SIZE) {
-        setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 15MB)' : 'File too large. Maximum size is 15MB.');
+        setError(lang === 'th' ? 'ไฟล์ใหญ่เกินไป (สูงสุด 10MB)' : 'File too large. Maximum size is 10MB.');
         return;
       }
       setError('');
@@ -388,9 +388,20 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
    * Returns a File that's guaranteed safe to upload.
    */
   const prepareFileForUpload = async (rawFile) => {
-    // 1. Try to optimize the image (resize/compress)
+    // 1. Convert HEIC/HEIF to JPEG first (iPhones default to HEIC)
+    //    This ensures the file is web-displayable and email-safe.
+    let file = rawFile;
     try {
-      const { file: optimized } = await optimizeImage(rawFile, {
+      setProofStatus(lang === 'th' ? 'กำลังแปลงไฟล์...' : 'Converting...');
+      file = await convertHeicToJpeg(rawFile);
+    } catch (e) {
+      console.warn('[prepareFile] HEIC conversion failed, continuing with original:', e);
+    }
+
+    // 2. Try to optimize the image (resize/compress)
+    try {
+      setProofStatus(lang === 'th' ? 'กำลังปรับขนาด...' : 'Optimizing...');
+      const { file: optimized } = await optimizeImage(file, {
         maxWidth: 1200,
         maxHeight: 1600,
         quality: 0.85,
@@ -403,17 +414,16 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
       console.warn('[prepareFile] Optimization failed, using original:', e);
     }
 
-    // 2. If optimization returned the same file or failed, ensure it has a valid type
+    // 3. If optimization returned the same file or failed, ensure it has a valid type
     //    Some banking apps download screenshots without proper MIME types
-    if (!rawFile.type || !rawFile.type.startsWith('image/')) {
-      // Infer type from extension or default to JPEG
-      const ext = (rawFile.name || '').split('.').pop()?.toLowerCase();
-      const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic' };
+    if (!file.type || !file.type.startsWith('image/')) {
+      const ext = (file.name || '').split('.').pop()?.toLowerCase();
+      const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
       const inferredType = mimeMap[ext] || 'image/jpeg';
-      return new File([rawFile], rawFile.name || 'payment-proof.jpg', { type: inferredType });
+      return new File([file], file.name || 'payment-proof.jpg', { type: inferredType });
     }
 
-    return rawFile;
+    return file;
   };
 
   // Submit order (PromptPay QR or Crypto)
@@ -436,28 +446,33 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
       const sanitize = (str) => str ? str.replace(/[<>"'`\\]/g, '').trim() : '';
 
       let proofUrl = '';
+      let emailProofUrl = '';
 
       // Upload payment proof (PromptPay or Crypto — both require screenshot)
       if (proofFile) {
-        // Step 1: Prepare the file (optimize + ensure valid MIME)
+        // Step 1: Prepare the file (HEIC convert + optimize + ensure valid MIME)
         const preparedFile = await prepareFileForUpload(proofFile);
+        setProofStatus(lang === 'th' ? 'กำลังอัพโหลด...' : 'Uploading...');
 
         // Step 2: Generate unique file path
         const fileExt = (preparedFile.name || 'proof.jpg').split('.').pop() || 'jpg';
-        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const fileBase = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const fileName = `${fileBase}.${fileExt}`;
         const filePath = `proofs/${fileName}`;
 
         // Step 3: Upload with retry (3 attempts, exponential backoff)
         const { error: uploadError } = await uploadWithRetry(filePath, preparedFile);
 
         if (uploadError) {
-          // If optimized file failed, try uploading the raw original as last resort
-          console.warn('[Checkout] Optimized upload failed, trying raw original...');
-          const rawExt = (proofFile.name || 'proof.jpg').split('.').pop() || 'jpg';
+          // If optimized file failed, try the HEIC-converted (but un-optimized) file as fallback.
+          // Use convertHeicToJpeg again to ensure we never upload raw HEIC to storage.
+          console.warn('[Checkout] Optimized upload failed, trying converted fallback...');
+          const fallbackFile = await convertHeicToJpeg(proofFile);
+          const rawExt = (fallbackFile.name || 'proof.jpg').split('.').pop() || 'jpg';
           const rawFileName = `${Date.now()}-raw-${Math.random().toString(36).substr(2, 9)}.${rawExt}`;
           const rawFilePath = `proofs/${rawFileName}`;
 
-          const rawUpload = await uploadWithRetry(rawFilePath, proofFile, 2);
+          const rawUpload = await uploadWithRetry(rawFilePath, fallbackFile, 2);
           if (rawUpload.error) {
             const detail = rawUpload.error?.message || rawUpload.error?.statusCode || 'Unknown error';
             console.error('[Checkout] All upload attempts failed:', detail);
@@ -478,6 +493,30 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
             .from('payment-proofs')
             .getPublicUrl(filePath);
           proofUrl = urlData?.publicUrl || '';
+        }
+
+        // Step 4: Generate and upload email-safe version (smaller JPEG for email embedding)
+        // This is non-blocking — if it fails, the order still has the full proof URL.
+        try {
+          const { file: emailFile } = await optimizeImage(preparedFile, {
+            maxWidth: 800,
+            maxHeight: 600,
+            quality: 0.75,
+            format: 'image/jpeg',
+          });
+          if (emailFile && emailFile.size > 0 && emailFile.size < preparedFile.size) {
+            const emailPath = `proofs/${fileBase}-email.jpg`;
+            const emailUpload = await uploadWithRetry(emailPath, emailFile, 1);
+            if (!emailUpload.error) {
+              const { data: emailUrlData } = supabase.storage
+                .from('payment-proofs')
+                .getPublicUrl(emailPath);
+              emailProofUrl = emailUrlData?.publicUrl || '';
+              console.log(`[Checkout] Email-safe proof uploaded: ${(emailFile.size / 1024).toFixed(0)}KB`);
+            }
+          }
+        } catch (e) {
+          console.warn('[Checkout] Email-safe version failed (non-critical):', e);
         }
       }
 
@@ -514,10 +553,24 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
         );
       }
 
+      // If we generated an email-safe proof, attach it to the order(s) via UPDATE.
+      // Fire-and-forget — order is already placed, this is enhancement only.
+      if (emailProofUrl && proofUrl) {
+        supabase
+          .from('orders')
+          .update({ payment_proof_email_url: emailProofUrl })
+          .eq('payment_proof_url', proofUrl)
+          .then(({ error: updateErr }) => {
+            if (updateErr) console.warn('[Checkout] Email proof URL update failed:', updateErr.message);
+            else console.log('[Checkout] Email proof URL attached to order');
+          });
+      }
+
       onPlaceOrder({ name, phone, address, district, province, postalCode, notes, paymentMethod, total });
     } catch (err) {
       setError(err.message || (lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'Something went wrong. Please try again.'));
       setLoading(false);
+      setProofStatus('');
     }
   };
 
@@ -910,7 +963,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*,.heic,.heif,.jfif"
+                  accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
                   capture="environment"
                   onChange={handleProofSelect}
                   style={{ display: 'none' }}
@@ -983,7 +1036,7 @@ export const CheckoutPage = ({ cart, onPlaceOrder, onBack, t = (key) => key, lan
                   transition: 'all 0.3s',
                 }}
               >
-                {loading ? t('submitting') : proofFile ? `${t('confirm_order')} — ฿${total.toFixed(0)}` : t('upload_to_continue')}
+                {loading ? (proofStatus || t('submitting')) : proofFile ? `${t('confirm_order')} — ฿${total.toFixed(0)}` : t('upload_to_continue')}
               </button>
             </div>
           )}

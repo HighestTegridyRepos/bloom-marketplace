@@ -7,6 +7,156 @@
  * Every function here is defensive — always returns a usable file, never throws.
  */
 
+import heic2any from 'heic2any';
+
+/**
+ * Detect if a file is HEIC/HEIF format (by MIME type or file extension).
+ * Banking app screenshots and iOS photos may have missing/wrong MIME types,
+ * so we check the extension as a fallback.
+ */
+function isHeicFile(file) {
+  if (!file) return false;
+  const type = (file.type || '').toLowerCase();
+  if (type.includes('heic') || type.includes('heif')) return true;
+  const name = (file.name || '').toLowerCase();
+  return name.endsWith('.heic') || name.endsWith('.heif');
+}
+
+/**
+ * Convert a HEIC/HEIF file to JPEG so it's web-displayable and email-safe.
+ * Uses heic2any (WASM-based) for client-side conversion.
+ *
+ * GUARANTEES: Always resolves with a File. Never rejects.
+ * If conversion fails or times out, returns the original file unchanged.
+ *
+ * @param {File} file - Original file (may or may not be HEIC)
+ * @param {Object} options
+ * @param {number} options.timeoutMs - Max time for conversion (default 15000ms)
+ * @returns {Promise<File>} - JPEG File if converted, or original file
+ */
+export async function convertHeicToJpeg(file, { timeoutMs = 15000 } = {}) {
+  if (!isHeicFile(file)) return file;
+
+  const originalSize = (file.size / (1024 * 1024)).toFixed(1);
+  console.log(`[HEIC] Converting: ${file.name} (${originalSize}MB)`);
+
+  try {
+    const conversionPromise = heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.92,
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('HEIC conversion timed out')), timeoutMs)
+    );
+
+    const result = await Promise.race([conversionPromise, timeoutPromise]);
+
+    // heic2any may return an array of blobs for multi-image HEIC — take the first
+    const blob = Array.isArray(result) ? result[0] : result;
+
+    if (!blob || blob.size === 0) {
+      console.warn('[HEIC] Conversion returned empty blob, using original');
+      return file;
+    }
+
+    const newName = (file.name || 'image').replace(/\.(heic|heif)$/i, '.jpg');
+    const converted = new File([blob], newName, { type: 'image/jpeg' });
+
+    const convertedSize = (converted.size / (1024 * 1024)).toFixed(1);
+    console.log(`[HEIC] Converted: ${originalSize}MB → ${convertedSize}MB JPEG`);
+
+    return converted;
+  } catch (err) {
+    console.warn('[HEIC] Conversion failed, uploading as-is:', err.message || err);
+    return file;
+  }
+}
+
+/**
+ * Read EXIF orientation tag from a JPEG file's first 64KB.
+ * Returns orientation value 1-8 (1 = normal, others = rotated/flipped).
+ * Resolves with 1 if not JPEG, no EXIF, or any error.
+ */
+function getExifOrientation(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const view = new DataView(e.target.result);
+        // Check JPEG SOI marker
+        if (view.getUint16(0, false) !== 0xFFD8) return resolve(1);
+        let offset = 2;
+        while (offset < view.byteLength) {
+          const marker = view.getUint16(offset, false);
+          offset += 2;
+          if (marker === 0xFFE1) {
+            // APP1 marker — EXIF data
+            offset += 2; // skip segment length
+            if (view.getUint32(offset, false) !== 0x45786966) return resolve(1); // not "Exif"
+            const little = view.getUint16(offset + 6, false) === 0x4949; // endianness
+            const tiffOffset = offset + 6;
+            const tags = view.getUint16(tiffOffset + 2, little);
+            for (let i = 0; i < tags; i++) {
+              const tagOffset = tiffOffset + 4 + i * 12;
+              if (tagOffset + 12 > view.byteLength) return resolve(1);
+              if (view.getUint16(tagOffset, little) === 0x0112) {
+                return resolve(view.getUint16(tagOffset + 8, little));
+              }
+            }
+            return resolve(1);
+          }
+          if ((marker & 0xFF00) !== 0xFF00) break;
+          offset += view.getUint16(offset, false);
+        }
+        resolve(1);
+      } catch {
+        resolve(1);
+      }
+    };
+    reader.onerror = () => resolve(1);
+    reader.readAsArrayBuffer(file.slice(0, 65536));
+  });
+}
+
+/**
+ * Apply EXIF orientation transform to a canvas context.
+ * Adjusts canvas dimensions and applies the correct rotation/flip
+ * so the image draws upright regardless of how the camera recorded it.
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} orientation - EXIF orientation value (1-8)
+ * @param {number} width - Original image width
+ * @param {number} height - Original image height
+ * @returns {{ drawWidth: number, drawHeight: number }} - dimensions for drawImage
+ */
+function applyExifOrientation(ctx, orientation, width, height) {
+  const canvas = ctx.canvas;
+
+  // Orientations 5-8 swap width/height
+  if (orientation >= 5) {
+    canvas.width = height;
+    canvas.height = width;
+  } else {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  switch (orientation) {
+    case 2: ctx.transform(-1, 0, 0, 1, width, 0); break;           // flip horizontal
+    case 3: ctx.transform(-1, 0, 0, -1, width, height); break;      // rotate 180
+    case 4: ctx.transform(1, 0, 0, -1, 0, height); break;           // flip vertical
+    case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;                 // transpose
+    case 6: ctx.transform(0, 1, -1, 0, height, 0); break;           // rotate 90 CW
+    case 7: ctx.transform(0, -1, -1, 0, height, width); break;      // transverse
+    case 8: ctx.transform(0, -1, 1, 0, 0, width); break;            // rotate 90 CCW
+    default: break; // orientation 1 = normal, no transform needed
+  }
+
+  return { drawWidth: width, drawHeight: height };
+}
+
 /**
  * Detect actual WebP encoding support (not just toBlob existence).
  * Caches result after first call.
@@ -74,6 +224,9 @@ export async function optimizeImage(file, options = {}) {
       return fallback;
     }
 
+    // Read EXIF orientation before loading into canvas (strips GPS/metadata via re-encode)
+    const orientation = await getExifOrientation(file);
+
     return await new Promise((resolve) => {
       // Timeout: if image processing takes > 10s, bail with original file
       const timeout = setTimeout(() => {
@@ -91,25 +244,32 @@ export async function optimizeImage(file, options = {}) {
         try {
           let { width, height } = img;
 
+          // For orientations 5-8, the image is rotated 90/270 degrees
+          // so we need to swap dimensions for correct aspect ratio calculation
+          const swapped = orientation >= 5;
+          let logicalW = swapped ? height : width;
+          let logicalH = swapped ? width : height;
+
           // Calculate new dimensions maintaining aspect ratio
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width = Math.round(width * ratio);
-            height = Math.round(height * ratio);
+          if (logicalW > maxWidth || logicalH > maxHeight) {
+            const ratio = Math.min(maxWidth / logicalW, maxHeight / logicalH);
+            logicalW = Math.round(logicalW * ratio);
+            logicalH = Math.round(logicalH * ratio);
           }
 
-          // If image is already small enough and file is under 500KB, skip
-          if (width === img.width && height === img.height && file.size < 500 * 1024) {
-            resolve({ file, width, height });
+          // Compute the draw dimensions (pre-rotation)
+          let drawW = swapped ? logicalH : logicalW;
+          let drawH = swapped ? logicalW : logicalH;
+
+          // If image is already small enough, orientation is normal, and file is under 500KB, skip
+          if (orientation === 1 && drawW === img.width && drawH === img.height && file.size < 500 * 1024) {
+            resolve({ file, width: logicalW, height: logicalH });
             return;
           }
 
           // Use regular canvas (more reliable across browsers than OffscreenCanvas
           // for image encoding, especially on mobile Safari and Android WebViews)
           const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-
           const ctx = canvas.getContext('2d');
           if (!ctx) {
             console.warn('[optimizeImage] Canvas 2D context unavailable, using original');
@@ -117,10 +277,18 @@ export async function optimizeImage(file, options = {}) {
             return;
           }
 
+          // Apply EXIF orientation transform — sets canvas dimensions and ctx transform
+          if (orientation > 1) {
+            applyExifOrientation(ctx, orientation, drawW, drawH);
+          } else {
+            canvas.width = drawW;
+            canvas.height = drawH;
+          }
+
           // Enable high-quality downscaling
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
-          ctx.drawImage(img, 0, 0, width, height);
+          ctx.drawImage(img, 0, 0, drawW, drawH);
 
           // Determine output format — use JPEG as safe default.
           // Only use WebP if we've verified the browser can actually encode it.
@@ -144,10 +312,11 @@ export async function optimizeImage(file, options = {}) {
                 const optimized = new File([blob], newName, { type: outputFormat });
 
                 // Only use optimized if it's actually smaller
-                if (optimized.size > 0 && optimized.size < file.size) {
-                  resolve({ file: optimized, width, height });
+                // (but always prefer the re-encoded version when orientation was corrected)
+                if (optimized.size > 0 && (optimized.size < file.size || orientation > 1)) {
+                  resolve({ file: optimized, width: logicalW, height: logicalH });
                 } else {
-                  resolve({ file, width: img.width, height: img.height });
+                  resolve({ file, width: logicalW, height: logicalH });
                 }
               } catch (e) {
                 console.warn('[optimizeImage] Error creating optimized File:', e);
