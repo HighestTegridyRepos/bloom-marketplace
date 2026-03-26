@@ -5,6 +5,8 @@ on:
 
 jobs:
   sync:
+    # Only run on the upstream repo — skip on the fork (where this file also exists)
+    if: github.repository == 'TegridyRepoRanch/bloom-marketplace'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,6 +16,5 @@ jobs:
 
       - name: Push to fork mirror
         run: |
-          git remote add fork https://x-access-token:${{ secrets.FORK_SYNC_TOKEN }}@github.com/HighestTegridyRepos/${{ github.event.repository.name }}.git
+          git remote add fork https://x-access-token:${{ secrets.FORK_SYNC_TOKEN }}@github.com/HighestTegridyRepos/bloom-marketplace.git
           git push fork main --force
-
